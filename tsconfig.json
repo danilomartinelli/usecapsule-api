@@ -38,6 +38,12 @@
     },
     {
       "path": "./libs/contexts/discovery"
+    },
+    {
+      "path": "./apps/service-deploy-e2e"
+    },
+    {
+      "path": "./apps/service-deploy"
     }
   ]
 }

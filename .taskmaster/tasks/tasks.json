@@ -4,13 +4,67 @@
       {
         "id": 1,
         "title": "Configurar Monorepo Nx com Estrutura Base",
-        "description": "Inicializar o monorepo Nx com a estrutura de pastas definida no PRD, configurar workspaces e ferramentas de build",
-        "details": "Usar Nx 17.2+ com preset 'integrated'. Configurar estrutura: apps/ (api-gateway, service-auth, service-deploy, service-billing, portal, cli) e libs/ (contexts/, shared/, ui/). Implementar nx.json com tags para enforce de boundaries entre contexts. Configurar TypeScript 5.3+ com paths mapping. Setup ESLint com plugin @nx/enforce-module-boundaries. Adicionar .nvmrc com Node 20 LTS.",
-        "testStrategy": "Validar que nx graph mostra corretamente as dependências, executar nx run-many --target=lint para verificar boundaries, testar que nx affected funciona corretamente após mudanças",
-        "priority": "high",
-        "dependencies": [],
+        "description": "Finalizar configuração do monorepo Nx com ajustes na estrutura de pastas conforme PRD, implementar module boundaries e scripts de desenvolvimento",
         "status": "pending",
-        "subtasks": []
+        "dependencies": [],
+        "priority": "high",
+        "details": "Projeto já tem Nx 21.4.1 configurado com TypeScript 5.8.2, ESLint, Prettier, Docker Compose e testes. Necessário: adicionar .nvmrc Node 20 LTS, configurar tags e module boundaries no nx.json, renomear/adicionar apps conforme PRD (service-auth, service-deploy, service-billing, cli), configurar enforce-module-boundaries no ESLint, adicionar scripts de desenvolvimento e CI/CD base.",
+        "testStrategy": "Validar que nx graph mostra corretamente as dependências, executar nx run-many --target=lint para verificar boundaries, testar que nx affected funciona corretamente após mudanças",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Adicionar .nvmrc e Ajustar Estrutura de Apps",
+            "description": "Adicionar .nvmrc com Node 20 LTS e ajustar estrutura de apps para seguir o PRD",
+            "status": "done",
+            "dependencies": [],
+            "details": "Criar .nvmrc com Node 20 LTS. Renomear apps existentes: dashboard → service-auth, landing-page → portal. Gerar novos apps: service-deploy, service-billing (NestJS), cli (Node). Manter api-gateway e portal existentes. Verificar que estrutura libs/ está correta com contexts/, shared/, ui/.\n<info added on 2025-08-24T15:39:11.087Z>\nBaseado na análise real da estrutura do projeto, os ajustes necessários são:\n\n**✅ Estrutura Existente Confirmada:**\n- api-gateway (microserviço principal já configurado)\n- dashboard (esqueleto do backoffice/admin - manter como está)\n- landing-page (esqueleto da página de marketing - manter como está)\n- portal (esqueleto do painel de clientes/usuários - manter como está)\n- libs/contexts/billing, deploy, discovery (já existem)\n- libs/shared/dto, types (já existem)\n- libs/ui/react (já existe)\n\n**🔄 Ações Necessárias:**\n- Criar .nvmrc com Node 20 LTS na raiz do projeto\n- Gerar service-auth (novo app NestJS para autenticação)\n- Gerar service-deploy (novo app NestJS para deploys)\n\n**❌ Removido do Escopo:**\n- CLI (não faz parte do MVP1)\n- Renomeação de apps existentes (dashboard e landing-page são esqueletos válidos que devem ser mantidos)\n- service-billing (não mencionado como necessário na análise atual)\n\nA estrutura de libs/ já está correta e alinhada com o PRD.\n</info added on 2025-08-24T15:39:11.087Z>\n<info added on 2025-08-24T15:39:20.992Z>\n**Estratégia de Teste Atualizada:**\n\nVerificar que .nvmrc foi criado na raiz do projeto e contém a versão Node 20 LTS. Executar nx list para confirmar que os novos apps service-auth e service-deploy aparecem na listagem de projetos disponíveis. Rodar nx run-many --target=build --all para validar que todos os apps, incluindo os recém-criados, compilam sem erros. Inspecionar a estrutura dos novos apps service-auth e service-deploy para confirmar que seguem o padrão NestJS correto com src/app/app.module.ts, main.ts e arquivos de configuração apropriados. Verificar que a estrutura de libs/ (contexts/, shared/, ui/) permanece inalterada e funcional após as modificações.\n</info added on 2025-08-24T15:39:20.992Z>",
+            "testStrategy": "Verificar que nx list mostra todos os apps conforme PRD, executar nx run-many --target=build --all para validar apps renomeados/criados, confirmar Node version com node --version após nvm use"
+          },
+          {
+            "id": 2,
+            "title": "Configurar Module Boundaries e Tags no nx.json",
+            "description": "Implementar sistema de tags e regras de dependência para enforce de boundaries entre contexts e apps",
+            "status": "pending",
+            "dependencies": [
+              1
+            ],
+            "details": "Configurar nx.json com tags: scope:auth, scope:deploy, scope:billing, scope:shared, type:app, type:lib, type:ui. Definir regras de dependência: apps podem importar de libs, contexts não podem importar entre si, shared pode ser importado por todos. Configurar implicitDependencies para docker-compose e scripts globais. Atualizar targetDefaults para build, test, lint aproveitando configuração Jest/Vitest existente.",
+            "testStrategy": "Executar nx graph para visualizar dependências, criar import proibido entre contexts e validar que nx lint falha, verificar que nx affected detecta mudanças corretamente"
+          },
+          {
+            "id": 3,
+            "title": "Configurar ESLint com Enforce Module Boundaries",
+            "description": "Adicionar plugin @nx/enforce-module-boundaries ao ESLint existente para validar regras de dependência",
+            "status": "pending",
+            "dependencies": [
+              2
+            ],
+            "details": "Instalar @nx/enforce-module-boundaries plugin. Configurar regras no .eslintrc.json existente para enforce das tags definidas no nx.json. Adicionar regras específicas: contexts não podem importar entre si, apps só podem importar de libs, shared pode ser usado por todos. Configurar allow/disallow patterns para imports.",
+            "testStrategy": "Executar nx run-many --target=lint para verificar que boundaries são respeitadas, criar imports inválidos entre contexts e confirmar que lint falha, testar que imports válidos passam no lint"
+          },
+          {
+            "id": 4,
+            "title": "Adicionar Scripts de Desenvolvimento no package.json",
+            "description": "Criar scripts npm para desenvolvimento aproveitando Docker Compose existente",
+            "status": "pending",
+            "dependencies": [
+              1
+            ],
+            "details": "Adicionar scripts no package.json raiz: dev:all (executa todos os serviços), dev:api (apenas backend services), dev:portal (apenas frontend), dev:cli (para testes do CLI). Criar scripts docker:up/down/reset usando docker-compose existente. Adicionar scripts para nx: affected:build, affected:test, affected:lint. Implementar script de setup inicial que valida dependências (Node 20, Docker, etc).",
+            "testStrategy": "Executar npm run dev:all e verificar que todos os apps iniciam, testar scripts docker:* com docker-compose existente, verificar que scripts affected funcionam corretamente"
+          },
+          {
+            "id": 5,
+            "title": "Configurar CI/CD Base com GitHub Actions",
+            "description": "Implementar workflow básico de CI/CD aproveitando configuração de testes existente",
+            "status": "pending",
+            "dependencies": [
+              3
+            ],
+            "details": "Criar .github/workflows/ci.yml com jobs para lint, test, build em matriz Node 20/22. Aproveitar configuração Jest/Vitest existente. Configurar nx-cloud token para cache distribuído. Adicionar job para validar module boundaries. Setup para executar testes e2e existentes. Configurar workflow para executar apenas em affected projects. Adicionar status checks obrigatórios para PRs.",
+            "testStrategy": "Verificar que GitHub Actions executa com sucesso em PR de exemplo, testar que apenas affected projects são executados, validar que cache nx-cloud funciona corretamente"
+          }
+        ]
       },
       {
         "id": 2,
@@ -448,7 +502,7 @@
     ],
     "metadata": {
       "created": "2025-08-24T15:09:23.310Z",
-      "updated": "2025-08-24T15:09:23.310Z",
+      "updated": "2025-08-24T15:54:41.019Z",
       "description": "Tasks for master context"
     }
   }

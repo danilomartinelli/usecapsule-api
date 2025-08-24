@@ -1,0 +1,26 @@
+{
+  "name": "@acme/service-deploy-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@acme/service-deploy"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "apps/service-deploy-e2e/jest.config.ts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "@acme/service-deploy:build",
+          "@acme/service-deploy:serve"
+        ]
+      }
+    }
+  }
+}
