@@ -24,11 +24,11 @@
             "id": 2,
             "title": "Configurar Module Boundaries e Tags no nx.json",
             "description": "Implementar sistema de tags e regras de dependência para enforce de boundaries entre contexts e apps",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
             ],
-            "details": "Configurar nx.json com tags: scope:auth, scope:deploy, scope:billing, scope:shared, type:app, type:lib, type:ui. Definir regras de dependência: apps podem importar de libs, contexts não podem importar entre si, shared pode ser importado por todos. Configurar implicitDependencies para docker-compose e scripts globais. Atualizar targetDefaults para build, test, lint aproveitando configuração Jest/Vitest existente.",
+            "details": "Configurar nx.json com tags: scope:auth, scope:deploy, scope:billing, scope:shared, type:app, type:lib, type:ui. Definir regras de dependência: apps podem importar de libs, contexts não podem importar entre si, shared pode ser importado por todos. Configurar implicitDependencies para docker-compose e scripts globais. Atualizar targetDefaults para build, test, lint aproveitando configuração Jest/Vitest existente.\n<info added on 2025-08-24T16:07:24.311Z>\n**Arquitetura de Comunicação entre Microserviços:**\n\n- api-gateway: Único serviço exposto em porta HTTP (3000) para comunicação externa\n- service-auth: Comunicação interna exclusivamente via RabbitMQ (sem porta HTTP exposta)\n- service-deploy: Comunicação interna exclusivamente via RabbitMQ (sem porta HTTP exposta)\n- Demais serviços: Comunicação interna via RabbitMQ seguindo padrão de mensageria\n\n**Configurações de Ports e Boundaries:**\n- Configurar tag adicional \"communication:http\" para api-gateway e \"communication:rabbitmq\" para serviços internos\n- Definir regra de boundary impedindo que serviços com tag \"communication:rabbitmq\" exponham portas HTTP\n- Incluir RabbitMQ nas implicitDependencies do docker-compose.yml\n- Configurar targetDefaults específicos para serviços de comunicação interna vs externa\n</info added on 2025-08-24T16:07:24.311Z>\n<info added on 2025-08-24T16:16:43.964Z>\n**✅ Implementação RabbitMQ Concluída:**\n\n- Corrigido warning de floating promise com `void bootstrap()` nos microserviços\n- Configurado RabbitMQ como transport principal para comunicação interna\n- Instaladas dependências necessárias: @nestjs/microservices, amqplib, @types/amqplib\n- Implementado sistema de filas específicas por serviço:\n  - service-auth: Fila 'auth_queue'\n  - service-deploy: Fila 'deploy_queue'\n- Configurado URL de conexão: amqp://usecapsule:usecapsule_dev_password@localhost:5672\n- Definido Transport.RMQ com QueueOptions durable: false para ambiente de desenvolvimento\n- Aplicadas correções de formatação conforme regras do linter\n- Validado funcionamento da arquitetura de mensageria interna sem exposição de portas HTTP nos serviços internos\n</info added on 2025-08-24T16:16:43.964Z>",
             "testStrategy": "Executar nx graph para visualizar dependências, criar import proibido entre contexts e validar que nx lint falha, verificar que nx affected detecta mudanças corretamente"
           },
           {
@@ -502,7 +502,7 @@
     ],
     "metadata": {
       "created": "2025-08-24T15:09:23.310Z",
-      "updated": "2025-08-24T15:54:41.019Z",
+      "updated": "2025-08-24T16:08:07.718Z",
       "description": "Tasks for master context"
     }
   }

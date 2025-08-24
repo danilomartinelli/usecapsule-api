@@ -4,19 +4,10 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/portal-e2e"
-    },
-    {
       "path": "./apps/portal"
     },
     {
-      "path": "./apps/landing-page-e2e"
-    },
-    {
       "path": "./apps/landing-page"
-    },
-    {
-      "path": "./apps/dashboard-e2e"
     },
     {
       "path": "./apps/dashboard"
@@ -38,9 +29,6 @@
     },
     {
       "path": "./libs/contexts/discovery"
-    },
-    {
-      "path": "./apps/service-deploy-e2e"
     },
     {
       "path": "./apps/service-deploy"

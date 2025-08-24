@@ -87,5 +87,9 @@
       "arch:hexagonal"
     ]
   },
-  "dependencies": {}
+  "dependencies": {
+    "@nestjs/microservices": "^11.1.6",
+    "@types/amqplib": "^0.10.7",
+    "amqplib": "^0.10.8"
+  }
 }
