@@ -1,82 +1,318 @@
-# Acme
+# Capsule
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+<a alt="Capsule logo" href="https://usecapsule.com.br" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danilomartinelli/usecapsule/main/public/logo.png" width="149"></a>
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+✨ **Capsule** - Platform for deploying Nx monorepos to production with zero configuration ✨
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/react-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+[Learn more about the architecture](./docs/architecture.md) | [Core Features](./docs/core-features.md) | Run `npx nx graph` to visually explore the workspace structure.
 
-## Finish your CI setup
+## Workspace Structure
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/QtWy3i8REr)
+This monorepo contains the Capsule platform components:
 
+```
+apps/
+├── api-gateway       # NestJS BFF API Gateway (Hexagonal Architecture)
+├── portal           # React + Vite admin dashboard (Feature-Sliced Design)
+├── dashboard        # React + Vite admin interface (Feature-Sliced Design)
+├── landing-page     # React + Vite marketing site (Feature-Sliced Design)
+└── [e2e tests]      # End-to-end test suites
 
-## Run tasks
-
-To run the dev server for your app, use:
-
-```sh
-npx nx serve acme
+libs/
+├── contexts/        # Domain-driven design bounded contexts (Backend)
+│   ├── deploy/     # Deployment domain (Hexagonal Architecture)
+│   ├── billing/    # Billing domain (Hexagonal Architecture)
+│   └── discovery/  # Service discovery domain (Hexagonal Architecture)
+├── shared/         # Shared utilities and types (Full-stack)
+│   ├── dto/        # Shared DTOs with class-validator/class-transformer
+│   └── types/      # Shared TypeScript types
+└── ui/            # Shared UI component library (Frontend-only)
+    └── react/     # React component library
 ```
 
-To create a production bundle:
+## Development Setup
+
+### Prerequisites
+
+- Node.js >= 18.0.0
+- Docker and Docker Compose
+- PostgreSQL 15+
+- Redis 7+
+
+### Initial Setup
 
 ```sh
-npx nx build acme
+# Clone and install dependencies
+git clone https://github.com/capsule-dev/capsule.git
+cd capsule
+npm install
+
+# Setup environment variables
+cp .env.example .env
+
+# Start infrastructure services
+docker-compose up -d
+
+# Run database migrations
+npx nx run api-gateway:migrate
+
+# Seed development data
+npx nx run workspace:seed
 ```
 
-To see all available targets to run for a project, run:
+## Run Tasks
+
+To start the development servers:
 
 ```sh
-npx nx show project acme
+# Start all services in development mode
+npx nx run-many --target=serve --all
+
+# Or start specific services
+npx nx serve api-gateway
+npx nx serve portal
+npx nx serve dashboard
+npx nx serve landing-page
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
+To build for production:
 
 ```sh
-npx nx g @nx/react:app demo
+# Build all affected projects
+npx nx affected:build
+
+# Build specific service
+npx nx build api-gateway
+
+# Build with production configuration
+npx nx build api-gateway --configuration=production
 ```
 
-To generate a new library, use:
+To run tests:
 
 ```sh
-npx nx g @nx/react:lib mylib
+# Run all tests
+npx nx run-many --target=test --all
+
+# Run affected tests
+npx nx affected:test
+
+# Run e2e tests
+npx nx e2e portal-e2e
+
+# Run with coverage
+npx nx test api-gateway --coverage
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## Code Generation
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Generate a new microservice:
 
+```sh
+npx nx g @nx/nest:app service-monitoring --directory=apps
+```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Generate a new bounded context:
 
-## Install Nx Console
+```sh
+npx nx g @nx/js:lib monitoring --directory=libs/contexts \
+  --tags="type:lib,scope:contexts,arch:hexagonal"
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+### Generate a new feature library:
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```sh
+npx nx g @nx/react:lib feature-dashboard --directory=libs/portal \
+  --tags="type:lib,scope:features,arch:feature-sliced"
+```
 
-## Useful links
+### Generate API resources:
 
-Learn more:
+```sh
+# Generate a new NestJS module
+npx nx g @nx/nest:module deployment --project=api-gateway
 
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/react-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# Generate a new controller
+npx nx g @nx/nest:controller deployment --project=api-gateway
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# Generate a new service
+npx nx g @nx/nest:service deployment --project=api-gateway
+```
+
+## Project Configuration
+
+### Key Configuration Files
+
+- `nx.json` - Nx workspace configuration
+- `tsconfig.base.json` - TypeScript path mappings
+- `.env.example` - Environment variables template
+- `docker-compose.yml` - Local infrastructure setup
+
+### Environment Variables
+
+```sh
+# Database
+DATABASE_URL=postgresql://user:pass@localhost:5432/capsule
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# Auth
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=15m
+
+# Services URLs (local development)
+API_GATEWAY_URL=http://localhost:3000
+PORTAL_URL=http://localhost:4200
+DASHBOARD_URL=http://localhost:4201
+LANDING_PAGE_URL=http://localhost:4202
+```
+
+## Affected Commands
+
+Nx uses git to determine affected projects:
+
+```sh
+# Test affected projects
+npx nx affected:test --base=main --head=HEAD
+
+# Build affected projects
+npx nx affected:build --base=main --head=HEAD
+
+# Lint affected projects
+npx nx affected:lint --base=main --head=HEAD
+
+# See affected projects graph
+npx nx affected:graph --base=main --head=HEAD
+```
+
+## Database Migrations
+
+```sh
+# Generate a new migration
+npx nx run api-gateway:migration:generate --name=AddDeploymentTable
+
+# Run migrations
+npx nx run api-gateway:migration:run
+
+# Revert last migration
+npx nx run api-gateway:migration:revert
+```
+
+## Docker Build
+
+```sh
+# Build Docker images for all services
+npx nx run-many --target=docker-build --all
+
+# Build specific service
+npx nx docker-build api-gateway
+
+# Build and push to registry
+npx nx docker-build api-gateway --push --tag=latest
+```
+
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/ci.yml
+- uses: nrwl/nx-set-shas@v4
+- run: npm ci
+
+- run: npx nx format:check
+- run: npx nx affected -t lint test build e2e --parallel=3
+```
+
+### Nx Cloud
+
+```sh
+# Connect to Nx Cloud for distributed caching
+npx nx connect-to-nx-cloud
+```
+
+## Debugging
+
+```sh
+# Debug a NestJS service
+npx nx serve api-gateway --inspect
+
+# Debug with VSCode
+# Use the launch configurations in .vscode/launch.json
+
+# View dependency graph
+npx nx graph
+
+# Reset Nx cache
+npx nx reset
+```
+
+## Production Deployment
+
+```sh
+# Build all services for production
+npx nx run-many --target=build --configuration=production --all
+
+# Deploy using Capsule CLI
+npx @capsule/cli deploy --env=production
+
+# Or use docker-compose for production
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+## Useful Commands
+
+```sh
+# Format code
+npx nx format:write
+
+# Check circular dependencies
+npx nx run-many --target=lint --all
+
+# Update dependencies
+npx nx migrate latest
+
+# Clean workspace
+npx nx reset
+rm -rf node_modules
+npm install
+```
+
+## Architecture Highlights
+
+### Domain-Driven Design (DDD)
+
+- **Bounded Contexts**: Each domain (deploy, billing, discovery) is isolated
+- **Hexagonal Architecture**: Clean separation between domain, application, and infrastructure layers
+- **Event-Driven**: Communication via domain events
+
+### Feature-Sliced Design (FSD)
+
+- **Frontend Apps**: Organized by features, widgets, entities, and shared layers
+- **Scalable Structure**: Easy to add new features without affecting existing code
+- **Shared UI Library**: Reusable components in `libs/ui/react`
+
+### Shared Libraries
+
+- **DTOs**: Use `class-validator` and `class-transformer` for validation and transformation
+- **Types**: Shared TypeScript types across frontend and backend
+- **Database Fields**: Kebab-case in database, camelCase in code with `@Expose` decorator
+
+## Learn More
+
+- [Nx Documentation](https://nx.dev)
+- [NestJS Documentation](https://docs.nestjs.com)
+- [React Documentation](https://react.dev)
+- [Capsule Architecture Guide](./docs/architecture.md)
+- [Core Features](./docs/core-features.md)
+- [API Documentation](./docs/api.md)
+- [Deployment Guide](./docs/deployment.md)
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines.
+
+## License
+
+MIT

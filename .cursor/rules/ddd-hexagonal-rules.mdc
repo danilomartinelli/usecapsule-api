@@ -1,0 +1,639 @@
+# Regras para DDD e Arquitetura Hexagonal - ACME
+
+Você está trabalhando com **Domain-Driven Design (DDD)** e **Arquitetura Hexagonal** no projeto ACME. Siga estas diretrizes rigorosas:
+
+## 🏗️ **Estrutura de Bounded Contexts**
+
+### Organização de Contextos
+
+```
+libs/contexts/
+├── billing/                  # Contexto de Cobrança
+│   ├── domain/             # Camada de Domínio
+│   ├── application/        # Camada de Aplicação
+│   └── infrastructure/     # Camada de Infraestrutura
+├── deploy/                  # Contexto de Deploy
+├── discovery/              # Contexto de Service Discovery
+└── shared/                 # Compartilhado entre contextos
+```
+
+### Princípios DDD
+
+- **Bounded Contexts** bem definidos e isolados
+- **Ubiquitous Language** consistente em cada contexto
+- **Domain Events** para comunicação entre contextos
+- **Aggregates** como unidades de consistência
+- **Value Objects** para conceitos imutáveis
+
+## 🎯 **Camada de Domínio (Domain Layer)**
+
+### Entities
+
+```typescript
+// libs/contexts/billing/domain/entities/BillingEntity.ts
+export class BillingEntity {
+  constructor(
+    public readonly id: BillingId,
+    public readonly customerId: CustomerId,
+    public readonly amount: Money,
+    public readonly status: BillingStatus,
+    public readonly dueDate: Date,
+    public readonly createdAt: Date,
+    public readonly updatedAt: Date
+  ) {}
+
+  // Factory method
+  static create(params: CreateBillingParams): BillingEntity {
+    return new BillingEntity(
+      BillingId.generate(),
+      CustomerId.fromString(params.customerId),
+      Money.create(params.amount),
+      BillingStatus.PENDING,
+      params.dueDate,
+      new Date(),
+      new Date()
+    );
+  }
+
+  // Domain methods
+  markAsPaid(): void {
+    if (this.status !== BillingStatus.PENDING) {
+      throw new DomainError('Billing is not in pending status');
+    }
+    // Domain logic
+  }
+
+  updateStatus(newStatus: BillingStatus): void {
+    // Domain validation
+    if (!this.canTransitionTo(newStatus)) {
+      throw new DomainError(
+        `Invalid status transition: ${this.status} -> ${newStatus}`
+      );
+    }
+    // Update logic
+  }
+
+  private canTransitionTo(newStatus: BillingStatus): boolean {
+    // Domain rules for status transitions
+    return true;
+  }
+}
+```
+
+### Value Objects
+
+```typescript
+// libs/contexts/billing/domain/value-objects/BillingId.ts
+export class BillingId {
+  constructor(private readonly value: string) {
+    this.validate();
+  }
+
+  static generate(): BillingId {
+    return new BillingId(crypto.randomUUID());
+  }
+
+  static fromString(value: string): BillingId {
+    return new BillingId(value);
+  }
+
+  toString(): string {
+    return this.value;
+  }
+
+  equals(other: BillingId): boolean {
+    return this.value === other.value;
+  }
+
+  private validate(): void {
+    if (!this.value || this.value.length === 0) {
+      throw new DomainError('BillingId cannot be empty');
+    }
+  }
+}
+
+// libs/contexts/billing/domain/value-objects/Money.ts
+export class Money {
+  constructor(
+    private readonly amount: number,
+    private readonly currency: string = 'BRL'
+  ) {
+    this.validate();
+  }
+
+  static create(amount: number, currency: string = 'BRL'): Money {
+    return new Money(amount, currency);
+  }
+
+  add(other: Money): Money {
+    if (this.currency !== other.currency) {
+      throw new DomainError('Cannot add money with different currencies');
+    }
+    return new Money(this.amount + other.amount, this.currency);
+  }
+
+  multiply(factor: number): Money {
+    return new Money(this.amount * factor, this.currency);
+  }
+
+  getAmount(): number {
+    return this.amount;
+  }
+
+  getCurrency(): string {
+    return this.currency;
+  }
+
+  private validate(): void {
+    if (this.amount < 0) {
+      throw new DomainError('Money amount cannot be negative');
+    }
+  }
+}
+```
+
+### Domain Events
+
+```typescript
+// libs/contexts/billing/domain/events/BillingCreatedEvent.ts
+export class BillingCreatedEvent extends DomainEvent {
+  constructor(
+    public readonly billingId: BillingId,
+    public readonly customerId: CustomerId,
+    public readonly amount: Money,
+    public readonly dueDate: Date
+  ) {
+    super();
+  }
+}
+
+// libs/contexts/billing/domain/events/BillingPaidEvent.ts
+export class BillingPaidEvent extends DomainEvent {
+  constructor(
+    public readonly billingId: BillingId,
+    public readonly paidAt: Date,
+    public readonly paymentMethod: string
+  ) {
+    super();
+  }
+}
+```
+
+### Domain Services
+
+```typescript
+// libs/contexts/billing/domain/services/BillingService.ts
+export class BillingService {
+  calculateInterest(billing: BillingEntity, daysLate: number): Money {
+    if (billing.status !== BillingStatus.OVERDUE) {
+      return Money.create(0);
+    }
+
+    const interestRate = 0.01; // 1% per day
+    const interestAmount = billing.amount.getAmount() * interestRate * daysLate;
+
+    return Money.create(interestAmount);
+  }
+
+  validateBillingCreation(customerId: CustomerId, amount: Money): boolean {
+    // Domain validation rules
+    return amount.getAmount() > 0;
+  }
+}
+```
+
+## 🔄 **Camada de Aplicação (Application Layer)**
+
+### Use Cases
+
+```typescript
+// libs/contexts/billing/application/use-cases/CreateBillingUseCase.ts
+export class CreateBillingUseCase {
+  constructor(
+    private readonly billingRepository: BillingRepositoryPort,
+    private readonly customerService: CustomerServicePort,
+    private readonly eventPublisher: EventPublisherPort,
+    private readonly billingService: BillingService
+  ) {}
+
+  async execute(dto: CreateBillingDto): Promise<CreateBillingResult> {
+    // 1. Validate input
+    this.validateInput(dto);
+
+    // 2. Check if customer exists
+    const customer = await this.customerService.findById(dto.customerId);
+    if (!customer) {
+      throw new ApplicationError('Customer not found');
+    }
+
+    // 3. Create domain entity
+    const billing = BillingEntity.create({
+      customerId: dto.customerId,
+      amount: Money.create(dto.amount),
+      dueDate: dto.dueDate,
+    });
+
+    // 4. Validate domain rules
+    if (
+      !this.billingService.validateBillingCreation(
+        CustomerId.fromString(dto.customerId),
+        billing.amount
+      )
+    ) {
+      throw new ApplicationError('Invalid billing data');
+    }
+
+    // 5. Persist entity
+    await this.billingRepository.save(billing);
+
+    // 6. Publish domain event
+    const event = new BillingCreatedEvent(
+      billing.id,
+      billing.customerId,
+      billing.amount,
+      billing.dueDate
+    );
+    await this.eventPublisher.publish(event);
+
+    // 7. Return result
+    return {
+      billingId: billing.id.toString(),
+      status: billing.status,
+      dueDate: billing.dueDate,
+    };
+  }
+
+  private validateInput(dto: CreateBillingDto): void {
+    if (!dto.customerId || !dto.amount || !dto.dueDate) {
+      throw new ApplicationError(
+        'Customer ID, amount and due date are required'
+      );
+    }
+  }
+}
+```
+
+### Ports (Interfaces)
+
+```typescript
+// libs/contexts/billing/application/ports/BillingRepository.port.ts
+export interface BillingRepositoryPort {
+  save(billing: BillingEntity): Promise<void>;
+  findById(id: BillingId): Promise<BillingEntity | null>;
+  findByCustomerId(customerId: CustomerId): Promise<BillingEntity[]>;
+  findByStatus(status: BillingStatus): Promise<BillingEntity[]>;
+  update(billing: BillingEntity): Promise<void>;
+  delete(id: BillingId): Promise<void>;
+}
+
+// libs/contexts/billing/application/ports/CustomerService.port.ts
+export interface CustomerServicePort {
+  findById(id: string): Promise<Customer | null>;
+  validateCustomer(id: string): Promise<boolean>;
+}
+
+// libs/contexts/billing/application/ports/EventPublisher.port.ts
+export interface EventPublisherPort {
+  publish(event: DomainEvent): Promise<void>;
+  publishAll(events: DomainEvent[]): Promise<void>;
+}
+```
+
+### DTOs
+
+```typescript
+// libs/contexts/billing/application/dtos/CreateBillingDto.ts
+export class CreateBillingDto {
+  constructor(
+    public readonly customerId: string,
+    public readonly amount: number,
+    public readonly dueDate: Date,
+    public readonly description?: string
+  ) {}
+}
+
+// libs/contexts/billing/application/dtos/CreateBillingResult.ts
+export class CreateBillingResult {
+  constructor(
+    public readonly billingId: string,
+    public readonly status: BillingStatus,
+    public readonly dueDate: Date
+  ) {}
+}
+```
+
+## 🔌 **Camada de Infraestrutura (Infrastructure Layer)**
+
+### Adapters
+
+```typescript
+// libs/contexts/billing/infrastructure/adapters/NestBillingController.ts
+@Controller('billing')
+export class NestBillingController {
+  constructor(
+    private readonly createBillingUseCase: CreateBillingUseCase,
+    private readonly getBillingUseCase: GetBillingUseCase
+  ) {}
+
+  @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createBilling(
+    @Body() dto: CreateBillingDto
+  ): Promise<CreateBillingResult> {
+    return this.createBillingUseCase.execute(dto);
+  }
+
+  @Get(':id')
+  async getBilling(@Param('id') id: string): Promise<BillingResponse> {
+    const result = await this.getBillingUseCase.execute({ billingId: id });
+    return this.mapToResponse(result);
+  }
+
+  private mapToResponse(billing: BillingEntity): BillingResponse {
+    return {
+      id: billing.id.toString(),
+      customerId: billing.customerId.toString(),
+      amount: billing.amount.getAmount(),
+      currency: billing.amount.getCurrency(),
+      status: billing.status,
+      dueDate: billing.dueDate,
+      createdAt: billing.createdAt,
+      updatedAt: billing.updatedAt,
+    };
+  }
+}
+
+// libs/contexts/billing/infrastructure/adapters/PostgresBillingRepository.ts
+@Injectable()
+export class PostgresBillingRepository implements BillingRepositoryPort {
+  constructor(
+    @InjectRepository(BillingModel)
+    private readonly repository: Repository<BillingModel>
+  ) {}
+
+  async save(billing: BillingEntity): Promise<void> {
+    const billingModel = this.mapToModel(billing);
+    await this.repository.save(billingModel);
+  }
+
+  async findById(id: BillingId): Promise<BillingEntity | null> {
+    const billingModel = await this.repository.findOne({
+      where: { id: id.toString() },
+    });
+
+    return billingModel ? this.mapToEntity(billingModel) : null;
+  }
+
+  async findByCustomerId(customerId: CustomerId): Promise<BillingEntity[]> {
+    const billingModels = await this.repository.find({
+      where: { customerId: customerId.toString() },
+    });
+
+    return billingModels.map((model) => this.mapToEntity(model));
+  }
+
+  async findByStatus(status: BillingStatus): Promise<BillingEntity[]> {
+    const billingModels = await this.repository.find({
+      where: { status },
+    });
+
+    return billingModels.map((model) => this.mapToEntity(model));
+  }
+
+  async update(billing: BillingEntity): Promise<void> {
+    const billingModel = this.mapToModel(billing);
+    await this.repository.update(billing.id.toString(), billingModel);
+  }
+
+  async delete(id: BillingId): Promise<void> {
+    await this.repository.delete(id.toString());
+  }
+
+  private mapToModel(billing: BillingEntity): any {
+    return {
+      id: billing.id.toString(),
+      customerId: billing.customerId.toString(),
+      amount: billing.amount.getAmount(),
+      currency: billing.amount.getCurrency(),
+      status: billing.status,
+      dueDate: billing.dueDate,
+      createdAt: billing.createdAt,
+      updatedAt: billing.updatedAt,
+    };
+  }
+
+  private mapToEntity(model: any): BillingEntity {
+    return new BillingEntity(
+      BillingId.fromString(model.id),
+      CustomerId.fromString(model.customerId),
+      Money.create(model.amount, model.currency),
+      model.status,
+      model.dueDate,
+      model.createdAt,
+      model.updatedAt
+    );
+  }
+}
+
+// libs/contexts/billing/infrastructure/adapters/RabbitMQEventPublisher.ts
+@Injectable()
+export class RabbitMQEventPublisher implements EventPublisherPort {
+  constructor(private readonly amqpConnection: AmqpConnection) {}
+
+  async publish(event: DomainEvent): Promise<void> {
+    const channel = await this.amqpConnection.createChannel();
+
+    await channel.assertExchange('domain_events', 'topic', { durable: true });
+
+    await channel.publish(
+      'domain_events',
+      event.constructor.name,
+      Buffer.from(JSON.stringify(event))
+    );
+  }
+
+  async publishAll(events: DomainEvent[]): Promise<void> {
+    for (const event of events) {
+      await this.publish(event);
+    }
+  }
+}
+```
+
+## 🧪 **Testes por Camada**
+
+### Domain Tests
+
+```typescript
+// libs/contexts/billing/domain/entities/__tests__/BillingEntity.spec.ts
+describe('BillingEntity', () => {
+  describe('create', () => {
+    it('should create billing with valid parameters', () => {
+      const params = {
+        customerId: 'customer-123',
+        amount: 100.5,
+        dueDate: new Date('2024-12-31'),
+      };
+
+      const billing = BillingEntity.create(params);
+
+      expect(billing.id).toBeDefined();
+      expect(billing.customerId.toString()).toBe('customer-123');
+      expect(billing.amount.getAmount()).toBe(100.5);
+      expect(billing.status).toBe(BillingStatus.PENDING);
+    });
+  });
+
+  describe('markAsPaid', () => {
+    it('should mark billing as paid when in pending status', () => {
+      const billing = BillingEntity.create({
+        customerId: 'customer-123',
+        amount: 100.5,
+        dueDate: new Date('2024-12-31'),
+      });
+
+      billing.markAsPaid();
+
+      expect(billing.status).toBe(BillingStatus.PAID);
+    });
+
+    it('should throw error when billing is not in pending status', () => {
+      const billing = BillingEntity.create({
+        customerId: 'customer-123',
+        amount: 100.5,
+        dueDate: new Date('2024-12-31'),
+      });
+
+      billing.markAsPaid(); // First payment
+
+      expect(() => billing.markAsPaid()).toThrow(DomainError);
+    });
+  });
+});
+```
+
+### Application Tests
+
+```typescript
+// libs/contexts/billing/application/use-cases/__tests__/CreateBillingUseCase.spec.ts
+describe('CreateBillingUseCase', () => {
+  let useCase: CreateBillingUseCase;
+  let mockBillingRepository: jest.Mocked<BillingRepositoryPort>;
+  let mockCustomerService: jest.Mocked<CustomerServicePort>;
+  let mockEventPublisher: jest.Mocked<EventPublisherPort>;
+  let mockBillingService: jest.Mocked<BillingService>;
+
+  beforeEach(() => {
+    mockBillingRepository = {
+      save: jest.fn(),
+      findById: jest.fn(),
+      findByCustomerId: jest.fn(),
+      findByStatus: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
+
+    mockCustomerService = {
+      findById: jest.fn(),
+      validateCustomer: jest.fn(),
+    };
+
+    mockEventPublisher = {
+      publish: jest.fn(),
+      publishAll: jest.fn(),
+    };
+
+    mockBillingService = {
+      validateBillingCreation: jest.fn(),
+      calculateInterest: jest.fn(),
+    };
+
+    useCase = new CreateBillingUseCase(
+      mockBillingRepository,
+      mockCustomerService,
+      mockEventPublisher,
+      mockBillingService
+    );
+  });
+
+  it('should create billing successfully', async () => {
+    const dto = new CreateBillingDto(
+      'customer-123',
+      100.5,
+      new Date('2024-12-31')
+    );
+
+    mockCustomerService.findById.mockResolvedValue({ id: 'customer-123' });
+    mockBillingService.validateBillingCreation.mockReturnValue(true);
+    mockBillingRepository.save.mockResolvedValue();
+    mockEventPublisher.publish.mockResolvedValue();
+
+    const result = await useCase.execute(dto);
+
+    expect(result.billingId).toBeDefined();
+    expect(result.status).toBe(BillingStatus.PENDING);
+    expect(mockBillingRepository.save).toHaveBeenCalled();
+    expect(mockEventPublisher.publish).toHaveBeenCalled();
+  });
+});
+```
+
+## 📋 **Regras de Implementação**
+
+### 1. Isolamento de Contextos
+
+- **Nunca** importe entidades de outros contextos
+- Use **Domain Events** para comunicação entre contextos
+- Mantenha **Ports** como interfaces puras
+- Implemente **Adapters** na camada de infraestrutura
+
+### 2. Domain Layer
+
+- **Entities** devem ser ricas em comportamento
+- **Value Objects** devem ser imutáveis
+- **Domain Events** devem representar fatos do domínio
+- **Domain Services** para lógica que não pertence a uma entidade
+
+### 3. Application Layer
+
+- **Use Cases** devem ser orquestradores
+- **Ports** devem ser interfaces simples
+- **DTOs** devem ser estruturas de dados simples
+- **Nunca** acesse infraestrutura diretamente
+
+### 4. Infrastructure Layer
+
+- **Adapters** implementam Ports
+- **Mapeamentos** entre domínio e infraestrutura
+- **Configurações** específicas da tecnologia
+- **Tratamento de erros** de infraestrutura
+
+### 5. Testes
+
+- **Domain**: Teste regras de negócio
+- **Application**: Teste casos de uso
+- **Infrastructure**: Teste adapters
+- **Integration**: Teste fluxos completos
+
+## 🚨 **Anti-patterns a Evitar**
+
+### ❌ Não fazer:
+
+- Importar entidades entre contextos
+- Colocar lógica de negócio em controllers
+- Usar DTOs como entidades
+- Acessar banco de dados em use cases
+- Misturar responsabilidades entre camadas
+
+### ✅ Fazer:
+
+- Usar Domain Events para comunicação
+- Manter entidades ricas em comportamento
+- Implementar Ports como interfaces
+- Separar claramente as camadas
+- Testar cada camada isoladamente
+  description:
+  globs:
+  alwaysApply: false
+
+---

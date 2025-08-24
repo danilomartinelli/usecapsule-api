@@ -1,0 +1,489 @@
+# Regras para Tailwind CSS no Workspace ACME
+
+Você está usando Tailwind CSS para estilização no workspace ACME. Siga estas diretrizes:
+
+## 🎨 **Configuração**
+
+### Arquivos de Configuração
+
+- **`tailwind.config.js`** - Configuração principal do Tailwind
+- **`postcss.config.js`** - Configuração do PostCSS
+- **`styles.css`** - Arquivo principal com diretivas do Tailwind
+
+### Diretivas Essenciais
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+## 🏗️ **Desenvolvimento**
+
+### Classes Utilitárias
+
+- **Use classes utilitárias** do Tailwind para estilização
+- **Prefira classes utilitárias** sobre CSS customizado
+- **Use classes responsivas** quando necessário
+- **Mantenha consistência** nas classes utilizadas
+
+### Estrutura de Classes
+
+```tsx
+// ✅ DO: Organizar classes por categoria
+<div
+  className="
+  /* Layout */
+  flex items-center justify-between
+  /* Espaçamento */
+  p-4 md:p-6 lg:p-8
+  /* Visual */
+  bg-white rounded-lg shadow-md
+  /* Interação */
+  hover:shadow-lg transition-shadow
+  /* Responsividade */
+  w-full md:w-auto
+"
+>
+  <h2 className="text-xl font-bold text-gray-800 mb-4">Título do Card</h2>
+  <p className="text-gray-600">Conteúdo do card</p>
+</div>
+```
+
+### Responsividade
+
+- **Mobile-First**: Comece com classes mobile, depois adicione breakpoints
+- **Breakpoints**: `sm:`, `md:`, `lg:`, `xl:`, `2xl:`
+- **Teste**: Sempre teste em diferentes tamanhos de tela
+
+## 🎯 **Componentes**
+
+### Estilização de Componentes
+
+```tsx
+// ✅ DO: Componente com Tailwind bem estruturado
+interface ButtonProps {
+  variant?: 'primary' | 'secondary' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  children: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
+export const Button: React.FC<ButtonProps> = ({
+  variant = 'primary',
+  size = 'md',
+  children,
+  onClick,
+  disabled = false,
+}) => {
+  const baseClasses =
+    'font-medium rounded transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
+
+  const variants = {
+    primary: 'bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500',
+    secondary:
+      'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500',
+    danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
+  };
+
+  const sizes = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-base',
+    lg: 'px-6 py-3 text-lg',
+  };
+
+  const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';
+
+  return (
+    <button
+      className={`
+        ${baseClasses}
+        ${variants[variant]}
+        ${sizes[size]}
+        ${disabledClasses}
+      `}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {children}
+    </button>
+  );
+};
+```
+
+### Exemplos de Uso
+
+```tsx
+// ✅ DO: Card responsivo
+<div className="
+  bg-white rounded-lg shadow-md p-4
+  md:p-6 lg:p-8
+  hover:shadow-lg transition-all duration-200
+  border border-gray-200
+">
+  <h2 className="text-xl font-bold text-gray-800 mb-4">
+    Título do Card
+  </h2>
+  <p className="text-gray-600 leading-relaxed">
+    Conteúdo do card com espaçamento adequado
+  </p>
+</div>
+
+// ✅ DO: Layout responsivo
+<div className="
+  grid grid-cols-1 gap-4
+  md:grid-cols-2 lg:grid-cols-3
+  p-4 md:p-6
+">
+  {items.map((item) => (
+    <Card key={item.id} item={item} />
+  ))}
+</div>
+
+// ✅ DO: Formulário bem estruturado
+<form className="space-y-6">
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Email
+    </label>
+    <input
+      type="email"
+      className="
+        w-full px-3 py-2 border border-gray-300 rounded-md
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+        placeholder-gray-400
+      "
+      placeholder="seu@email.com"
+    />
+  </div>
+</form>
+```
+
+## 🎨 **Customização**
+
+### Configuração do Tailwind
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  content: ['./app/**/*.{js,ts,jsx,tsx}', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          900: '#1e3a8a',
+        },
+        gray: {
+          50: '#f9fafb',
+          100: '#f3f4f6',
+          500: '#6b7280',
+          600: '#4b5563',
+          700: '#374151',
+          900: '#111827',
+        },
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      spacing: {
+        18: '4.5rem',
+        88: '22rem',
+      },
+      borderRadius: {
+        xl: '0.75rem',
+        '2xl': '1rem',
+      },
+    },
+  },
+  plugins: [],
+};
+```
+
+### Variáveis CSS Customizadas
+
+```css
+/* styles.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 59 130 246;
+    --color-secondary: 107 114 128;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md p-4 border border-gray-200;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
+}
+```
+
+## 🚀 **Boas Práticas**
+
+### Organização
+
+```tsx
+// ✅ DO: Agrupar classes relacionadas
+<div className="
+  /* Layout */
+  flex items-center justify-between
+  /* Espaçamento */
+  p-4 md:p-6 lg:p-8
+  /* Visual */
+  bg-white rounded-lg shadow-md border border-gray-200
+  /* Interação */
+  hover:shadow-lg transition-all duration-200
+  /* Responsividade */
+  w-full md:w-auto
+">
+```
+
+### Performance
+
+- **Use classes utilitárias** em vez de CSS customizado
+- **Aproveite o tree-shaking** do Tailwind
+- **Configure purge** para remover classes não utilizadas
+- **Use classes condicionais** eficientemente
+
+### Acessibilidade
+
+```tsx
+// ✅ DO: Classes de foco adequadas
+<button className="
+  px-4 py-2 bg-blue-500 text-white rounded
+  hover:bg-blue-600
+  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+  disabled:opacity-50 disabled:cursor-not-allowed
+">
+  Enviar
+</button>
+
+// ✅ DO: Contraste adequado
+<div className="bg-gray-900 text-white">
+  <h1 className="text-2xl font-bold">Título</h1>
+  <p className="text-gray-300">Texto com contraste adequado</p>
+</div>
+```
+
+## 🔧 **Integração com React**
+
+### Componentes Funcionais
+
+```tsx
+// ✅ DO: Componente com variantes
+const Badge: React.FC<BadgeProps> = ({ variant = 'default', children }) => {
+  const variants = {
+    default: 'bg-gray-100 text-gray-800',
+    success: 'bg-green-100 text-green-800',
+    warning: 'bg-yellow-100 text-yellow-800',
+    error: 'bg-red-100 text-red-800',
+  };
+
+  return (
+    <span
+      className={`
+      inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+      ${variants[variant]}
+    `}
+    >
+      {children}
+    </span>
+  );
+};
+```
+
+### Hooks Customizados
+
+```tsx
+// ✅ DO: Hook para classes responsivas
+const useResponsiveClass = (
+  mobile: string,
+  tablet: string,
+  desktop: string
+) => {
+  return `${mobile} md:${tablet} lg:${desktop}`;
+};
+
+// Uso
+const containerClass = useResponsiveClass('p-4', 'p-6', 'p-8');
+const gridClass = useResponsiveClass(
+  'grid-cols-1',
+  'grid-cols-2',
+  'grid-cols-3'
+);
+```
+
+## 🧪 **Testes**
+
+### Testes de Componentes
+
+```tsx
+// ✅ DO: Teste de classes CSS
+import { render, screen } from '@testing-library/react';
+import { Button } from './Button';
+
+describe('Button', () => {
+  it('should apply correct classes for primary variant', () => {
+    render(<Button variant="primary">Click me</Button>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('bg-blue-500', 'text-white');
+  });
+
+  it('should apply disabled classes when disabled', () => {
+    render(<Button disabled>Click me</Button>);
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('opacity-50', 'cursor-not-allowed');
+  });
+});
+```
+
+## 🚨 **Anti-patterns a Evitar**
+
+### ❌ NÃO fazer:
+
+```tsx
+// ❌ DON'T: Classes CSS inline
+<div style={{ padding: '1rem', backgroundColor: 'white' }}>
+
+// ❌ DON'T: Classes não organizadas
+<div className="flex p-4 bg-white rounded shadow hover:shadow-lg transition-shadow w-full md:w-auto items-center justify-between">
+
+// ❌ DON'T: CSS customizado desnecessário
+<style>
+  .custom-button {
+    padding: 0.5rem 1rem;
+    background-color: blue;
+    color: white;
+  }
+</style>
+```
+
+### ✅ Fazer:
+
+```tsx
+// ✅ DO: Classes Tailwind organizadas
+<div className="
+  flex items-center justify-between
+  p-4 bg-white rounded shadow
+  hover:shadow-lg transition-shadow
+  w-full md:w-auto
+">
+
+// ✅ DO: Componentes reutilizáveis
+<Button variant="primary" size="md">
+  Ação
+</Button>
+
+// ✅ DO: Classes utilitárias
+<div className="p-4 bg-white rounded-lg shadow-md">
+```
+
+## 🔍 **Debugging**
+
+### Ferramentas Úteis
+
+- **Tailwind CSS IntelliSense** (VSCode) - Autocomplete de classes
+- **Headwind** - Organização automática de classes
+- **Tailwind CSS Debug Screens** - Visualizar breakpoints
+
+### Debugging de Classes
+
+```tsx
+// ✅ DO: Debug de classes
+<div
+  className="
+  /* Debug: visualize layout */
+  border-2 border-red-500
+  /* Layout */
+  flex items-center justify-between
+  /* Espaçamento */
+  p-4 md:p-6 lg:p-8
+"
+>
+  Conteúdo
+</div>
+```
+
+## 📱 **Responsividade**
+
+### Breakpoints
+
+```tsx
+// ✅ DO: Mobile-first approach
+<div className="
+  /* Mobile (default) */
+  p-4 text-sm
+  /* Tablet */
+  md:p-6 md:text-base
+  /* Desktop */
+  lg:p-8 lg:text-lg
+  /* Large Desktop */
+  xl:p-10 xl:text-xl
+">
+  Conteúdo responsivo
+</div>
+
+// ✅ DO: Grid responsivo
+<div className="
+  grid grid-cols-1 gap-4
+  sm:grid-cols-2
+  md:grid-cols-3
+  lg:grid-cols-4
+  xl:grid-cols-5
+">
+  {items.map(item => <Card key={item.id} item={item} />)}
+</div>
+```
+
+## 🎨 **Temas e Dark Mode**
+
+### Suporte a Dark Mode
+
+```tsx
+// ✅ DO: Classes para dark mode
+<div
+  className="
+  bg-white dark:bg-gray-900
+  text-gray-900 dark:text-white
+  border-gray-200 dark:border-gray-700
+"
+>
+  <h1 className="text-2xl font-bold">Título</h1>
+  <p className="text-gray-600 dark:text-gray-300">Conteúdo</p>
+</div>
+```
+
+### Configuração de Dark Mode
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  darkMode: 'class', // ou 'media'
+  // ... resto da configuração
+};
+```
+
+description:
+globs:
+alwaysApply: false
+
+---

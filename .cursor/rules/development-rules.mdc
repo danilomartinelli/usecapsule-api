@@ -1,0 +1,535 @@
+# Regras de Desenvolvimento e Qualidade de Código - ACME
+
+## 🎯 **Formatação e Estilo**
+
+### Prettier e ESLint
+
+- **Use Prettier** para formatação automática (já configurado no workspace)
+- **Mantenha consistência** com as configurações do `.prettierrc`
+- **Use 2 espaços** para indentação
+- **Sempre termine arquivos** com uma nova linha
+- **Use ESLint** para linting (configurado no workspace)
+
+### Configurações
+
+```json
+// .prettierrc
+{
+  "semi": true,
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "printWidth": 80,
+  "tabWidth": 2
+}
+```
+
+## 🔄 **Git e Versionamento**
+
+### Commits Semânticos
+
+```bash
+# ✅ DO: Commits semânticos
+feat: adiciona autenticação JWT
+fix: corrige validação de email
+docs: atualiza README do projeto
+refactor: refatora service de usuários
+test: adiciona testes para billing
+chore: atualiza dependências
+style: ajusta formatação do código
+perf: otimiza query de usuários
+ci: configura GitHub Actions
+build: ajusta configuração do Vite
+```
+
+### Estrutura de Commits
+
+```
+<tipo>(<escopo>): <descrição>
+
+[corpo opcional]
+
+[rodapé opcional]
+```
+
+### Branches
+
+```bash
+# ✅ DO: Nomes descritivos para branches
+feature/user-authentication
+fix/email-validation
+hotfix/critical-security-issue
+refactor/billing-service
+docs/api-documentation
+```
+
+## 📝 **Qualidade de Código**
+
+### Nomenclatura
+
+```typescript
+// ✅ DO: Nomes descritivos
+const userRepository = new UserRepository();
+const isValidEmail = validateEmail(email);
+const handleUserLogin = async (credentials: LoginCredentials) => {};
+
+// ❌ DON'T: Nomes genéricos
+const repo = new Repo();
+const valid = check(email);
+const handle = async (data) => {};
+```
+
+### Funções
+
+```typescript
+// ✅ DO: Funções com responsabilidade única
+const validateUserInput = (user: CreateUserDto): ValidationResult => {
+  const errors: string[] = [];
+
+  if (!user.email) {
+    errors.push('Email is required');
+  }
+
+  if (!user.name) {
+    errors.push('Name is required');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+
+// ❌ DON'T: Funções com múltiplas responsabilidades
+const processUser = async (user: any) => {
+  // Validação
+  // Transformação
+  // Persistência
+  // Notificação
+  // Logging
+};
+```
+
+### Early Returns
+
+```typescript
+// ✅ DO: Early returns para reduzir aninhamento
+const getUserById = async (id: string): Promise<User | null> => {
+  if (!id) {
+    return null;
+  }
+
+  if (!isValidUUID(id)) {
+    throw new Error('Invalid UUID format');
+  }
+
+  const user = await userRepository.findById(id);
+  return user;
+};
+
+// ❌ DON'T: Aninhamento excessivo
+const getUserById = async (id: string): Promise<User | null> => {
+  if (id) {
+    if (isValidUUID(id)) {
+      const user = await userRepository.findById(id);
+      return user;
+    } else {
+      throw new Error('Invalid UUID format');
+    }
+  } else {
+    return null;
+  }
+};
+```
+
+## 🚀 **Performance**
+
+### Otimizações
+
+```typescript
+// ✅ DO: Lazy loading
+const Dashboard = lazy(() => import('./Dashboard'));
+const UserProfile = lazy(() => import('./UserProfile'));
+
+// ✅ DO: Memoização
+const expensiveCalculation = useMemo(() => {
+  return computeExpensiveValue(data);
+}, [data]);
+
+const handleClick = useCallback(() => {
+  console.log('Button clicked');
+}, []);
+
+// ✅ DO: Debounce para inputs
+const debouncedSearch = useMemo(
+  () =>
+    debounce((query: string) => {
+      searchUsers(query);
+    }, 300),
+  []
+);
+```
+
+### Bundle Size
+
+```typescript
+// ✅ DO: Imports específicos
+import { Button } from '@acme/ui/react';
+import { debounce } from 'lodash-es';
+
+// ❌ DON'T: Imports completos
+import * as UI from '@acme/ui/react';
+import _ from 'lodash';
+```
+
+## 🔒 **Segurança**
+
+### Validação
+
+```typescript
+// ✅ DO: Validação de entrada
+@Post()
+@UsePipes(new ValidationPipe({ transform: true }))
+async createUser(@Body() createUserDto: CreateUserDto) {
+  return this.usersService.create(createUserDto);
+}
+
+// ✅ DO: Sanitização
+const sanitizeInput = (input: string): string => {
+  return input.trim().replace(/[<>]/g, '');
+};
+```
+
+### Variáveis de Ambiente
+
+```typescript
+// ✅ DO: Configuração segura
+@Injectable()
+export class ConfigService {
+  get jwtSecret(): string {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error('JWT_SECRET is required');
+    }
+    return secret;
+  }
+}
+
+// ❌ DON'T: Hardcoded secrets
+const JWT_SECRET = 'my-secret-key';
+```
+
+## 📚 **Documentação**
+
+### JSDoc
+
+```typescript
+// ✅ DO: Documentação de APIs públicas
+/**
+ * Creates a new user in the system
+ * @param createUserDto - User creation data
+ * @returns Promise<User> - Created user
+ * @throws {ConflictException} When email already exists
+ * @throws {ValidationException} When input is invalid
+ */
+async createUser(createUserDto: CreateUserDto): Promise<User> {
+  // Implementation
+}
+
+// ✅ DO: Documentação de interfaces
+interface UserService {
+  /**
+   * Finds a user by their unique identifier
+   * @param id - User UUID
+   * @returns Promise<User | null> - User or null if not found
+   */
+  findById(id: string): Promise<User | null>;
+}
+```
+
+### README
+
+````markdown
+# ACME Project
+
+## Descrição
+
+Sistema de gerenciamento empresarial com arquitetura modular.
+
+## Estrutura
+
+- `apps/` - Aplicações (dashboard, portal, api-gateway)
+- `libs/` - Libraries compartilhadas
+  - `contexts/` - Bounded contexts (backend)
+  - `shared/` - Utilitários compartilhados
+  - `ui/` - Componentes UI (frontend)
+
+## Comandos
+
+```bash
+# Desenvolvimento
+nx serve dashboard
+nx serve api-gateway
+
+# Build
+nx build dashboard
+nx build api-gateway
+
+# Testes
+nx test dashboard
+nx test api-gateway
+```
+````
+
+````
+
+## 🧪 **Testes**
+
+### Estrutura de Testes
+
+```typescript
+// ✅ DO: Testes bem estruturados
+describe('UserService', () => {
+  let service: UserService;
+  let mockRepository: jest.Mocked<UserRepository>;
+
+  beforeEach(() => {
+    mockRepository = {
+      findById: jest.fn(),
+      save: jest.fn(),
+    };
+    service = new UserService(mockRepository);
+  });
+
+  describe('findById', () => {
+    it('should return user when found', async () => {
+      const mockUser = { id: '1', name: 'John' };
+      mockRepository.findById.mockResolvedValue(mockUser);
+
+      const result = await service.findById('1');
+
+      expect(result).toEqual(mockUser);
+      expect(mockRepository.findById).toHaveBeenCalledWith('1');
+    });
+
+    it('should return null when user not found', async () => {
+      mockRepository.findById.mockResolvedValue(null);
+
+      const result = await service.findById('999');
+
+      expect(result).toBeNull();
+    });
+  });
+});
+````
+
+### Cobertura
+
+```bash
+# ✅ DO: Executar testes com cobertura
+nx test api-gateway --coverage
+nx test dashboard --coverage
+
+# Verificar cobertura mínima
+npm run test:coverage
+```
+
+## 🔧 **Ferramentas do Workspace**
+
+### Comandos Nx
+
+```bash
+# ✅ DO: Comandos específicos por projeto
+nx serve dashboard          # Dashboard
+nx serve landing-page       # Landing page
+nx serve portal            # Portal
+nx serve api-gateway       # API Gateway
+
+# Build
+nx build dashboard
+nx build api-gateway
+
+# Testes
+nx test dashboard
+nx test api-gateway
+
+# Linting
+nx lint dashboard
+nx lint api-gateway
+
+# Affected
+nx affected:build          # Build apenas projetos afetados
+nx affected:test           # Testa apenas projetos afetados
+```
+
+### Cache do Nx
+
+```bash
+# ✅ DO: Aproveitar cache
+nx run-many --target=build --all --parallel=3
+
+# Limpar cache quando necessário
+nx reset
+```
+
+## 🎨 **VSCode Configuração**
+
+### Extensões Recomendadas
+
+```json
+// .vscode/extensions.json
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense"
+  ]
+}
+```
+
+### Settings
+
+```json
+// .vscode/settings.json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  }
+}
+```
+
+## 🚨 **Anti-patterns a Evitar**
+
+### ❌ NÃO fazer:
+
+```typescript
+// ❌ DON'T: Any types
+const processData = (data: any) => {
+  return data.map((item) => item.name);
+};
+
+// ❌ DON'T: Console.log em produção
+console.log('User data:', user);
+
+// ❌ DON'T: Funções muito longas
+const processEverything = async () => {
+  // 100+ linhas de código
+};
+
+// ❌ DON'T: Imports não utilizados
+import { Button, Card, Modal, Dropdown } from '@acme/ui/react';
+// Só usa Button e Card
+```
+
+### ✅ Fazer:
+
+```typescript
+// ✅ DO: Tipos específicos
+const processData = (data: User[]) => {
+  return data.map((user) => user.name);
+};
+
+// ✅ DO: Logger estruturado
+this.logger.log('User data processed', { userId: user.id });
+
+// ✅ DO: Funções pequenas e focadas
+const validateUser = (user: User): ValidationResult => {
+  // Lógica de validação
+};
+
+const saveUser = async (user: User): Promise<void> => {
+  // Lógica de persistência
+};
+
+// ✅ DO: Imports específicos
+import { Button, Card } from '@acme/ui/react';
+```
+
+## 📊 **Monitoramento**
+
+### Logging
+
+```typescript
+// ✅ DO: Logging estruturado
+@Injectable()
+export class UserService {
+  constructor(private readonly logger: Logger) {}
+
+  async createUser(dto: CreateUserDto): Promise<User> {
+    this.logger.log('Creating user', { email: dto.email });
+
+    try {
+      const user = await this.userRepository.save(dto);
+      this.logger.log('User created successfully', { userId: user.id });
+      return user;
+    } catch (error) {
+      this.logger.error('Failed to create user', { error, email: dto.email });
+      throw error;
+    }
+  }
+}
+```
+
+### Métricas
+
+```typescript
+// ✅ DO: Métricas de performance
+@Injectable()
+export class MetricsService {
+  recordApiCall(endpoint: string, duration: number) {
+    // Registrar métrica
+  }
+
+  recordError(error: Error, context: string) {
+    // Registrar erro
+  }
+}
+```
+
+## 🔄 **Refatoração**
+
+### Quando Refatorar
+
+- **Código duplicado** em múltiplos lugares
+- **Funções muito longas** (>20 linhas)
+- **Classes com muitas responsabilidades**
+- **Imports não utilizados**
+- **Código comentado** desnecessário
+
+### Processo de Refatoração
+
+1. **Identificar** código candidato
+2. **Escrever testes** para funcionalidade
+3. **Refatorar** gradualmente
+4. **Executar testes** a cada mudança
+5. **Validar** funcionalidade
+6. **Comitar** mudanças pequenas
+
+## 📋 **Checklist de Qualidade**
+
+### Antes do Commit
+
+- [ ] **Código formatado** com Prettier
+- [ ] **Linting** sem erros
+- [ ] **Testes** passando
+- [ ] **Imports** organizados
+- [ ] **Nomes descritivos** para variáveis/funções
+- [ ] **Documentação** atualizada
+- [ ] **Commits semânticos** com mensagens claras
+- [ ] **Sem credenciais** hardcoded
+- [ ] **Tratamento de erros** adequado
+- [ ] **Performance** considerada
+      description:
+      globs:
+      alwaysApply: false
+
+---

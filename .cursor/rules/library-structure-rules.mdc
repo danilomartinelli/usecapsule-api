@@ -1,0 +1,379 @@
+# Regras para Estrutura de Libraries no Workspace ACME
+
+Você está trabalhando com a estrutura de libraries do workspace ACME. Siga estas convenções rigorosas:
+
+## 📁 **Estrutura de Pastas**
+
+### **`libs/contexts/` (Backend-only)**
+
+- **Propósito**: Bounded Contexts DDD para lógica de negócio
+- **Arquitetura**: Domain-Driven Design + Hexagonal Architecture
+- **Uso**: Apenas projetos backend (NestJS microserviços)
+- **Tags**: `scope:<context>,type:domain,arch:hexagonal`
+- **Exemplos**: billing, deploy, discovery
+
+### **`libs/shared/` (Full-stack)**
+
+- **Propósito**: Compartilhado entre frontend e backend
+- **Uso**: Qualquer projeto (apps, libs)
+- **Tags**: `scope:shared,type:utils,arch:shared`
+- **Exemplos**: DTOs, tipos, interfaces, utilitários
+
+### **`libs/ui/` (Frontend-only)**
+
+- **Propósito**: Componentes e bibliotecas de UI
+- **Uso**: Apenas projetos frontend (React, Vue, etc.)
+- **Tags**: `scope:shared,type:ui,arch:shared`
+- **Restrição**: Não pode ser usado por projetos backend
+- **Exemplos**: React components, design system, layouts
+
+## 🔗 **Regras de Dependências**
+
+### **✅ Permitido:**
+
+#### **Frontend → UI**
+
+```typescript
+// apps/portal/app/dashboard/page.tsx
+import { Button, Card } from '@acme/ui/react';
+```
+
+#### **Frontend → Shared**
+
+```typescript
+// apps/portal/app/api/client.ts
+import { BaseResponseDto } from '@acme/shared/dto';
+```
+
+#### **Backend → Contexts**
+
+```typescript
+// apps/api-gateway/src/billing/billing.controller.ts
+import { CreateBillingUseCase } from '@acme/contexts/billing';
+```
+
+#### **Backend → Shared**
+
+```typescript
+// apps/api-gateway/src/common/types.ts
+import { BaseEntity } from '@acme/shared/types';
+```
+
+### **❌ Proibido:**
+
+#### **Backend → UI**
+
+```typescript
+// ❌ NUNCA fazer isso
+// apps/api-gateway/src/app.controller.ts
+import { Button } from '@acme/ui/react'; // ERRO!
+```
+
+#### **Contexts → UI**
+
+```typescript
+// ❌ NUNCA fazer isso
+// libs/contexts/billing/src/application/use-cases/CreateBillingUseCase.ts
+import { Button } from '@acme/ui/react'; // ERRO!
+```
+
+## 🏗️ **Criação de Novas Libraries**
+
+### **Bounded Context (Backend)**
+
+```bash
+nx g @nx/js:library \
+  --directory=libs/contexts/<context-name> \
+  --name=contexts-<context-name> \
+  --tags=scope:<context-name>,type:domain,arch:hexagonal \
+  --bundler=none \
+  --linter=eslint \
+  --unitTestRunner=jest \
+  --useProjectJson=true
+```
+
+### **Shared Library (Full-stack)**
+
+```bash
+nx g @nx/js:library \
+  --directory=libs/shared/<library-name> \
+  --name=shared-<library-name> \
+  --tags=scope:shared,type:utils,arch:shared \
+  --bundler=none \
+  --linter=eslint \
+  --unitTestRunner=jest \
+  --useProjectJson=true
+```
+
+### **UI Library (Frontend)**
+
+```bash
+nx g @nx/react:library \
+  --directory=libs/ui/<framework> \
+  --name=shared-ui-<framework> \
+  --tags=scope:shared,type:ui,arch:shared \
+  --bundler=vite \
+  --linter=eslint \
+  --unitTestRunner=jest \
+  --style=tailwind \
+  --useProjectJson=true
+```
+
+## 📋 **Estrutura Interna das Libraries**
+
+### **Bounded Contexts (DDD + Hexagonal)**
+
+```
+libs/contexts/<context>/
+├── src/
+│   ├── domain/           # Entities, Value Objects, Events
+│   ├── application/      # Use Cases, Ports, DTOs
+│   └── infrastructure/   # Adapters (opcional)
+├── package.json
+└── project.json
+```
+
+### **Shared Libraries**
+
+```
+libs/shared/<library>/
+├── src/
+│   ├── base/            # Tipos/DTOs base
+│   ├── <context1>/      # Contexto específico
+│   └── <context2>/      # Contexto específico
+├── package.json
+└── project.json
+```
+
+### **UI Libraries**
+
+```
+libs/ui/<framework>/
+├── src/
+│   ├── components/      # Componentes React
+│   ├── theme/          # Sistema de design
+│   ├── hooks/          # Hooks customizados
+│   └── utils/          # Utilitários de UI
+├── tailwind.config.js  # Configuração Tailwind
+├── package.json
+└── project.json
+```
+
+## 🎯 **Nomenclatura**
+
+### **Nomes de Libraries**
+
+- **Contexts**: `contexts-<context-name>` (ex: `contexts-billing`)
+- **Shared**: `shared-<library-name>` (ex: `shared-dto`)
+- **UI**: `shared-ui-<framework>` (ex: `shared-ui-react`)
+
+### **Nomes de Pacotes**
+
+- **Contexts**: `@acme/contexts-<context-name>`
+- **Shared**: `@acme/shared-<library-name>`
+- **UI**: `@acme/shared-ui-<framework>`
+
+## 🔍 **Validação de Dependências**
+
+### **Verificar Dependências**
+
+```bash
+# Ver dependências de um projeto
+nx dep-graph --focus=contexts-billing
+
+# Ver dependências de UI
+nx dep-graph --focus=shared-ui-react
+
+# Verificar se há violações
+nx lint contexts-billing
+```
+
+### **Filtros por Tipo**
+
+```bash
+# Ver apenas bounded contexts
+nx graph --focus="type:domain"
+
+# Ver apenas UI libraries
+nx graph --focus="type:ui"
+
+# Ver apenas shared libraries
+nx graph --focus="scope:shared"
+```
+
+## 🚨 **Anti-patterns a Evitar**
+
+### **❌ Não fazer:**
+
+- Criar UI libraries em `libs/contexts/`
+- Criar bounded contexts em `libs/ui/`
+- Usar UI libraries em projetos backend
+- Misturar responsabilidades entre pastas
+- Quebrar a separação frontend/backend
+
+### **✅ Fazer:**
+
+- Manter separação clara de responsabilidades
+- Usar tags adequadas para cada library
+- Seguir convenções de nomenclatura
+- Validar dependências antes de commitar
+- Documentar mudanças na estrutura
+
+## 📚 **Documentação**
+
+### **README de cada Library**
+
+Cada library deve ter um README.md com:
+
+- **Propósito** da library
+- **Como usar** (exemplos)
+- **Dependências** permitidas
+- **Estrutura** interna
+- **Exemplos** de uso
+
+### **Exemplo de README**
+
+````markdown
+# @acme/contexts-billing
+
+Bounded Context para gerenciamento de cobrança no ACME.
+
+## Uso
+
+```typescript
+import { CreateBillingUseCase } from '@acme/contexts/billing';
+```
+````
+
+## Dependências
+
+- ✅ `@acme/shared/types`
+- ❌ `@acme/shared-ui-react` (não permitido)
+
+````
+
+## 🏗️ **Exemplos de Libraries Existentes**
+
+### **Contexts (Backend)**
+- `libs/contexts/billing/` - Gerenciamento de cobrança
+- `libs/contexts/deploy/` - Gerenciamento de deploys
+- `libs/contexts/discovery/` - Service discovery
+
+### **Shared (Full-stack)**
+- `libs/shared/dto/` - Data Transfer Objects
+- `libs/shared/types/` - Tipos TypeScript compartilhados
+
+### **UI (Frontend)**
+- `libs/ui/react/` - Componentes React reutilizáveis
+
+## 🔧 **Configuração de Projetos**
+
+### **project.json para Contexts**
+```json
+{
+  "name": "contexts-billing",
+  "tags": ["scope:billing", "type:domain", "arch:hexagonal"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/contexts/billing",
+        "main": "libs/contexts/billing/src/index.ts",
+        "tsConfig": "libs/contexts/billing/tsconfig.lib.json"
+      }
+    }
+  }
+}
+````
+
+### **project.json para UI**
+
+```json
+{
+  "name": "shared-ui-react",
+  "tags": ["scope:shared", "type:ui", "arch:shared"],
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/ui/react"
+      }
+    }
+  }
+}
+```
+
+## 🧪 **Testes**
+
+### **Estrutura de Testes**
+
+```
+libs/contexts/billing/
+├── src/
+│   └── domain/
+│       └── entities/
+│           ├── BillingEntity.ts
+│           └── __tests__/
+│               └── BillingEntity.spec.ts
+```
+
+### **Testes por Tipo**
+
+- **Domain**: Teste regras de negócio
+- **Application**: Teste casos de uso
+- **Infrastructure**: Teste adapters
+- **UI**: Teste componentes React
+
+## 📦 **Publicação e Versionamento**
+
+### **Package.json**
+
+```json
+{
+  "name": "@acme/contexts-billing",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
+    }
+  }
+}
+```
+
+### **Index.ts**
+
+```typescript
+// libs/contexts/billing/src/index.ts
+export * from './domain/entities/BillingEntity';
+export * from './application/use-cases/CreateBillingUseCase';
+export * from './application/ports/BillingRepository.port';
+```
+
+## 🔄 **Migração e Refatoração**
+
+### **Quando Migrar**
+
+- Quando uma funcionalidade é usada em múltiplos projetos
+- Quando há lógica de negócio complexa que pode ser isolada
+- Quando há componentes UI reutilizáveis
+- Quando há tipos/DTOs compartilhados
+
+### **Processo de Migração**
+
+1. **Identificar** código candidato à migração
+2. **Criar** nova library com estrutura adequada
+3. **Mover** código para a nova library
+4. **Atualizar** imports nos projetos existentes
+5. **Testar** funcionalidade
+6. **Documentar** mudanças
+   description:
+   globs:
+   alwaysApply: false
+
+---

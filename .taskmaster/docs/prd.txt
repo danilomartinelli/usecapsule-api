@@ -1,0 +1,260 @@
+# Product Requirements Document - Capsule Platform
+
+## Visão Geral do Produto
+
+**Capsule** é uma plataforma para deploy de monorepos Nx em produção com configuração zero. Assim como a Vercel revolucionou o deploy de aplicações Next.js, Capsule faz o mesmo para arquiteturas empresariais complexas - detectando automaticamente microserviços, frontends e workers em monorepos, configurando toda a infraestrutura necessária e deployando com configuração zero.
+
+**Nossa promessa**: Do código ao production em menos de 5 minutos, sem YAML, sem Kubernetes, sem dor de cabeça.
+
+## Público-Alvo
+
+### MVP1 - Early Adopters
+- **Startup CTOs/Tech Leads** (50-200 funcionários)
+- Usando Nx/monorepo mas sofrendo com deploy
+- Gastando $5k-50k/mês em cloud
+- Time de 5-20 devs, 0-2 DevOps
+
+### MVP2 - Scale-ups
+- **Empresas em crescimento** (200-1000 funcionários)
+- Migrando de Heroku/Render para arquitetura própria
+- Multiple squads, precisam de isolamento
+- Compliance e auditoria começando a importar
+
+### MVP3 - Enterprise
+- **Empresas estabelecidas** com iniciativas de modernização
+- Querem alternativa ao EKS/GKE gerenciado
+- Precisam de exit strategy (export para K8s)
+- Multi-cloud e hybrid cloud requirements
+
+## Arquitetura Técnica
+
+### Estrutura do Monorepo
+```
+apps/
+├── api-gateway       # NestJS BFF API Gateway
+├── service-auth      # Authentication microservice
+├── service-deploy    # Deployment orchestration service
+├── service-billing   # Billing and usage tracking
+├── portal           # React + Vite admin dashboard
+└── cli              # Command-line interface
+
+libs/
+├── contexts/        # Domain-driven design bounded contexts
+│   ├── auth/       # Authentication domain
+│   ├── deploy/     # Deployment domain
+│   └── billing/    # Billing domain
+├── shared/         # Shared utilities and types
+└── ui/            # Shared UI component library
+```
+
+### Princípios Arquiteturais
+- **Domain-Driven Design (DDD)** - Organização por bounded contexts
+- **Hexagonal Architecture** - Isolamento de domínio via ports & adapters
+- **Event-Driven Architecture** - Comunicação assíncrona via eventos
+- **Feature-Sliced Design (FSD)** - Organização frontend escalável
+- **Monorepo com Nx** - Gerenciamento eficiente de múltiplos projetos
+
+## Core Features
+
+### 1. Magic Deploy para Monorepos Nx (Hero Feature)
+- Deploy automático e inteligente de monorepos Nx
+- Detecção automática de apps (React, Angular, Vue, NestJS, Express)
+- Entendimento das dependências entre apps
+- Deploy com configuração zero
+- URLs automáticas baseadas em nomes de apps
+
+### 2. Deploy One-Click para Container Images
+- Deploy via UI/CLI de imagens Docker
+- Health checks automáticos
+- Rollout seguro
+- Logs em tempo real
+- Suporte a registries públicos e privados
+
+### 3. Blue/Green e Canary Automáticos
+- Tráfego roteável por porcentagem/rota
+- Promoção e rollback instantâneo
+- Monitoramento de métricas
+- Rollback automático em caso de degradação
+
+### 4. Service Discovery + Internal DNS
+- Resolução DNS interna (svc.internal)
+- Políticas de acesso configuráveis
+- mTLS opcional
+- Suporte a HTTP/gRPC/broker
+
+### 5. Managed Broker Marketplace
+- Provisionamento on-demand de RabbitMQ/Redis
+- Isolamento por tenant
+- Rotas seguras
+- Quotas/retention configuráveis
+
+### 6. Config & Secrets as Code
+- Configuração declarativa
+- Integração com Vault-compatible
+- Injeção segura via env/volume
+- Auditoria de mudanças
+
+### 7. Built-in Observability
+- Logs agregados
+- Traces com sampling
+- Métricas básicas (latência/throughput)
+- Exportáveis via OTLP/Prometheus
+
+### 8. Preview Environments Automáticos
+- Ambientes efêmeros por PR/branch
+- Teardown automático
+- Links públicos
+- Políticas de custo
+
+### 9. Lightweight Autoscaling
+- Escalonamento por CPU/RPS/custom
+- Limites mínimo/máximo
+- Cooldown configurável
+- Políticas simples
+
+### 10. Network Policies GUI
+- Editor visual para políticas de rede
+- Templates seguros
+- Validação em tempo real
+- Suporte a ingress/egress
+
+### 11. Portable Export/Import
+- Exportar/importar em YAML/Helm/Terraform
+- Reduzir vendor lock-in
+- Aplicação idempotente
+- Preservação semântica
+
+### 12. Authentication & Authorization (RBAC)
+- Sistema completo de autenticação multi-provider
+- OAuth + Email/Password
+- Autorização baseada em roles (RBAC)
+- Gestão de organizações/times
+- API Keys para automação
+
+## Developer Tools & CLI
+
+### Capsule CLI
+- Comandos para gerenciamento de recursos
+- Desenvolvimento local
+- Automação de workflows
+- Integração com CI/CD
+
+### Code Generators
+- Generators para scaffolding rápido
+- Templates seguindo best practices
+- Dockerfile otimizado multi-stage
+- GitHub Actions workflow
+
+### Local Development Tools
+- Emulação local do ambiente Capsule
+- Hot reload com watchers
+- Service discovery local
+- Logs agregados
+
+## Métricas de Sucesso
+
+### Ativação (Primeiras 4 semanas)
+- **Time to First Deploy**: < 5 minutos (p50), < 10 minutos (p90)
+- **Zero-config success rate**: > 80% dos monorepos Nx deployam sem configuração manual
+- **Ativação D7**: > 60% dos trials fazem 5+ deploys na primeira semana
+
+### Engajamento (Mês 2-3)
+- **Weekly Active Teams**: > 70% dos times ativos semanalmente
+- **Services per Account**: média de 5+ serviços por conta ativa
+- **Preview Environments**: > 50% dos PRs com preview automático
+
+### Retenção (Trimestre)
+- **3-month retention**: > 85% das contas pagas
+- **Revenue expansion**: > 140% NRR (net revenue retention)
+- **Churn < 3% mensal** para contas > $500/mês
+
+### North Star Metrics
+- **Deploys per Developer per Week**: > 10 (vs. 2-3 industry average)
+- **MTTR (Mean Time to Recovery)**: < 10 minutos com rollback automático
+- **Infrastructure Cost Efficiency**: 30% redução vs. self-managed K8s
+
+## Roadmap de Desenvolvimento
+
+### MVP1 (Base operável)
+- Deploy one-click (1)
+- Service Discovery (4)
+- Config & Secrets (6)
+- Observability minimal (7)
+- Authentication & Authorization (12)
+
+### MVP2 (Fluxo de entrega segura)
+- Preview Envs (8)
+- Blue/Green & Canary (3)
+- Network Policies GUI (10)
+
+### MVP3 (Confiabilidade e portabilidade)
+- Managed Broker (5)
+- Portable Export/Import (11)
+- Autoscaling (9)
+
+## Requisitos Técnicos
+
+### Prerequisites
+- Node.js >= 18.0.0
+- Docker and Docker Compose
+- PostgreSQL 15+
+- Redis 7+
+
+### Infraestrutura
+- Multi-stage builds para otimização
+- Non-root users para segurança
+- Health checks obrigatórios
+- Resource limits configuráveis
+- DNS interno (svc.internal)
+- Load balancing automático
+- Circuit breakers para resiliência
+
+### Segurança
+- JWT Tokens para autenticação
+- RBAC por projeto/ambiente/serviço
+- mTLS opcional para service-to-service
+- Vault para gerenciamento de secrets
+- Network policies deny-by-default
+- Auditoria de acesso
+
+### Observability
+- Prometheus para coleta de métricas
+- Grafana para visualização
+- OpenTelemetry para traces
+- Health checks automáticos
+- Logging estruturado
+
+## Critérios de Aceitação
+
+### MVP1
+- Onboarding p50 < 15min
+- Deploy p50 < 60s
+- Logs/health disponíveis
+- DNS interno funcional com políticas básicas
+
+### MVP2
+- 80% dos PRs com preview
+- Rollback < 30s
+- Políticas aplicáveis via UI sem YAML
+
+### MVP3
+- Provisionamento broker p90 < 3min
+- Export/import idempotente validado
+- Redução de custo via autoscaling ≥ 20%
+
+## Riscos e Mitigações
+
+### Isolamento de brokers gerenciados
+**Mitigação**: vhosts/virtual clusters por tenant, namespaces, TLS obrigatório, rate-limits
+
+### Custo de previews
+**Mitigação**: TTL obrigatório, hibernação automática, orçamentos por projeto
+
+### Vendor lock-in
+**Mitigação**: Export/Import para Kubernetes/Helm/Terraform, evitar recursos proprietários
+
+### Complexidade de mesh
+**Mitigação**: mesh-lite opt-in (mTLS, retries, timeouts) e escopo controlado
+
+### Segurança de segredos
+**Mitigação**: Vault-compatible + KMS, rotação automática, auditoria, zero exposição em logs

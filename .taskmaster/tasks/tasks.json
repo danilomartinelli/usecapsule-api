@@ -1,0 +1,455 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Configurar Monorepo Nx com Estrutura Base",
+        "description": "Inicializar o monorepo Nx com a estrutura de pastas definida no PRD, configurar workspaces e ferramentas de build",
+        "details": "Usar Nx 17.2+ com preset 'integrated'. Configurar estrutura: apps/ (api-gateway, service-auth, service-deploy, service-billing, portal, cli) e libs/ (contexts/, shared/, ui/). Implementar nx.json com tags para enforce de boundaries entre contexts. Configurar TypeScript 5.3+ com paths mapping. Setup ESLint com plugin @nx/enforce-module-boundaries. Adicionar .nvmrc com Node 20 LTS.",
+        "testStrategy": "Validar que nx graph mostra corretamente as dependências, executar nx run-many --target=lint para verificar boundaries, testar que nx affected funciona corretamente após mudanças",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implementar Shared Libraries Base",
+        "description": "Criar bibliotecas compartilhadas para types, utilities e configurações comuns entre todos os serviços",
+        "details": "Em libs/shared: criar @capsule/types com DTOs usando class-validator 0.14+, @capsule/utils com helpers para logging (winston 3.11+), error handling, date formatting. Configurar @capsule/config com joi 17.11+ para validação de env vars. Implementar @capsule/errors com classes de erro customizadas seguindo RFC 7807. Setup @capsule/testing com fixtures e helpers para testes. Adicionar @capsule/ui-kit com componentes base para o portal usando Radix UI.",
+        "testStrategy": "Testes unitários para cada utility, validação de schemas com casos edge, testes de integração verificando que libraries são importáveis em todos os apps, testes de componentes UI com Testing Library",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Setup Infraestrutura Local com Docker Compose",
+        "description": "Configurar ambiente de desenvolvimento local com todos os serviços necessários rodando em containers",
+        "details": "Criar docker-compose.yml com PostgreSQL 15.5, Redis 7.2, RabbitMQ 3.12 com management plugin, Vault 1.15 em dev mode. Configurar networks isoladas (backend, frontend). Adicionar health checks para cada serviço. Criar scripts npm para start/stop/reset do ambiente. Configurar volumes para persistência de dados. Adicionar Adminer para debug do banco.",
+        "testStrategy": "Script de smoke test verificando conectividade com todos os serviços, validar que containers reiniciam corretamente, testar persistência de dados após restart",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implementar Domain Context de Autenticação",
+        "description": "Criar bounded context de autenticação seguindo DDD e Hexagonal Architecture com suporte a OAuth e email/password",
+        "details": "Em libs/contexts/auth: implementar domain entities (User, Organization, Team, Role, Permission) com TypeORM 0.3.17+. Criar ports (UserRepository, AuthService interfaces). Implementar adapters com Passport.js 0.7+ para OAuth (Google, GitHub, GitLab) com foco especial em GitHub/GitLab para o fluxo de deploy mágico. Usar bcrypt 5.1+ para hashing. Implementar JWT com RS256 usando jose 5.1+. Criar refresh token rotation. Setup RBAC com CASL 6.5+. Adicionar session management para o portal.",
+        "testStrategy": "Testes unitários para domain logic, testes de integração para OAuth flows especialmente GitHub/GitLab, testes e2e simulando login completo no portal, validação de JWT signatures, testes de autorização RBAC, testes de sessão e refresh token",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implementar Domain Model e Entidades de Autenticação",
+            "description": "Criar as entidades de domínio (User, Organization, Session, OAuthProvider) e value objects (Email, Password, OAuthToken) seguindo DDD em libs/contexts/auth",
+            "dependencies": [],
+            "details": "Implementar entidades User com campos id, email, passwordHash, profile, createdAt, updatedAt. Organization com id, name, slug, ownerId, settings. Session com id, userId, token, expiresAt, refreshToken. OAuthProvider com id, userId, provider, providerId, accessToken, refreshToken. Value Objects: Email com validação RFC 5322, Password com regras de complexidade, OAuthToken com validação e expiração. Usar TypeORM 0.3.17+ com decorators e migrations. Implementar métodos de domínio para validação e regras de negócio.",
+            "status": "pending",
+            "testStrategy": "Testes unitários para validação de value objects, testes de domínio para regras de negócio das entidades, testes de integração com banco de dados in-memory, validação de constraints e relacionamentos"
+          },
+          {
+            "id": 2,
+            "title": "Implementar Ports e Adapters para Autenticação",
+            "description": "Criar interfaces de ports (UserRepository, AuthService, OAuthService) e implementar adapters com Passport.js para OAuth e bcrypt para hashing",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Criar interfaces em domain/ports: IUserRepository com métodos findById, findByEmail, create, update. IAuthService com authenticate, validateToken, refreshToken. IOAuthService com authorize, callback, exchangeToken. Implementar adapters em infrastructure: TypeORMUserRepository, PassportAuthAdapter com strategies para GitHub e GitLab OAuth 2.0. Configurar Passport.js 0.7+ com passport-github2 e passport-gitlab2. Implementar bcrypt 5.1+ adapter para password hashing com salt rounds configurável. Criar factory pattern para instanciar providers.",
+            "status": "pending",
+            "testStrategy": "Testes unitários com mocks para cada adapter, testes de integração para OAuth flow com providers mockados, testes de segurança para password hashing, validação de interfaces com testes de contrato"
+          },
+          {
+            "id": 3,
+            "title": "Implementar JWT e Session Management",
+            "description": "Desenvolver sistema de tokens JWT com RS256, refresh token rotation e gerenciamento de sessões para o portal",
+            "dependencies": [
+              "4.1",
+              "4.2"
+            ],
+            "details": "Implementar JWTService usando jose 5.1+ com algoritmo RS256. Gerar par de chaves RSA para assinatura. Criar tokens com claims padrão (sub, iat, exp) e customizados (organizationId, permissions). Implementar refresh token rotation com invalidação de tokens antigos. SessionManager para gerenciar sessões ativas com Redis. Configurar TTL para access tokens (15min) e refresh tokens (7 dias). Implementar revogação de tokens e logout em todos dispositivos. Adicionar jti (JWT ID) para tracking único.",
+            "status": "pending",
+            "testStrategy": "Testes de validação de assinatura JWT, testes de expiração e refresh, testes de concorrência para rotation, testes de performance para validação de tokens, simulação de ataques de replay"
+          },
+          {
+            "id": 4,
+            "title": "Implementar RBAC com CASL e Autorização",
+            "description": "Configurar sistema de autorização baseado em roles e permissions usando CASL para o portal",
+            "dependencies": [
+              "4.1",
+              "4.3"
+            ],
+            "details": "Implementar entidades Role e Permission com relacionamento many-to-many. Roles padrão: owner, admin, developer, viewer. Permissions granulares: project.create, project.delete, deployment.trigger, settings.update. Configurar CASL 6.5+ com ability factory. Criar middleware de autorização para verificar permissions. Implementar herança de roles em Organization e Team levels. Cache de permissions com invalidação em mudanças. Audit log para ações sensíveis. Suporte para resource-based permissions.",
+            "status": "pending",
+            "testStrategy": "Testes unitários para regras de autorização, testes de integração para herança de roles, testes de cenários complexos de permissão, validação de cache e invalidação"
+          },
+          {
+            "id": 5,
+            "title": "Implementar API REST de Autenticação",
+            "description": "Criar endpoints REST para login, registro, OAuth callbacks e gerenciamento de perfil/organização com segurança adequada",
+            "dependencies": [
+              "4.1",
+              "4.2",
+              "4.3",
+              "4.4"
+            ],
+            "details": "Endpoints: POST /auth/register, POST /auth/login, POST /auth/refresh, POST /auth/logout, GET /auth/oauth/:provider, GET /auth/oauth/:provider/callback, GET /auth/me, PATCH /auth/me, GET /auth/sessions, DELETE /auth/sessions/:id. Implementar rate limiting com express-rate-limit (5 tentativas/min para login). CORS configuration para portal. Input validation com class-validator. Helmet.js para security headers. CSRF protection para state parameter em OAuth. Sanitização de inputs contra XSS. Response formatting consistente com error handling.",
+            "status": "pending",
+            "testStrategy": "Testes e2e para fluxo completo de autenticação, testes de segurança para rate limiting e validação, testes de integração para OAuth callbacks, validação de CORS e headers de segurança"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Desenvolver Service de Autenticação",
+        "description": "Criar microserviço NestJS para autenticação com endpoints REST e GraphQL",
+        "details": "Em apps/service-auth: NestJS 10.3+ com Fastify adapter. Implementar AuthModule consumindo libs/contexts/auth. Endpoints: POST /auth/login, /auth/register, /auth/refresh, /auth/logout, OAuth callbacks com foco em GitHub/GitLab para integração com repositórios. GraphQL com Apollo Server 4+ para queries de user/org/team. Rate limiting com @nestjs/throttler. Helmet.js para security headers. Swagger/OpenAPI docs automáticos. CORS configurado para o portal.",
+        "testStrategy": "Testes e2e para todos os endpoints, testes de carga para rate limiting, validação de security headers, testes de integração com providers OAuth GitHub/GitLab, testes de CORS com origem do portal",
+        "priority": "high",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implementar Domain Context de Deploy",
+        "description": "Criar bounded context para gerenciamento de deployments com suporte a diferentes estratégias",
+        "details": "Em libs/contexts/deploy: entities (Project, Environment, Deployment, Service, Container). Implementar state machine para deployment lifecycle usando XState 5+ com estados visíveis no portal. Criar value objects para deployment strategies (BlueGreen, Canary, Rolling). Ports para ContainerRegistry, DeploymentOrchestrator. Implementar event sourcing com EventStore para auditoria completa. Adicionar entidades para integração com repositórios Git.",
+        "testStrategy": "Testes unitários para state transitions, testes de propriedade para invariantes de domínio, simulação de cenários de deploy complexos, testes de integração com repositórios Git",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Desenvolver Service de Deploy",
+        "description": "Criar microserviço para orquestração de deployments com integração a container registries",
+        "details": "Em apps/service-deploy: NestJS com Bull 5.10+ para job queues. Integração com Docker Registry API v2, Harbor 2.9+, AWS ECR. Implementar deployment strategies com Kubernetes client-go via @kubernetes/client-node 0.20+. WebSocket para streaming de logs em tempo real para o portal. Métricas com prom-client 15+. Circuit breaker com opossum 8+. Webhook handlers para GitHub/GitLab para trigger automático de deploys.",
+        "testStrategy": "Testes de integração com registry mock, testes e2e simulando deploy completo iniciado pelo portal, chaos testing para resiliência, validação de rollback automático, testes de webhook com payloads reais",
+        "priority": "high",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implementar API Gateway com BFF Pattern",
+        "description": "Criar API Gateway que agrega e orquestra chamadas aos microserviços internos",
+        "details": "Em apps/api-gateway: NestJS com GraphQL Federation via @apollo/gateway 2.5+. Implementar DataLoader para resolver N+1. Rate limiting por tenant com Redis. Request/Response transformation. API versioning com custom headers. Distributed tracing com OpenTelemetry. Cache com Redis e cache-manager 5+. WebSocket proxy para real-time features do portal. CORS e autenticação para requisições do portal.",
+        "testStrategy": "Testes de carga para verificar performance do DataLoader, testes e2e para federação GraphQL, validação de rate limiting por tenant, testes de WebSocket com cliente do portal",
+        "priority": "high",
+        "dependencies": [
+          5,
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Desenvolver Portal MVP1 com Fluxo de Deploy Mágico",
+        "description": "Criar interface principal onde clientes fazem login, conectam repositórios e realizam o deploy mágico",
+        "details": "Em apps/portal: React 18.2+ com Vite 5+. Implementar FSD com layers focadas no MVP1. UI com Radix UI + Tailwind CSS 3.4+. State management com Zustand 4.4+ para auth e deploy state. React Query 5+ para data fetching. Páginas: Login/Register com OAuth GitHub/GitLab, Dashboard com lista de projetos, Wizard de conexão de repositório, Página de deploy com logs em tempo real via WebSocket, Status de deployments. React Hook Form 7.48+ para wizard. Autenticação com refresh token interceptor.",
+        "testStrategy": "Testes de componentes críticos do fluxo de deploy, testes e2e com Playwright para o fluxo completo de login → conectar repo → deploy, testes de usabilidade do wizard, validação de real-time updates",
+        "priority": "high",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implementar Sistema de Autenticação e Onboarding",
+            "description": "Desenvolver páginas de login/registro com OAuth GitHub/GitLab e fluxo de onboarding para novos usuários",
+            "dependencies": [],
+            "details": "Criar páginas de Login e Register usando React Hook Form 7.48+ com validações. Implementar OAuth flow com GitHub e GitLab para autenticação e autorização de acesso aos repositórios. Desenvolver fluxo de onboarding com wizard de 3 etapas: dados da organização, conexão com provider Git, e configurações iniciais. Integrar com Zustand para gerenciar estado de autenticação e implementar refresh token interceptor com axios. Usar Radix UI Dialog para modais e Tailwind CSS para estilização responsiva.",
+            "status": "pending",
+            "testStrategy": "Testes unitários para validações de formulário, testes de integração para OAuth flow mockando providers, testes e2e com Playwright para fluxo completo de registro → onboarding → dashboard, testes de acessibilidade com axe-core"
+          },
+          {
+            "id": 2,
+            "title": "Desenvolver Dashboard Principal e Listagem de Projetos",
+            "description": "Criar interface principal do portal com dashboard mostrando projetos e métricas básicas",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Implementar Dashboard com React Query 5+ para fetching de dados de projetos. Criar componentes de cards para exibir projetos com status de deployment, última atualização e ações rápidas. Implementar filtros e busca com debounce. Adicionar gráficos básicos de métricas usando Recharts. Criar empty states para usuários sem projetos. Implementar navegação com React Router 6+ e breadcrumbs. Usar Radix UI Dropdown Menu para ações de projeto.",
+            "status": "pending",
+            "testStrategy": "Testes de componentes para cards e filtros, testes de integração com React Query mockando API responses, testes de performance para renderização de listas grandes, testes e2e para navegação entre páginas"
+          },
+          {
+            "id": 3,
+            "title": "Criar Wizard de Conexão de Repositório e Configuração Nx",
+            "description": "Desenvolver interface step-by-step para conectar repositórios Git e configurar projeto Nx automaticamente",
+            "dependencies": [
+              "9.1",
+              "9.2"
+            ],
+            "details": "Implementar wizard multi-step com React Hook Form e validação por etapa. Step 1: Seleção de provider (GitHub/GitLab) e listagem de repositórios via API. Step 2: Detecção automática de tipo de projeto e sugestão de configurações Nx. Step 3: Customização de configurações de build e deploy. Step 4: Review e confirmação. Usar Radix UI Progress para indicador de progresso. Implementar auto-save de progresso no localStorage. Adicionar tooltips explicativos com Radix UI Tooltip.",
+            "status": "pending",
+            "testStrategy": "Testes unitários para cada step do wizard, testes de integração para detecção de tipo de projeto, testes e2e simulando conexão completa de repositório, testes de edge cases como perda de conexão durante wizard"
+          },
+          {
+            "id": 4,
+            "title": "Implementar Interface de Deploy com Logs em Tempo Real",
+            "description": "Criar página de deploy com progresso visual e streaming de logs via WebSocket",
+            "dependencies": [
+              "9.2",
+              "9.3"
+            ],
+            "details": "Desenvolver página de deploy com terminal virtual para exibir logs usando react-terminal-ui. Implementar conexão WebSocket com reconnection logic para streaming de logs. Criar progress stepper mostrando fases do deploy (Build → Test → Deploy → Verify). Adicionar botões de ação: pausar, cancelar, retry. Implementar auto-scroll com opção de pausar. Usar React Query para polling de status quando WebSocket falhar. Criar notificações toast com Radix UI Toast para eventos importantes.",
+            "status": "pending",
+            "testStrategy": "Testes de componente para terminal e progress stepper, testes de WebSocket com mock server, testes de resiliência simulando desconexões, testes e2e para fluxo completo de deploy com verificação de logs"
+          },
+          {
+            "id": 5,
+            "title": "Desenvolver Sistema de Status e Histórico de Deployments",
+            "description": "Criar interface para visualizar status atual e histórico de todos os deployments com filtros avançados",
+            "dependencies": [
+              "9.2",
+              "9.4"
+            ],
+            "details": "Implementar página de deployments com tabela usando Tanstack Table para sorting/filtering. Criar timeline view para histórico de deployments por projeto. Adicionar badges de status com cores semânticas (success, failed, pending, cancelled). Implementar filtros por data, status, projeto e ambiente. Criar modal de detalhes com informações completas do deployment incluindo logs, artifacts e métricas. Adicionar funcionalidade de comparação entre deployments. Implementar export de relatórios em CSV/PDF.",
+            "status": "pending",
+            "testStrategy": "Testes unitários para componentes de tabela e filtros, testes de integração para export de dados, testes de performance com grandes volumes de dados, testes e2e para fluxo de visualização e filtragem"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Implementar CLI com Commander.js",
+        "description": "Desenvolver ferramenta de linha de comando para interação com a plataforma Capsule",
+        "details": "Em apps/cli: Commander.js 11+ com TypeScript. Comandos: capsule deploy, capsule logs, capsule env, capsule secret. Autenticação via API key ou browser OAuth flow. Progress bars com ora 7+. Tabelas com cli-table3. Config local em ~/.capsule/config.json. Auto-update com update-notifier. Telemetria opt-in com analytics-node.",
+        "testStrategy": "Testes unitários para cada comando, testes de integração com API mock, testes e2e simulando workflows completos, validação de output formatting",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Implementar Service Discovery e DNS Interno",
+        "description": "Criar sistema de descoberta de serviços com DNS interno para comunicação entre microserviços",
+        "details": "Implementar service registry com etcd 3.5+ ou Consul 1.17+. DNS server customizado com node-dns ou CoreDNS sidecar. Formato: service-name.namespace.svc.internal. Health check integration para remover serviços unhealthy. Client libraries para service discovery em cada linguagem. Load balancing com round-robin e least-connections. Circuit breaker automático.",
+        "testStrategy": "Testes de resolução DNS, simulação de falhas de serviço, validação de load balancing, testes de performance para lookup time",
+        "priority": "high",
+        "dependencies": [
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Desenvolver Sistema de Configuração e Secrets",
+        "description": "Implementar gerenciamento centralizado de configurações e secrets com integração ao Vault",
+        "details": "Integração com HashiCorp Vault via node-vault 0.10+. Criar abstração para config sources (env vars, files, Vault). Implementar hot-reload de configs sem restart. Encryption at rest para secrets locais usando AES-256-GCM. Audit trail para todas as mudanças. Template engine para interpolação de valores. Validação de configs com JSON Schema. Interface no portal para gerenciar variáveis de ambiente por projeto.",
+        "testStrategy": "Testes de integração com Vault, validação de encryption/decryption, testes de hot-reload, simulação de rotação de secrets, testes da UI de gerenciamento no portal",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Implementar Observability Stack",
+        "description": "Configurar stack completa de observabilidade com logs, métricas e traces",
+        "details": "Logs: Winston com transport para Loki 2.9+. Métricas: Prometheus client com custom metrics. Traces: OpenTelemetry com Jaeger 1.51+ backend. Configurar Grafana 10.2+ com dashboards pré-configurados. Implementar correlation IDs. Log aggregation com Fluentd. Alerting com Prometheus Alertmanager. SLO/SLI tracking. Integração básica no portal para visualização de logs de deploy.",
+        "testStrategy": "Validar que traces conectam corretamente entre serviços, testar alertas com condições simuladas, verificar retenção de dados, testar visualização de logs no portal",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Desenvolver Preview Environments Automáticos",
+        "description": "Criar sistema para provisionar ambientes efêmeros por PR/branch",
+        "details": "Webhook integration com GitHub/GitLab/Bitbucket. Namespace isolation no Kubernetes. Geração de URLs únicas com wildcard DNS. Lifecycle management com TTL configurável. Resource quotas por preview. Banco de dados branching com thin cloning. Integração com CI/CD para deploy automático. Teardown automático após merge/close.",
+        "testStrategy": "Testes e2e criando PR e validando preview, verificar isolamento entre ambientes, testar limites de recursos",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Implementar Blue-Green e Canary Deployments",
+        "description": "Desenvolver estratégias avançadas de deployment com rollback automático",
+        "details": "Implementar traffic splitting com Envoy Proxy 1.28+ ou Istio 1.20+. Canary analysis com Flagger 1.35+. Métricas customizadas para decisão de promoção. Progressive rollout configurável. A/B testing support com feature flags (Unleash 5+). Rollback automático baseado em error rate, latency, custom metrics. Shadow traffic para validação.",
+        "testStrategy": "Testes simulando degradação de performance, validação de traffic splitting percentages, testes de rollback automático",
+        "priority": "medium",
+        "dependencies": [
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Desenvolver Managed Broker Marketplace",
+        "description": "Criar sistema para provisionar message brokers gerenciados on-demand",
+        "details": "Operators para RabbitMQ 3.12+, Redis 7.2+, Kafka 3.6+. Multi-tenancy com vhosts/namespaces. Backup automático com Velero 1.12+. Monitoring específico por broker. Quotas de mensagens/conexões. TLS obrigatório com cert-manager. Auto-scaling baseado em queue depth. Disaster recovery com replicação cross-region.",
+        "testStrategy": "Testes de provisionamento multi-tenant, validação de isolamento, testes de performance sob carga, simulação de disaster recovery",
+        "priority": "low",
+        "dependencies": [
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Implementar Network Policies GUI",
+        "description": "Criar interface visual para configuração de políticas de rede sem YAML",
+        "details": "React Flow 11+ para visualização de rede no portal. Drag-and-drop para criar conexões. Templates pré-definidos (web app, API, database). Validação em tempo real de políticas. Geração de NetworkPolicy YAML/JSON. Simulador de tráfego para testar políticas. Versionamento de políticas. Import/export de configurações. Integração com a página de projeto no portal.",
+        "testStrategy": "Testes de usabilidade com usuários, validação de políticas geradas, testes e2e do fluxo completo de criação no portal",
+        "priority": "low",
+        "dependencies": [
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Desenvolver Sistema de Billing",
+        "description": "Implementar domain context e serviço para cobrança e tracking de uso",
+        "details": "Em libs/contexts/billing: entities para Plan, Subscription, Usage, Invoice. Integração com Stripe 14+ para pagamentos. Usage tracking com ClickHouse 23.10+ para analytics. Implementar metering para CPU/memory/bandwidth/storage. Alertas de quota. Invoicing automático. Dunning para failed payments. Revenue recognition compliance.",
+        "testStrategy": "Testes de integração com Stripe test mode, validação de cálculos de usage, testes de billing cycles, simulação de upgrades/downgrades",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Implementar Autoscaling Leve",
+        "description": "Desenvolver sistema de autoscaling baseado em métricas customizáveis",
+        "details": "HPA (Horizontal Pod Autoscaler) com custom metrics API. Suporte para CPU, memory, RPS, queue depth. Implementar predictive scaling com Prophet. Cooldown periods configuráveis. Cost-aware scaling. Scheduled scaling para padrões conhecidos. Integration com cluster-autoscaler. Notifications para scaling events.",
+        "testStrategy": "Testes de carga para trigger de scaling, validação de cooldown periods, testes de cost optimization, simulação de traffic spikes",
+        "priority": "low",
+        "dependencies": [
+          13
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 20,
+        "title": "Desenvolver Export/Import Portável",
+        "description": "Criar sistema para exportar configurações em formatos padrão reduzindo vendor lock-in",
+        "details": "Exporters para Kubernetes YAML, Helm Charts 3.13+, Terraform 1.6+ HCL. Preservar semântica de configurações. Implementar importers para migração reversa. Validação de schemas. Dry-run mode. Diff visualization. Suporte para partial exports. Encryption de exports sensíveis. Versionamento de formato.",
+        "testStrategy": "Testes de round-trip (export → import → export), validação em clusters Kubernetes reais, testes de compatibilidade entre versões",
+        "priority": "low",
+        "dependencies": [
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 21,
+        "title": "Implementar Detecção Automática de Apps Nx",
+        "description": "Criar sistema inteligente para detectar e configurar apps em monorepos Nx automaticamente",
+        "details": "Parser de workspace.json/project.json do Nx. Detecção de frameworks via package.json e file patterns. Inferência de tipo (frontend/backend/library). Análise de dependências com nx graph. Geração automática de Dockerfile multi-stage otimizado. Detecção de portas e health check endpoints. Build caching com Nx Cloud integration. UI no portal mostrando apps detectados com opção de configuração manual.",
+        "testStrategy": "Testes com diferentes estruturas de monorepo, validação de detecção de frameworks populares, testes de build optimization, testes da UI de detecção no portal",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 22,
+        "title": "Desenvolver GitHub Actions Integration",
+        "description": "Criar workflows e actions para CI/CD integrado com Capsule",
+        "details": "GitHub Action customizada para Capsule deploy. Workflows templates para monorepo Nx. Integration com GitHub Deployments API. Status checks automáticos. Secret scanning com Trufflehog. SAST com Semgrep. Container scanning com Trivy. Dependency updates com Renovate. Performance budgets com Lighthouse CI. Configuração automática via portal ao conectar repositório.",
+        "testStrategy": "Testes em repositório real, validação de todos os status checks, testes de segurança com vulnerabilidades conhecidas, teste do fluxo de configuração via portal",
+        "priority": "medium",
+        "dependencies": [
+          10
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 23,
+        "title": "Implementar Multi-tenancy e Isolamento",
+        "description": "Desenvolver isolamento completo entre tenants para segurança e compliance",
+        "details": "Namespace isolation no Kubernetes. Network policies deny-by-default. Resource quotas por organização. RBAC com OPA (Open Policy Agent) 0.58+. Pod Security Standards enforcement. Audit logging com Falco 0.36+. Data isolation no banco com RLS. Encryption per-tenant com KMS. Compliance reports (SOC2, ISO27001).",
+        "testStrategy": "Penetration testing entre tenants, validação de quotas e limites, auditoria de acessos, testes de compliance",
+        "priority": "high",
+        "dependencies": [
+          4,
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 24,
+        "title": "Desenvolver Local Development Experience",
+        "description": "Criar ferramentas para desenvolvimento local que emulem o ambiente Capsule",
+        "details": "Tilt 0.33+ para hot reload de Kubernetes local. Kind ou k3d para cluster local. Telepresence 2.17+ para debugging remoto. Skaffold 2.9+ para build/deploy workflow. Local service discovery com dnsmasq. Fake cloud services com LocalStack. Dev containers com padrões consistentes. Nx executors customizados.",
+        "testStrategy": "Testes de developer experience, medição de tempo de feedback loop, validação de paridade com produção",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          10
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 25,
+        "title": "Implementar Disaster Recovery e Backup",
+        "description": "Desenvolver sistema completo de backup e recuperação de desastres",
+        "details": "Velero 1.12+ para backup de Kubernetes resources. Database backups com pgBackRest para Postgres. Point-in-time recovery. Cross-region replication. RTO < 1 hora, RPO < 15 minutos. Automated disaster recovery drills. Backup encryption com age. Imutável backup storage. Runbooks automatizados para recovery.",
+        "testStrategy": "Disaster recovery drills mensais, testes de restore em ambiente isolado, validação de RTO/RPO, chaos engineering",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          12
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-24T15:09:23.310Z",
+      "updated": "2025-08-24T15:09:23.310Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

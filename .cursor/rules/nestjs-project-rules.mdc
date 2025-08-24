@@ -1,0 +1,519 @@
+# Regras para Projetos NestJS no Workspace ACME
+
+Você está trabalhando em projetos NestJS no workspace ACME. Siga estas diretrizes específicas:
+
+## 🏗️ **Estrutura do API Gateway**
+
+### Organização de Arquivos
+
+- **App Principal**: `apps/api-gateway/`
+- **Estrutura**: Use `src/` como pasta principal
+- **Entry Point**: `src/main.ts` - Configuração da aplicação
+- **Módulo Principal**: `src/app.module.ts` - Configuração de módulos
+- **Controllers**: Organize por funcionalidade em pastas separadas
+
+### Estrutura Recomendada
+
+```
+apps/api-gateway/src/
+├── main.ts                 # Entry point
+├── app.module.ts          # Módulo principal
+├── app.controller.ts      # Controller principal
+├── app.service.ts         # Service principal
+├── common/               # Utilitários compartilhados
+│   ├── decorators/       # Decorators customizados
+│   ├── filters/          # Exception filters
+│   ├── guards/           # Guards de autenticação
+│   ├── interceptors/     # Interceptors
+│   └── pipes/            # Pipes customizados
+├── config/               # Configurações
+├── modules/              # Módulos da aplicação
+│   ├── auth/             # Autenticação
+│   ├── users/            # Usuários
+│   └── health/           # Health checks
+└── types/                # Tipos TypeScript
+```
+
+## 🎯 **Controllers**
+
+### Padrões de Controllers
+
+```typescript
+// ✅ DO: Controller bem estruturado
+@Controller('users')
+@UseGuards(AuthGuard)
+export class UsersController {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly logger: Logger
+  ) {}
+
+  @Get()
+  @UseInterceptors(LoggingInterceptor)
+  async findAll(@Query() query: FindUsersDto): Promise<UserResponseDto[]> {
+    this.logger.log('Finding all users');
+    return this.usersService.findAll(query);
+  }
+
+  @Get(':id')
+  @UseInterceptors(CacheInterceptor)
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string
+  ): Promise<UserResponseDto> {
+    return this.usersService.findOne(id);
+  }
+
+  @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    return this.usersService.create(createUserDto);
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateUserDto: UpdateUserDto
+  ): Promise<UserResponseDto> {
+    return this.usersService.update(id, updateUserDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    await this.usersService.remove(id);
+  }
+}
+```
+
+### Validação e DTOs
+
+```typescript
+// ✅ DO: DTOs com validação
+import { IsString, IsEmail, IsOptional, MinLength } from 'class-validator';
+import { Expose, Transform } from 'class-transformer';
+
+export class CreateUserDto {
+  @IsString()
+  @MinLength(2)
+  @Expose()
+  name: string;
+
+  @IsEmail()
+  @Expose()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  @Expose()
+  password: string;
+
+  @IsOptional()
+  @IsString()
+  @Expose()
+  role?: string;
+}
+
+export class UpdateUserDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @Expose()
+  name?: string;
+
+  @IsOptional()
+  @IsEmail()
+  @Expose()
+  email?: string;
+}
+```
+
+## 🔧 **Services**
+
+### Padrões de Services
+
+```typescript
+// ✅ DO: Service com injeção de dependência
+@Injectable()
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly logger: Logger,
+    private readonly eventEmitter: EventEmitter2
+  ) {}
+
+  async findAll(query: FindUsersDto): Promise<User[]> {
+    const { page = 1, limit = 10, search } = query;
+
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+    if (search) {
+      queryBuilder.where(
+        'user.name ILIKE :search OR user.email ILIKE :search',
+        {
+          search: `%${search}%`,
+        }
+      );
+    }
+
+    const [users, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    this.logger.log(`Found ${users.length} users`);
+    return users;
+  }
+
+  async findOne(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return user;
+  }
+
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const existingUser = await this.userRepository.findOne({
+      where: { email: createUserDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    const user = this.userRepository.create(createUserDto);
+    const savedUser = await this.userRepository.save(user);
+
+    this.eventEmitter.emit('user.created', savedUser);
+    this.logger.log(`User created with ID: ${savedUser.id}`);
+
+    return savedUser;
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+
+    Object.assign(user, updateUserDto);
+    const updatedUser = await this.userRepository.save(user);
+
+    this.eventEmitter.emit('user.updated', updatedUser);
+    this.logger.log(`User updated with ID: ${id}`);
+
+    return updatedUser;
+  }
+
+  async remove(id: string): Promise<void> {
+    const user = await this.findOne(id);
+    await this.userRepository.remove(user);
+
+    this.eventEmitter.emit('user.deleted', { id });
+    this.logger.log(`User deleted with ID: ${id}`);
+  }
+}
+```
+
+## 🏛️ **Módulos**
+
+### Configuração de Módulos
+
+```typescript
+// ✅ DO: Módulo bem configurado
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    forwardRef(() => AuthModule), // Evita dependência circular
+  ],
+  controllers: [UsersController],
+  providers: [
+    UsersService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+  ],
+  exports: [UsersService], // Exporta para outros módulos
+})
+export class UsersModule {}
+```
+
+## 🔐 **Autenticação e Autorização**
+
+### Guards
+
+```typescript
+// ✅ DO: Guard de autenticação
+@Injectable()
+export class AuthGuard implements CanActivate {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly usersService: UsersService
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
+
+    if (!token) {
+      throw new UnauthorizedException();
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token);
+      const user = await this.usersService.findOne(payload.sub);
+      request['user'] = user;
+    } catch {
+      throw new UnauthorizedException();
+    }
+
+    return true;
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
+  }
+}
+```
+
+## 🎨 **Interceptors e Pipes**
+
+### Interceptors
+
+```typescript
+// ✅ DO: Interceptor de logging
+@Injectable()
+export class LoggingInterceptor implements NestInterceptor {
+  constructor(private readonly logger: Logger) {}
+
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const request = context.switchToHttp().getRequest();
+    const { method, url } = request;
+    const now = Date.now();
+
+    return next.handle().pipe(
+      tap(() => {
+        const response = context.switchToHttp().getResponse();
+        const delay = Date.now() - now;
+
+        this.logger.log(`${method} ${url} ${response.statusCode} ${delay}ms`);
+      })
+    );
+  }
+}
+```
+
+### Pipes Customizados
+
+```typescript
+// ✅ DO: Pipe de transformação
+@Injectable()
+export class ParseUUIDPipe implements PipeTransform {
+  transform(value: string): string {
+    if (!isUUID(value)) {
+      throw new BadRequestException('Invalid UUID format');
+    }
+    return value;
+  }
+}
+```
+
+## 🗄️ **Banco de Dados**
+
+### Entidades
+
+```typescript
+// ✅ DO: Entidade com decorators
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  name: string;
+
+  @Column({ type: 'varchar', length: 255, unique: true })
+  email: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  @Exclude()
+  password: string;
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  role: UserRole;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    if (this.password) {
+      this.password = await hash(this.password, 10);
+    }
+  }
+}
+```
+
+## 🧪 **Testes**
+
+### Testes de Controllers
+
+```typescript
+// ✅ DO: Teste de controller
+describe('UsersController', () => {
+  let controller: UsersController;
+  let service: UsersService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [UsersController],
+      providers: [
+        {
+          provide: UsersService,
+          useValue: {
+            findAll: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+            remove: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    controller = module.get<UsersController>(UsersController);
+    service = module.get<UsersService>(UsersService);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+
+  describe('findAll', () => {
+    it('should return an array of users', async () => {
+      const result = [{ id: '1', name: 'Test User' }];
+      jest.spyOn(service, 'findAll').mockResolvedValue(result);
+
+      expect(await controller.findAll({})).toBe(result);
+    });
+  });
+});
+```
+
+## 🚀 **Comandos de Desenvolvimento**
+
+### Comandos Específicos
+
+```bash
+# Desenvolvimento
+nx serve api-gateway          # Inicia servidor de desenvolvimento
+nx build api-gateway          # Build para produção
+nx test api-gateway           # Executa testes
+nx lint api-gateway           # Executa linting
+
+# Debugging
+nx serve api-gateway --inspect  # Com debugging habilitado
+```
+
+## 🚨 **Anti-patterns a Evitar**
+
+### ❌ NÃO fazer:
+
+```typescript
+// ❌ DON'T: Lógica de negócio em controllers
+@Controller('users')
+export class UsersController {
+  @Post()
+  async create(@Body() dto: CreateUserDto) {
+    // ❌ Lógica de negócio aqui
+    const hashedPassword = await hash(dto.password, 10);
+    const user = new User();
+    user.name = dto.name;
+    user.email = dto.email;
+    user.password = hashedPassword;
+    return this.userRepository.save(user);
+  }
+}
+
+// ❌ DON'T: Validação manual
+@Post()
+async create(@Body() dto: any) {
+  if (!dto.email || !dto.name) {
+    throw new BadRequestException('Missing required fields');
+  }
+  // ...
+}
+```
+
+### ✅ Fazer:
+
+```typescript
+// ✅ DO: Delegate para service
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  async create(@Body() dto: CreateUserDto) {
+    return this.usersService.create(dto);
+  }
+}
+
+// ✅ DO: Usar DTOs com validação
+@Post()
+@UsePipes(new ValidationPipe({ transform: true }))
+async create(@Body() dto: CreateUserDto) {
+  return this.usersService.create(dto);
+}
+```
+
+## 🔧 **Configuração**
+
+### Environment Variables
+
+```typescript
+// ✅ DO: Configuração com validação
+@Injectable()
+export class ConfigService {
+  constructor() {
+    this.validate();
+  }
+
+  get port(): number {
+    return parseInt(process.env.PORT || '3000', 10);
+  }
+
+  get databaseUrl(): string {
+    return process.env.DATABASE_URL || 'postgresql://localhost/acme';
+  }
+
+  get jwtSecret(): string {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error('JWT_SECRET is required');
+    }
+    return secret;
+  }
+
+  private validate(): void {
+    const required = ['JWT_SECRET', 'DATABASE_URL'];
+    for (const env of required) {
+      if (!process.env[env]) {
+        throw new Error(`${env} environment variable is required`);
+      }
+    }
+  }
+}
+```
+
+description:
+globs:
+alwaysApply: false
+
+---

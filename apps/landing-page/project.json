@@ -1,0 +1,9 @@
+{
+  "name": "@acme/landing-page",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["scope:customer", "type:web", "arch:feature-sliced"],
+  "sourceRoot": "apps/landing-page/src",
+  "projectType": "application",
+  "// targets": "to see all targets run: nx show project @acme/landing-page --web",
+  "targets": {}
+}
