@@ -3,10 +3,6 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev:all": "nx run-many --target=serve --all",
-    "dev:api": "nx run-many --target=serve --projects=api-gateway,service-auth,service-deploy",
-    "dev:portal": "nx run-many --target=dev --projects=portal,dashboard,landing-page",
-    "dev:backend": "nx run-many --target=start --projects=api-gateway,service-auth,service-deploy",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:reset": "docker-compose down -v && docker-compose up -d",
