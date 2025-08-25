@@ -23,9 +23,47 @@ export default [
           enforceBuildableLibDependency: true,
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
           depConstraints: [
+            // Apps podem importar de qualquer lib
             {
-              sourceTag: '*',
-              onlyDependOnLibsWithTags: ['*'],
+              sourceTag: 'type:app',
+              onlyDependOnLibsWithTags: ['type:lib'],
+            },
+            {
+              sourceTag: 'type:web',
+              onlyDependOnLibsWithTags: ['type:lib'],
+            },
+            {
+              sourceTag: 'type:api',
+              onlyDependOnLibsWithTags: ['type:lib'],
+            },
+            // Contexts não podem importar entre si
+            {
+              sourceTag: 'scope:contexts',
+              onlyDependOnLibsWithTags: ['scope:shared', 'scope:ui'],
+            },
+            // Shared pode ser usado por todos
+            {
+              sourceTag: 'scope:shared',
+              onlyDependOnLibsWithTags: ['scope:shared'],
+            },
+            // UI pode ser usado por apps web
+            {
+              sourceTag: 'scope:ui',
+              onlyDependOnLibsWithTags: ['scope:shared'],
+            },
+            // Gateway pode importar de contexts
+            {
+              sourceTag: 'scope:gateway',
+              onlyDependOnLibsWithTags: ['type:lib'],
+            },
+            // Auth e Deploy podem importar de contexts
+            {
+              sourceTag: 'scope:auth',
+              onlyDependOnLibsWithTags: ['type:lib'],
+            },
+            {
+              sourceTag: 'scope:deploy',
+              onlyDependOnLibsWithTags: ['type:lib'],
             },
           ],
         },

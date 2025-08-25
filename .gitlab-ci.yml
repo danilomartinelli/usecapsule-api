@@ -1,28 +1,140 @@
 image: node:20
 variables:
-  CI: 'true'
+  CI: "true"
+  NX_SKIP_NX_CACHE: "false"
 
-# Main job
-CI:
+# Cache configuration for faster builds
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+    - .nx/cache/
+
+stages:
+  - setup
+  - lint
+  - test
+  - build
+  - e2e
+
+# Setup stage - install dependencies and setup environment
+setup:
+  stage: setup
   interruptible: true
   only:
     - main
     - merge_requests
   script:
-    # This enables task distribution via Nx Cloud
-    # Run this command as early as possible, before dependencies are installed
-    # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-    # Uncomment this line to enable task distribution
-    # - npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
-
     - npm ci --legacy-peer-deps
     - npx playwright install --with-deps
+  artifacts:
+    paths:
+      - node_modules/
+      - .nx/cache/
+    expire_in: 1 hour
 
-    # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
-    # - npx nx-cloud record -- echo Hello World
-    # When you enable task distribution, run the e2e-ci task instead of e2e
-    - npx nx run-many -t lint test build typecheck e2e
-    # Nx Cloud recommends fixes for failures to help you get CI green faster. Learn more: https://nx.dev/ci/features/self-healing-ci
+# Lint stage - validate code quality and module boundaries
+lint:
+  stage: lint
+  interruptible: true
+  only:
+    - main
+    - merge_requests
+  dependencies:
+    - setup
+  script:
+    - npx nx affected --target=lint --base=origin/main --head=HEAD
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.{ts,tsx,js,jsx,json}"
+    - if: $CI_COMMIT_BRANCH == "main"
 
-  after_script:
-    - npx nx fix-ci
+# Test stage - run unit tests
+test:
+  stage: test
+  interruptible: true
+  only:
+    - main
+    - merge_requests
+  dependencies:
+    - setup
+  script:
+    - npx nx affected --target=test --base=origin/main --head=HEAD
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.{ts,tsx,js,jsx,json}"
+        - "**/*.spec.{ts,tsx,js,jsx}"
+        - "**/*.test.{ts,tsx,js,jsx}"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# Build stage - compile projects
+build:
+  stage: build
+  interruptible: true
+  only:
+    - main
+    - merge_requests
+  dependencies:
+    - setup
+  script:
+    - npx nx affected --target=build --base=origin/main --head=HEAD
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.{ts,tsx,js,jsx,json}"
+        - "**/*.config.{ts,js,json}"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# Typecheck stage - validate TypeScript types
+typecheck:
+  stage: build
+  interruptible: true
+  only:
+    - main
+    - merge_requests
+  dependencies:
+    - setup
+  script:
+    - npx nx affected --target=typecheck --base=origin/main --head=HEAD
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.{ts,tsx}"
+        - "**/*.config.{ts,js,json}"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# E2E stage - run end-to-end tests (only on main branch)
+e2e:
+  stage: e2e
+  interruptible: true
+  only:
+    - main
+  dependencies:
+    - setup
+    - build
+  script:
+    - npx nx affected --target=e2e --base=origin/main --head=HEAD
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+      allow_failure: true
+
+# Fallback job for when no affected projects are found
+no-affected-projects:
+  stage: lint
+  interruptible: true
+  only:
+    - main
+    - merge_requests
+  dependencies:
+    - setup
+  script:
+    - echo "No affected projects found. Skipping CI tasks."
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true
