@@ -103,9 +103,7 @@
     "apps/*",
     "libs/*",
     "libs/shared/*",
-    "libs/contexts/billing",
-    "libs/contexts/deploy",
-    "libs/contexts/discovery",
-    "libs/contexts/auth"
+    "libs/contexts/*",
+    "libs/ui/*"
   ]
 }
