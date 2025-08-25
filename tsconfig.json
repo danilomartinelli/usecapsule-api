@@ -26,6 +26,9 @@
     },
     {
       "path": "./libs/shared/types"
+    },
+    {
+      "path": "./libs/ui/react"
     }
   ]
 }
