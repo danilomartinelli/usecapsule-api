@@ -19,7 +19,19 @@
       "path": "./libs/contexts/discovery"
     },
     {
-      "path": "./apps/service-deploy"
+      "path": "./apps/api-gateway-e2e"
+    },
+    {
+      "path": "./apps/api-gateway"
+    },
+    {
+      "path": "./apps/service-auth"
+    },
+    {
+      "path": "./apps/portal-e2e"
+    },
+    {
+      "path": "./apps/portal"
     }
   ]
 }

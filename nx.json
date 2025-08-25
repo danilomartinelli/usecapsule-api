@@ -86,7 +86,9 @@
       "exclude": [
         "api-e2e/**/*",
         "apps/api-gateway-e2e/**/*",
-        "apps/service-deploy-e2e/**/*"
+        "apps/service-deploy-e2e/**/*",
+        "apps/api-gateway-e2e/**/*",
+        "apps/service-auth-e2e/**/*"
       ]
     }
   ],
@@ -98,6 +100,23 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    }
+  },
+  "generators": {
+    "@nx/react": {
+      "application": {
+        "babel": true,
+        "style": "css",
+        "linter": "eslint",
+        "bundler": "vite"
+      },
+      "component": {
+        "style": "css"
+      },
+      "library": {
+        "style": "css",
+        "linter": "eslint"
+      }
     }
   }
 }

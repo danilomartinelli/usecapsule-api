@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app/app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -18,10 +18,9 @@ async function bootstrap() {
           durable: false,
         },
       },
-    },
+    }
   );
 
-  // Service-auth não expõe porta HTTP, apenas comunicação via RabbitMQ
   Logger.log('🔐 Service Auth iniciado - Comunicação via RabbitMQ');
   Logger.log('📡 Conectado ao RabbitMQ na fila: auth_queue');
 
