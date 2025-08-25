@@ -1,5 +1,5 @@
 {
-  "name": "@acme/billing",
+  "name": "@acme/context-auth",
   "version": "0.0.1",
   "private": true,
   "main": "./dist/index.js",
@@ -13,13 +13,6 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
-  },
-  "nx": {
-    "tags": [
-      "scope:contexts",
-      "type:lib",
-      "arch:hexagonal"
-    ]
   },
   "dependencies": {
     "tslib": "^2.3.0"

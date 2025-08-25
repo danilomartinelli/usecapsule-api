@@ -1,0 +1,9 @@
+{
+  "name": "@acme/shared-dto",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/dto/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:lib", "arch:clean"],
+  "// targets": "to see all targets run: nx show project @acme/shared-dto --web",
+  "targets": {}
+}

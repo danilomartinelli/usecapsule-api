@@ -10,7 +10,7 @@ const swcJestConfig = JSON.parse(
 swcJestConfig.swcrc = false;
 
 export default {
-  displayName: '@acme/deploy',
+  displayName: '@acme/shared-dto',
   preset: '../../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

@@ -1,1 +1,1 @@
-export * from './lib/dto.js';
+export * from './lib/shared-dto.js';

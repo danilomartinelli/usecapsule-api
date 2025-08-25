@@ -1,11 +1,11 @@
-// Uncomment this line to use CSS modules
-// import styles from './app.module.css';
-import NxWelcome from './nx-welcome';
+import '../styles.css';
 
 export function App() {
   return (
     <div>
-      <NxWelcome title="@acme/portal" />
+      <h1 className="text-3xl font-bold underline text-green-500">
+        Welcome to the portal
+      </h1>
     </div>
   );
 }

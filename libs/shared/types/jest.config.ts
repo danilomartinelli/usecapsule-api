@@ -10,7 +10,7 @@ const swcJestConfig = JSON.parse(
 swcJestConfig.swcrc = false;
 
 export default {
-  displayName: '@acme/discovery',
+  displayName: '@acme/shared-types',
   preset: '../../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

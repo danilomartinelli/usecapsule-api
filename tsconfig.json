@@ -4,21 +4,6 @@
   "files": [],
   "references": [
     {
-      "path": "./libs/shared/dto"
-    },
-    {
-      "path": "./libs/shared/types"
-    },
-    {
-      "path": "./libs/contexts/billing"
-    },
-    {
-      "path": "./libs/contexts/deploy"
-    },
-    {
-      "path": "./libs/contexts/discovery"
-    },
-    {
       "path": "./apps/api-gateway-e2e"
     },
     {
@@ -32,6 +17,15 @@
     },
     {
       "path": "./apps/portal"
+    },
+    {
+      "path": "./libs/contexts/auth"
+    },
+    {
+      "path": "./libs/shared/dto"
+    },
+    {
+      "path": "./libs/shared/types"
     }
   ]
 }

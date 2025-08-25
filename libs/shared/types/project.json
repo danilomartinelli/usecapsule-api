@@ -1,0 +1,9 @@
+{
+  "name": "@acme/shared-types",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/types/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:lib", "arch:clean"],
+  "// targets": "to see all targets run: nx show project @acme/shared-types --web",
+  "targets": {}
+}

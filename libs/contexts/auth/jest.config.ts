@@ -10,7 +10,7 @@ const swcJestConfig = JSON.parse(
 swcJestConfig.swcrc = false;
 
 export default {
-  displayName: '@acme/billing',
+  displayName: '@acme/context-auth',
   preset: '../../../jest.preset.js',
   testEnvironment: 'node',
   transform: {
