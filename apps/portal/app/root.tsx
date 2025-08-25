@@ -1,11 +1,13 @@
+import './styles.css';
+
 import {
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  type MetaFunction,
   type LinksFunction,
+  type MetaFunction,
 } from 'react-router';
 
 import { AppNav } from './app-nav';
