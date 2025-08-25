@@ -13,12 +13,6 @@
       "path": "./apps/service-auth"
     },
     {
-      "path": "./apps/portal-e2e"
-    },
-    {
-      "path": "./apps/portal"
-    },
-    {
       "path": "./libs/contexts/auth"
     },
     {
@@ -29,6 +23,12 @@
     },
     {
       "path": "./libs/ui/react"
+    },
+    {
+      "path": "./apps/portal-e2e"
+    },
+    {
+      "path": "./apps/portal"
     }
   ]
 }

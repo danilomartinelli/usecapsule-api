@@ -1,6 +1,5 @@
 /// <reference types='vitest' />
 import { reactRouter } from '@react-router/dev/vite';
-import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig(() => ({
@@ -9,18 +8,12 @@ export default defineConfig(() => ({
   server: {
     port: 4200,
     host: 'localhost',
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: false,
-      },
-    },
   },
   preview: {
     port: 4200,
     host: 'localhost',
   },
-  plugins: [!process.env.VITEST && reactRouter(), tailwindcss()],
+  plugins: [!process.env.VITEST && reactRouter()],
   // Uncomment this if you are using workers.
   // worker: {
   //  plugins: [ nxViteTsPaths() ],
