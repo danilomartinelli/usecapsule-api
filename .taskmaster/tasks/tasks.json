@@ -517,7 +517,7 @@
             "description": "Criar estrutura base de design tokens incluindo cores primitivas e semânticas baseadas no Figma, sistema de tipografia responsiva com clamp(), espaçamentos harmônicos, sombras com elevation system, bordas e animações",
             "dependencies": [],
             "details": "Em libs/ui/react/tokens/, implementar: cores primitivas (violeta, verde, amarelo, fundos escuros) e semânticas (primary, secondary, success, warning, error); tipografia com scale system responsivo usando clamp() para h1-h6, body, caption; espaçamentos baseados em 4px/8px (space-1 até space-12); sombras com 5 níveis de elevação; border radius tokens (sm: 4px, md: 8px, lg: 16px, xl: 24px); breakpoints mobile-first (sm: 640px, md: 768px, lg: 1024px, xl: 1280px); animações com duration (fast: 150ms, normal: 300ms, slow: 500ms) e easing functions. Exportar como CSS custom properties e objeto TypeScript. Criar plugin Tailwind para integração completa.\n<info added on 2025-08-24T22:37:03.592Z>\n**✅ IMPLEMENTAÇÃO CONCLUÍDA COM SUCESSO!**\n\nSistema de Design Tokens totalmente implementado em libs/ui/react/tokens/ com:\n\n**Cores Implementadas:**\n- Primitivas: violeta (#8b5cf6), verde (#10b981), amarelo (#f59e0b), vermelho (#ef4444), azul (#3b82f6)\n- Fundos escuros: primary (#13141a), secondary (#0a0b0d), surface (#1c1d24), elevated (#2c2d37)\n- Bordas e texto com estados completos (hover, active, disabled)\n- Cores semânticas com gradientes e funções utilitárias\n\n**Tipografia Responsiva:**\n- Sistema clamp() para h1-h6, body, ui, code, caption, label\n- Famílias: Inter (sans), JetBrains Mono (mono)\n- Pesos completos (100-900) e alturas de linha\n- Classes CSS e funções TypeScript\n\n**Espaçamentos Harmônicos:**\n- Sistema 4px base: 1 (4px) até 64 (256px)\n- Espaçamentos semânticos e responsivos\n- Classes para padding, margin, gap\n\n**Bordas e Elevação:**\n- Border radius: none até full (9999px)\n- Sistema elevation com 6 níveis (0-5)\n- Sombras coloridas e especiais (inner, focus)\n\n**Breakpoints e Animações:**\n- Mobile-first: xs (320px) até 2xl (1536px)\n- Durações: fast (150ms) até slowest (1000ms)\n- Easing functions e animações predefinidas\n\n**Integração Completa:**\n- Plugin Tailwind customizado\n- Variáveis CSS completas\n- Função utilitária cn() para classes\n- 26 testes passando\n- Tipos TypeScript completos\n- Documentação inline\n\nEstrutura criada: colors.ts, typography.ts, spacing.ts, borders.ts, breakpoints.ts, index.ts, tailwind-plugin.ts, tokens.css, utils.ts e testes completos.\n</info added on 2025-08-24T22:37:03.592Z>",
-            "status": "done",
+            "status": "pending",
             "testStrategy": "Testes unitários validando valores dos tokens, testes de snapshot para garantir consistência, testes visuais no Storybook mostrando aplicação dos tokens"
           },
           {
@@ -574,7 +574,7 @@
     ],
     "metadata": {
       "created": "2025-08-24T15:09:23.310Z",
-      "updated": "2025-08-24T22:37:06.939Z",
+      "updated": "2025-08-25T02:16:49.489Z",
       "description": "Tasks for master context"
     }
   }
