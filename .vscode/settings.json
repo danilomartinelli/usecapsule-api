@@ -1,3 +1,6 @@
 {
-  "nxConsole.generateAiAgentRules": true
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

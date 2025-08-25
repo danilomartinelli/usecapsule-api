@@ -1,1322 +1,1438 @@
 # Core Platform Features
 
-## Overview
+# 📋 Product Requirements Document (PRD) - Capsule Platform
 
-### Visão
+> **Version**: 2.0.0
 
-Capsule é a plataforma que transforma monorepos Nx em aplicações production-ready com um único comando. Assim como a Vercel revolucionou o deploy de aplicações Next.js, Capsule faz o mesmo para arquiteturas empresariais complexas - detectando automaticamente microserviços, frontends e workers em seu monorepo, configurando toda a infraestrutura necessária (service mesh, brokers, observability) e deployando com configuração zero.
+> **Last Updated**: 2025-08-24
 
-**Nossa promessa**: Do código ao production em menos de 5 minutos, sem YAML, sem Kubernetes, sem dor de cabeça.
+> **Status**: In Planning
 
-### O Problema Real
+> **Document Type**: Technical Product Specification
 
-### Para Desenvolvedores e Startups
+---
 
-- **Complexidade desnecessária**: Configurar Kubernetes, service mesh, observability e CI/CD pode levar semanas
-- **Curva de aprendizado brutal**: Dezenas de ferramentas e conceitos antes do primeiro deploy
-- **Custos imprevisíveis**: Overprovisioning por medo, surpresas na fatura da cloud
-- **DevOps como gargalo**: Pequenos times gastam 40% do tempo em infraestrutura
+## 🎯 Executive Summary
 
-### Para Empresas em Crescimento
+### Product Vision Statement
 
-- **Migração dolorosa**: Sair de PaaS simples (Heroku/Render) para arquitetura robusta é um salto mortal
-- **Vendor lock-in**: Presos em soluções proprietárias sem path de saída
-- **Falta de padronização**: Cada time reinventa a roda, configurações divergentes
-- **Observability fragmentada**: Logs, métricas e traces em ferramentas separadas
+Capsule é a **plataforma de deployment e gerenciamento de aplicações cloud-native** que simplifica a jornada do código à produção. Oferecemos uma experiência unificada para deploy de containers, microserviços, e aplicações full-stack - desde aplicações simples até arquiteturas empresariais complexas.
 
-### Por que agora?
+**Diferencial único**: Enquanto outras plataformas focam em nichos específicos (Vercel para Next.js, Heroku para apps simples), Capsule oferece flexibilidade total com a simplicidade de um PaaS, suportando:
 
-1. **Monorepos são o novo padrão**: Nx, Turborepo e Rush dominam empresas modernas
-2. **Microserviços sem a complexidade**: Teams querem os benefícios sem o overhead operacional
-3. **FinOps é crítico**: Pressão por eficiência de custos pós-2023
-4. **Developer Experience venceu**: Ferramentas que não são delightful morrem
+- ✅ **Qualquer container Docker** (público ou privado)
+- ✅ **Monorepos** (Nx, Turborepo, Lerna, Rush)
+- ✅ **Microserviços** independentes
+- ✅ **Aplicações full-stack** tradicionais
+- ✅ **Workers e jobs** assíncronos
+- ✅ **APIs e serviços** backend
 
-### Público-alvo Primário
+### Core Value Proposition
 
-### 1. Early Adopters (MVP1)
+**"Deploy anything, anywhere, in minutes - from simple containers to complex architectures"**
 
-- **Startup CTOs/Tech Leads** (50-200 funcionários)
-  - Usando Nx/monorepo mas sofrendo com deploy
-  - Gastando $5k-50k/mês em cloud
-  - Time de 5-20 devs, 0-2 DevOps
+### Three Pillars of Capsule
 
-### 2. Expansão (MVP2)
+1. **🚀 Universal Deployment**: Suporte para qualquer stack tecnológico
+2. **🔍 Complete Observability**: Monitoramento, logs, traces e métricas em um só lugar
+3. **👥 Team Collaboration**: Preview environments, RBAC, e workflows integrados
 
-- **Scale-ups** (200-1000 funcionários)
-  - Migrando de Heroku/Render para arquitetura própria
-  - Multiple squads, precisam de isolamento
+### Key Success Metrics
+
+- **Time to First Deploy**: < 5 minutos (p50)
+- **Zero-config Success Rate**: > 80% dos monorepos Nx
+- **Developer Productivity**: 10+ deploys per developer per week
+- **Infrastructure Cost Reduction**: 30% vs self-managed K8s
+
+---
+
+## 🔍 Problem Statement & Market Analysis
+
+### 1. Current Market Problems
+
+### 1.1 For Developers and Startups
+
+- **🚧 Complexidade Desnecessária**
+  - Configurar Kubernetes, service mesh, observability e CI/CD pode levar semanas
+  - Dezenas de ferramentas e conceitos antes do primeiro deploy
+  - Curva de aprendizado extremamente íngreme
+- **💸 Custos Imprevisíveis**
+  - Overprovisioning por medo de downtime
+  - Surpresas constantes na fatura da cloud
+  - Falta de visibilidade sobre custos por serviço
+- **⏰ DevOps como Gargalo**
+  - Pequenos times gastam 40% do tempo em infraestrutura
+  - Falta de expertise específica em Kubernetes
+  - Dependência de consultores externos caros
+
+### 1.2 For Growing Companies
+
+- **🔄 Migração Dolorosa**
+  - Sair de PaaS simples (Heroku/Render) para arquitetura robusta é complexo
+  - Perda de produtividade durante transição
+  - Risco de downtime durante migração
+- **🔒 Vendor Lock-in**
+  - Presos em soluções proprietárias sem path de saída
+  - APIs específicas que dificultam portabilidade
+  - Custos crescentes sem alternativas viáveis
+- **📊 Falta de Padronização**
+  - Cada time reinventa a roda
+  - Configurações divergentes entre projetos
+  - Dificuldade de compartilhar conhecimento
+
+### 2. Market Opportunity
+
+### 2.1 Why Now?
+
+1. **📦 Monorepos são o novo padrão**
+   - Nx tem 2M+ downloads semanais
+   - Grandes empresas adotando monorepos (Google, Meta, Microsoft)
+   - Ferramentas maduras disponíveis
+2. **🎯 Microserviços sem complexidade**
+   - Teams querem benefícios sem overhead operacional
+   - Necessidade de isolamento e escalabilidade independente
+   - Demanda por arquiteturas event-driven
+3. **💰 FinOps é crítico**
+   - Pressão por eficiência de custos pós-2023
+   - Necessidade de accountability por projeto/equipe
+   - Automação de otimização de recursos
+4. **✨ Developer Experience venceu**
+   - Ferramentas que não são delightful morrem
+   - Expectativa de onboarding em minutos, não dias
+   - Demanda por ferramentas self-service
+
+---
+
+## 👥 Target Audience & Personas
+
+### Primary Personas
+
+### 1. 🚀 Startup CTO/Tech Lead
+
+- **Company Size**: 50-200 funcionários
+- **Team Size**: 5-20 developers, 0-2 DevOps
+- **Tech Stack**: Nx monorepo, TypeScript, React/Angular/Vue + NestJS
+- **Cloud Spend**: $5k-50k/mês
+- **Pain Points**:
+  - Tempo excessivo configurando infraestrutura
+  - Falta de expertise em Kubernetes
+  - Necessidade de ship fast sem sacrificar qualidade
+- **Success Criteria**:
+  - Deploy em produção < 1 dia
+  - Redução de 50% no tempo gasto com DevOps
+  - Custos previsíveis e controláveis
+
+### 2. 🏢 Scale-up Engineering Manager
+
+- **Company Size**: 200-1000 funcionários
+- **Team Size**: Multiple squads, 20-100 developers
+- **Tech Stack**: Microserviços, múltiplas linguagens
+- **Cloud Spend**: $50k-500k/mês
+- **Pain Points**:
+  - Migração de PaaS para infraestrutura própria
+  - Necessidade de isolamento entre equipes
   - Compliance e auditoria começando a importar
+- **Success Criteria**:
+  - Padronização entre equipes
+  - Redução de incidentes relacionados a deploy
+  - Visibilidade completa de custos por equipe
 
-### 3. Enterprise (MVP3)
+### 3. 🛠️ Full-stack Developer
 
-- **Empresas estabelecidas** com iniciativas de modernização
-  - Querem alternativa ao EKS/GKE gerenciado
-  - Precisam de exit strategy (export para K8s)
-  - Multi-cloud e hybrid cloud requirements
+- **Experience**: 2-10 anos
+- **Responsibilities**: Frontend + Backend + Basic DevOps
+- **Tools**: VS Code, GitHub, Docker basics
+- **Pain Points**:
+  - Frustração com complexidade de Kubernetes
+  - Tempo perdido em configuração vs coding
+  - Dificuldade em debugar problemas de produção
+- **Success Criteria**:
+  - Deploy tão simples quanto git push
+  - Logs e métricas acessíveis facilmente
+  - Preview environments automáticos
 
-### Métricas de Sucesso do Produto
+### User Journey Map
 
-### Ativação (Primeiras 4 semanas)
+```mermaid
+journey
+    title Developer Journey - From Code to Production
 
-- **Time to First Deploy**: < 5 minutos (p50), < 10 minutos (p90)
-- **Zero-config success rate**: > 80% dos monorepos Nx deployam sem configuração manual
-- **Ativação D7**: > 60% dos trials fazem 5+ deploys na primeira semana
+    section Discovery
+      Research Solutions: 3: Developer
+      Find Capsule: 5: Developer
+      Review Documentation: 4: Developer
 
-### Engajamento (Mês 2-3)
+    section Onboarding
+      Sign Up: 5: Developer
+      Connect GitHub: 5: Developer
+      Auto-detect Services: 5: Developer
+      First Deploy: 5: Developer
 
-- **Weekly Active Teams**: > 70% dos times ativos semanalmente
-- **Services per Account**: média de 5+ serviços por conta ativa
-- **Preview Environments**: > 50% dos PRs com preview automático
+    section Daily Usage
+      Push Code: 5: Developer
+      Preview Environment: 5: Developer
+      Monitor Services: 4: Developer
+      Debug Issues: 4: Developer
 
-### Retenção (Trimestre)
+    section Scaling
+      Add Team Members: 4: Developer
+      Configure Autoscaling: 4: Developer
+      Optimize Costs: 5: Developer
+```
 
-- **3-month retention**: > 85% das contas pagas
-- **Revenue expansion**: > 140% NRR (net revenue retention)
-- **Churn < 3% mensal** para contas > $500/mês
+---
 
-### North Star Metrics
+## 🎨 Core Features & Requirements
 
-- **Deploys per Developer per Week**: > 10 (vs. 2-3 industry average)
-- **MTTR (Mean Time to Recovery)**: < 10 minutos com rollback automático
-- **Infrastructure Cost Efficiency**: 30% redução vs. self-managed K8s
+### Platform Capabilities Overview
 
-## Core Features Expandidas
+Baseando-se no dashboard real da Capsule, a plataforma oferece um conjunto completo de funcionalidades para gerenciamento de aplicações modernas:
 
-### 0. 🪄 Magic Deploy para Monorepos Nx (Hero Feature - MVP1)
+### 📊 **Dashboard Unificado**
 
-**Descrição**
+- **Platform Overview**: Visão em tempo real de deployments, serviços, builds e performance
+- **Services Management**: Monitoramento de CPU, memória, versões e status por serviço
+- **Team Activity**: Commits recentes, pull requests, deployments por membro
+- **Cost Tracking**: Budget monitoring com alertas e previsões ($2,847 of $5,000 budget)
 
-Deploy automático e inteligente de monorepos Nx com detecção de arquitetura, igual Vercel faz com Next.js. Capsule analisa seu `nx.json`, detecta todos os apps (React, Angular, Vue, NestJS, Express), entende as dependências entre eles, e faz o deploy de tudo com configuração zero.
+### 🚀 **Deployment Flexibility**
 
-**Como funciona a mágica**
+- **Multiple Service Types**: API Gateway, User Services, Auth Services, Analytics Engines, Workers
+- **Any Container Support**: Docker Hub, GHCR, ECR, private registries
+- **Environment Management**: Production, Staging, Development com isolamento completo
+- **Version Control**: Tracking de versões deployadas (v2.4.1, v1.7.3, etc)
+- **Build Pipeline**: Status em tempo real (Running, Building, Failed)
 
-1. **Connect GitHub**: Autoriza o repo
-2. **Auto-discovery**: Capsule escaneia e encontra:
-   - Frontend apps → gera URLs públicas com CDN
-   - API/Backend services → configura API Gateway
-   - Workers/Jobs → setup de filas automático
-   - Shared libs → otimização de build
-3. **Smart Routing**: Cria rotas automáticas baseadas em nomes
-   - `apps/web` → [`myapp.capsule.dev`](http://myapp.capsule.dev)
-   - `apps/api` → [`api.myapp.capsule.dev`](http://api.myapp.capsule.dev)
-   - `apps/admin` → [`admin.myapp.capsule.dev`](http://admin.myapp.capsule.dev)
-4. **Instant Deploy**: Um clique, tudo no ar
+### 👁️ **Preview Environments**
 
-**Acceptance Criteria**
+- **Automatic PR Environments**: Criação automática para cada pull request
+- **Branch-based Deploys**: Environment isolado por branch (feature/payment-flow, etc)
+- **Public URLs**: Links compartilháveis ([pr-123.preview.capsule.dev](http://pr-123.preview.capsule.dev))
+- **Status Tracking**: Active, Building, Failed com timestamps
+- **Quick Actions**: Deploy, destroy, logs, terminal access
 
-- GIVEN um monorepo Nx com 5+ apps; WHEN conectado ao GitHub; THEN Capsule detecta todos os apps e suas dependências em < 30s
-- GIVEN apps com `project.json` padrão; WHEN deploy é triggered; THEN todos sobem com URLs funcionais em < 3 minutos
-- GIVEN dependências entre apps; WHEN um lib compartilhada muda; THEN apenas apps afetados são redeployados
+### 📈 **Observability & Analytics**
 
-**Magic Features Incluídas**
+- **System Performance**: Gráficos real-time de CPU, Memory Usage
+- **Resource Usage**: CPU (45%), Memory (67%), Storage (23%), Network I/O (34%)
+- **API Usage Analytics**:
+  - Top Endpoints tracking (/api/v1/users: 24.5k requests)
+  - Response Times (Average: 245ms, p95: 580ms, p99: 1.2s)
+  - Request patterns com gráficos temporais
+- **Security Monitoring**:
+  - Real-time security scanning
+  - Alertas categorizados (0 Critical, 2 Medium, 5 Low)
+- **Compliance Dashboard**:
+  - SOC 2 Type II: Compliant ✓
+  - GDPR: Compliant ✓
+  - PCI DSS: Audit pending
+  - HIPAA: Compliant ✓
 
-- **Build Cache Inteligente**: Compartilha cache entre builds como Nx Cloud
-- **Affected Detection**: Só rebuilda o que mudou
-- **Environment Sync**: Desenvolvimento, staging e production auto-configurados
-- **Secrets Inference**: Detecta variáveis necessárias analisando imports
+### 👥 **Team Collaboration**
 
-**Exemplos de Detecção Automática**
+- **Activity Feed**: Recent commits, PRs, deployments
+- **Multi-user Support**: Team roles e permissões
+- **Audit Trail**: Todas as ações registradas com autor e timestamp
+- **Notifications**: Integração com Slack, email, webhooks
+
+### Feature Priority Matrix
+
+| Priority | Feature                        | MVP  | Impact | Effort | Owner     |
+| -------- | ------------------------------ | ---- | ------ | ------ | --------- |
+| P0       | 🎯 Universal Smart Deploy      | MVP1 | High   | Medium | Platform  |
+| P0       | 📊 Unified Dashboard           | MVP1 | High   | Medium | Frontend  |
+| P0       | 🔐 Authentication & RBAC       | MVP1 | High   | Medium | Platform  |
+| P0       | 🚀 Multi-Service Deploy        | MVP1 | High   | Low    | Platform  |
+| P0       | 🔍 Service Discovery + DNS     | MVP1 | High   | Medium | Infra     |
+| P0       | 🔑 Config & Secrets Management | MVP1 | High   | Medium | Platform  |
+| P0       | 📈 Real-time Monitoring        | MVP1 | High   | Medium | Infra     |
+| P1       | 🔄 Blue/Green & Canary         | MVP2 | High   | Medium | Platform  |
+| P1       | 👁️ Preview Environments        | MVP2 | High   | Medium | Platform  |
+| P1       | 💰 Cost Analytics              | MVP2 | High   | Low    | Analytics |
+| P1       | 🛡️ Security Scanning           | MVP2 | High   | Medium | Security  |
+| P1       | 📡 API Analytics               | MVP2 | Medium | Low    | Analytics |
+| P2       | 📨 Managed Brokers             | MVP3 | High   | High   | Infra     |
+| P2       | 📦 Export/Import (IaC)         | MVP3 | High   | Medium | Platform  |
+| P2       | ⚖️ Autoscaling                 | MVP3 | Medium | Medium | Infra     |
+| P2       | 🏆 Compliance Automation       | MVP3 | High   | High   | Security  |
+
+### Detailed Feature Specifications#### 🪄 F0: Universal Smart Deploy
+
+### Description
+
+Sistema inteligente de deployment que detecta automaticamente o tipo de aplicação e configura o ambiente ideal, suportando múltiplos paradigmas de deployment.
+
+### Supported Deployment Methods
+
+### 1. 📦 **Container-based Deploy**
+
+- Docker images de qualquer registry (Docker Hub, GHCR, ECR, privados)
+- Dockerfile no repositório com build automático
+- Docker Compose para orquestração multi-container
+- Import de Kubernetes manifests existentes
+
+### 2. 🎯 **Monorepo Auto-detection**
+
+- **Nx**: Detecção via nx.json e project.json
+- **Turborepo**: Parse de turbo.json
+- **Lerna**: Análise de lerna.json
+- **Rush**: Rush.json configuration
+- **Yarn/PNPM Workspaces**: Workspace detection
+
+### 3. 📡 **Source Code Deploy**
+
+- **Node.js**: package.json auto-detection
+- **Python**: requirements.txt, Pipfile, pyproject.toml
+- **Go**: go.mod analysis
+- **Java**: Maven/Gradle support
+- **Ruby**: Gemfile parsing
+- **.NET**: Project file detection
+
+### 4. 🌐 **Static Sites & SPAs**
+
+- Auto-detect build outputs
+- CDN deployment with edge optimization
+- Framework-specific optimizations
+
+### Intelligent Configuration
 
 ```tsx
-// Detectado: Frontend React com Vite
-apps/portal/
-  vite.config.ts    → Deploy como SPA com CDN
-  .env.example      → Solicita variáveis no primeiro deploy
+interface SmartDeployConfig {
+  // Auto-detected settings
+  detected: {
+    type: 'container' | 'monorepo' | 'source' | 'static';
+    framework?: string;
+    language?: string;
+    ports?: number[];
+    commands?: {
+      build?: string;
+      start?: string;
+      test?: string;
+    };
+  };
 
-// Detectado: API NestJS
-apps/api/
-  main.ts com NestFactory → Deploy como container, health check automático
-  prisma/schema     → Sugere database connection string
+  // Suggested optimizations
+  suggestions: {
+    caching?: CacheStrategy;
+    scaling?: ScalingPolicy;
+    healthCheck?: HealthCheckConfig;
+    resources?: ResourceLimits;
+  };
 
-// Detectado: Worker/Cron
-apps/worker/
-  Bull/BullMQ imports → Provisiona Redis automaticamente
-  @Cron decorators   → Configura agendamento
+  // Override options
+  customizable: {
+    env: Record<string, string>;
+    secrets: string[];
+    volumes?: VolumeMount[];
+    networking?: NetworkConfig;
+  };
+}
 ```
 
-**KRs mensuráveis**
-
-- 90% dos monorepos Nx deployam sem nenhuma configuração manual
-- Tempo do push ao deploy < 3min (p50) para affected apps
-- Zero-downtime em 100% dos deploys de atualização
-
-## Core Features
-
-### 1. Deploy one-click para container images
-
-**Descrição**
-
-Deploy via UI/CLI de imagens Docker públicas/privadas com health checks, rollout seguro e logs em tempo real.
-
-**Owner sugerido**
-
-Platform
-
-**Prioridade / Esforço**
-
-Alta / Baixo
-
-**Registries suportados**
-
-Docker Hub, Amazon ECR, GitHub Container Registry (GHCR) e registries privados via imagePullSecret
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN uma conta com permissões válidas e uma imagem disponível no registry; WHEN o usuário aciona "Deploy" via UI/CLI; THEN o serviço sobe saudável e fica acessível com logs e status em tempo real
-- GIVEN uma imagem multi-arch; WHEN o deploy é iniciado; THEN a arquitetura correta é selecionada automaticamente
-- GIVEN health checks configurados; WHEN o serviço starta; THEN probes passam e o status muda para Healthy
-
-**KRs mensuráveis**
-
-p50 de deploy < 60s; taxa de deploy bem-sucedido > 99% em imagens ≤ 500MB; falhas recuperáveis com retry automático < 2 minutos
-
-**Hipóteses de sucesso**
-
-Simplificar o caminho da imagem à produção reduz churn no onboarding e aumenta a ativação de contas
-
-### 2. Blue/Green e Canary automáticos por rota
-
-**Descrição**
-
-Tráfego roteável por porcentagem/rota com promoção e rollback instantâneo.
-
-**Owner sugerido**
-
-Platform
-
-**Prioridade / Esforço**
-
-Alta / Médio
-
-**Registries suportados**
-
-Docker Hub, ECR, GHCR e privados via imagePullSecret
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN uma versão estável (blue) e uma candidata (green); WHEN o usuário configura 10% canary; THEN 10% do tráfego é roteado para green e métricas são coletadas
-- GIVEN degradação de métricas; WHEN limiares são ultrapassados; THEN rollback automático ocorre em < 30s
-- GIVEN múltiplas rotas; WHEN se define pesos por rota; THEN a distribuição respeita as porcentagens por rota
-
-**KRs mensuráveis**
-
-95% de rollbacks automáticos em canaries problemáticos; tempo de rollback < 30s p50; zero downtime perceptível (erro 5xx adicional < 0,1%)
-
-**Hipóteses de sucesso**
-
-Releases graduais reduzem risco e aumentam velocidade de entrega sem impactar usuários
-
-### 3. Service Discovery + Internal DNS leve
-
-**Descrição**
-
-Resolução DNS interna (svc.internal) com políticas de acesso e mTLS opcional, suportando HTTP/gRPC/broker.
-
-**Owner sugerido**
-
-Infra
-
-**Prioridade / Esforço**
-
-Alta / Médio
-
-**Registries suportados**
-
-Docker Hub, ECR, GHCR e privados via imagePullSecret
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN dois serviços no mesmo app; WHEN um chama outro via nome DNS interno; THEN a resolução ocorre < 100ms e respeita políticas de rede
-- GIVEN mTLS habilitado; WHEN serviços se comunicam; THEN certificados válidos são negociados e conexões não autorizadas são bloqueadas
-- GIVEN namespaces lógicos; WHEN políticas são aplicadas; THEN isolamento entre ambientes é garantido
-
-**KRs mensuráveis**
-
-Resolução p95 < 100ms; 0 conexões cross-namespace não autorizadas; 100% de rotação de certificados automatizada
-
-**Hipóteses de sucesso**
-
-Descoberta simples diminui erros de configuração e incidentes de rede
-
-### 4. Managed Broker Marketplace (RabbitMQ/Redis pub/sub)
-
-**Descrição**
-
-Provisionamento on-demand com isolamento por tenant, rotas seguras e quotas/retention configuráveis.
-
-**Owner sugerido**
-
-Infra
-
-**Prioridade / Esforço**
-
-Alta / Médio
-
-**Registries suportados**
-
-Docker Hub, ECR, GHCR e privados via imagePullSecret
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN um projeto; WHEN o usuário provisiona um broker; THEN endpoints e credenciais seguras são entregues em < 3 minutos
-- GIVEN bindings definidos; WHEN serviços sobem; THEN conexões TLS são estabelecidas e quotas aplicadas
-- GIVEN upgrade de plano; WHEN ampliado; THEN interrupção máxima < 30s
-
-**KRs mensuráveis**
-
-Provisionamento p90 < 3min; isolamento multi-tenant sem vazamentos (0 incidentes); > 99,9% uptime trimestral
-
-**Hipóteses de sucesso**
-
-Broker gerenciado reduz configuração e acelera adoção de arquiteturas event-driven
-
-### 5. Config & Secrets as Code
-
-**Descrição**
-
-Configuração declarativa e integração com Vault-compatible para injeção segura via env/volume.
-
-**Owner sugerido**
-
-Platform
-
-**Prioridade / Esforço**
-
-Alta / Médio
-
-**Registries suportados**
-
-Docker Hub, ECR, GHCR e privados via imagePullSecret
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN secrets referenciados; WHEN um deploy roda; THEN secrets são injetados sem exposição em logs
-- GIVEN um PR com alteração em config; WHEN aplicado; THEN histórico e diff são registráveis e auditáveis
-- GIVEN rotação de secret; WHEN atualizada; THEN serviços recebem novos valores sem downtime
-
-**KRs mensuráveis**
-
-100% de operações de secrets auditadas; rotação de secrets em < 5min; zero vazamento de segredos em logs conhecidos
-
-**Hipóteses de sucesso**
-
-Declaratividade e auditoria elevam confiança e conformidade
-
-### 6. Built-in Observability Minimal
-
-**Descrição**
-
-Logs agregados, traces com sampling e métricas básicas (latência/throughput), exportáveis via OTLP/Prometheus.
-
-**Owner sugerido**
-
-Infra
-
-**Prioridade / Esforço**
-
-Alta / Médio
-
-**Registries suportados**
-
-Docker Hub, ECR, GHCR e privados via imagePullSecret
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN um serviço; WHEN filtros de logs são aplicados; THEN busca retorna em < 2s p50
-- GIVEN tracing habilitado; WHEN requests fluem; THEN spans e latências são visualizáveis por serviço
-- GIVEN métricas padrão; WHEN dashboards são abertos; THEN p95/p99 e erro rate são exibidos por rota
-
-**KRs mensuráveis**
-
-Consulta de logs p50 < 2s; 100% de serviços com métricas básicas; redução de MTTR em 30%
-
-**Hipóteses de sucesso**
-
-Visibilidade mínima já reduz tempo de diagnóstico em incidentes comuns
-
-### 7. Preview Environments automáticos por branch/PR
-
-**Descrição**
-
-Ambientes efêmeros por PR/branch com teardown automático, links públicos e políticas de custo.
-
-**Owner sugerido**
-
-Platform
-
-**Prioridade / Esforço**
-
-Alta / Médio
-
-**Registries suportados**
-
-Docker Hub, ECR, GHCR e privados via imagePullSecret
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN um PR aberto; WHEN pipeline roda; THEN um ambiente preview é criado em < 5min com URL pública
-- GIVEN PR fechado/inativo; WHEN TTL expira; THEN preview é destruído automaticamente
-- GIVEN limites de custo; WHEN excedidos; THEN preview é pausado e alerta é enviado
-
-**KRs mensuráveis**
-
-80% dos PRs com preview; custo médio por preview dentro de ±10% do orçamento; teardown automático em 100% dos expirados
-
-**Hipóteses de sucesso**
-
-Previews aceleram validação e reduzem regressões
-
-### 8. Lightweight Autoscaling por service
-
-**Descrição**
-
-Escalonamento por CPU/RPS/custom, com limites mínimo/máximo e cooldown.
-
-**Owner sugerido**
-
-Infra
-
-**Prioridade / Esforço**
-
-Médio / Médio
-
-**Registries suportados**
-
-Docker Hub, ECR, GHCR e privados via imagePullSecret
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN políticas definidas; WHEN carga aumenta; THEN réplicas escalam sem thrashing
-- GIVEN cooldown; WHEN picos transitórios; THEN scaling não oscila acima de ±1 réplica
-- GIVEN limites; WHEN carga cai; THEN escala para o mínimo respeitando SLOs
-
-**KRs mensuráveis**
-
-Redução de 20% no custo médio sem impacto no p95; ≤ 5% de eventos de thrashing por semana
-
-**Hipóteses de sucesso**
-
-Políticas simples cobrem 80% dos casos sem mesh completo
-
-### 9. Network Policies GUI + Templates
-
-**Descrição**
-
-Editor visual com templates seguros para ingress/egress entre serviços, HTTP/gRPC/broker.
-
-**Owner sugerido**
-
-Frontend
-
-**Prioridade / Esforço**
-
-Médio / Baixo
-
-**Registries suportados**
-
-Docker Hub, ECR, GHCR e privados via imagePullSecret
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN um serviço; WHEN uma política é aplicada via UI; THEN tráfego não permitido é bloqueado
-- GIVEN presets; WHEN selecionados; THEN regras mínimas seguras entram em vigor
-- GIVEN validação; WHEN há conflito; THEN a UI exibe erro antes de aplicar
-
-**KRs mensuráveis**
-
-90% das políticas criadas via UI (sem YAML); redução de 50% de incidentes de egress indevido
-
-**Hipóteses de sucesso**
-
-Visualidade e presets reduzem erros e tempo de configuração
-
-### 10. Portable Export/Import (Infra as Code)
-
-**Descrição**
-
-Exportar/importar app, roteamento e dependências em YAML/Helm/Terraform para reduzir lock-in.
-
-**Owner sugerido**
-
-Platform
-
-**Prioridade / Esforço**
-
-Alta / Médio
-
-**Registries suportados**
-
-Docker Hub, ECR, GHCR e privados via imagePullSecret
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN um app; WHEN exportado; THEN o bundle aplica em um Kubernetes vanilla sem ajustes manuais
-- GIVEN um bundle; WHEN importado; THEN diferenças são mostradas (dry-run) e aplicação é idempotente
-- GIVEN rotas/policies; WHEN exportadas; THEN semântico é preservado
-
-**KRs mensuráveis**
-
-30% dos apps com export habilitado; 0 falhas conhecidas de import idempotente nos casos testados
-
-**Hipóteses de sucesso**
-
-Portabilidade aumenta confiança e reduz risco de lock-in
-
-### 11. Authentication & Authorization (RBAC)
-
-**Descrição**
-
-Sistema completo de autenticação multi-provider (OAuth + Email/Password), autorização baseada em roles (RBAC), gestão de organizações/times e API Keys para automação.
-
-**Owner sugerido**
-
-Platform
-
-**Prioridade / Esforço**
-
-Alta / Médio (crítico para MVP1)
-
-**Providers suportados**
-
-- OAuth: GitHub, Google, GitLab
-- Email/Password com verificação
-- API Keys para CI/CD e automação
-- SSO SAML para Enterprise (MVP3)
-
-**Acceptance Criteria (GIVEN/WHEN/THEN)**
-
-- GIVEN um novo usuário; WHEN se registra via GitHub OAuth; THEN conta é criada, organização padrão provisionada e JWT emitido
-- GIVEN um membro com role Developer; WHEN tenta deletar serviço; THEN ação é negada com 403 Forbidden
-- GIVEN uma API Key com permissões limitadas; WHEN usada para deploy; THEN apenas ações permitidas são executadas
-- GIVEN token expirado; WHEN refresh token é válido; THEN novo access token é gerado sem re-login
-- GIVEN convite para organização; WHEN aceito; THEN usuário é adicionado com role especificado
-
-**KRs mensuráveis**
-
-Tempo de login < 2s p50; Taxa de sucesso OAuth > 99%; Rotação automática de tokens sem downtime; 100% das ações auditáveis
-
-**Hipóteses de sucesso**
-
-OAuth reduz atrito no onboarding; RBAC granular previne incidentes de segurança; API Keys habilitam automação segura
-
-## User Experience
-
-### Personas
-
-- **Dev Solo**: busca velocidade e simplicidade
-- **Founder/CTO**: foco em previsibilidade de custo e governança leve
-- **Eng. Full-stack**: produtividade no dia a dia, CI/CD e depuração
-
-### Roles e permissões (RBAC detalhado)
-
-### Owner (Proprietário)
-
-- Acesso total à organização
-- Gerencia billing e upgrades de plano
-- Define políticas globais e limites
-- Gerencia membros e seus roles
-- Deleta organização
-- Todas as permissões de Admin
-
-### Admin (Administrador)
-
-- Cria/edita/deleta projetos e ambientes
-- Gerencia membros (exceto outros admins/owner)
-- Configura integrações e webhooks
-- Acessa logs de auditoria
-- Todas as permissões de Developer
-
-### Developer (Desenvolvedor)
-
-- Cria/edita serviços
-- Realiza deploys e rollbacks
-- Gerencia secrets e configurações
-- Cria/deleta preview environments
-- Visualiza logs, métricas e traces
-- Configura autoscaling e health checks
-
-### Viewer (Visualizador)
-
-- Acesso read-only a todos os recursos
-- Visualiza serviços e status
-- Visualiza logs e métricas
-- Lista secrets (sem ver valores)
-- Exporta relatórios
-
-### Regras de RBAC
-
-- Permissões são hierárquicas (Owner > Admin > Developer > Viewer)
-- Permissões podem ser customizadas por projeto/ambiente
-- API Keys herdam permissões do criador ou podem ter escopo reduzido
-- Audit log registra todas as ações com timestamp e autor
-
-### Alertas de cobrança (UX)
-
-- Banner não intrusivo quando 70% do orçamento do mês é atingido; toast e e-mail/SMS opcional
-- Ao atingir 90%: modal com opções (ajustar orçamento, pausar previews, reduzir autoscaling)
-- Página de custos com breakdown por serviço/ambiente e previsão do mês
-
-### User flows críticos
-
-### 1. Deploy one-click
-
-**Passos (UI)**: Login → Conectar registry → Selecionar imagem (tag) → Configurar env/health → Confirmar Deploy → Ver status/logs
-
-**CLI**:
-
-```bash
-capsule registry add ...
-capsule deploy --image [ghcr.io/org/api:1.0.0](http://ghcr.io/org/api:1.0.0) --env prod
+### Framework-Specific Features
+
+| Framework       | Auto-Detection                | Optimizations                               |
+| --------------- | ----------------------------- | ------------------------------------------- |
+| **Next.js**     | package.json + next.config    | SSR/SSG/ISR, Image optimization, API routes |
+| **React**       | package.json + public/        | SPA routing, CDN distribution               |
+| **Vue**         | package.json + vue.config     | Build optimization, Route handling          |
+| **Angular**     | angular.json                  | AOT compilation, Service workers            |
+| **NestJS**      | @nestjs/core in deps          | Microservice mode, Health checks            |
+| **Express**     | express in deps               | Cluster mode, Graceful shutdown             |
+| **Django**      | [manage.py](http://manage.py) | Static files, Migrations, WSGI/ASGI         |
+| **Rails**       | Gemfile + Rakefile            | Asset pipeline, Database tasks              |
+| **Spring Boot** | pom.xml/gradle                | Actuator integration, JVM tuning            |
+| **Laravel**     | composer.json + artisan       | Queue workers, Scheduling                   |
+| **FastAPI**     | fastapi in deps               | ASGI server, OpenAPI docs                   |
+| **Flask**       | flask in deps                 | WSGI config, Static files                   |
+
+### Acceptance Criteria
+
+- ✅ GIVEN any GitHub/GitLab/Bitbucket repository
+  - WHEN connected to platform
+  - THEN application type detected in < 30s
+- ✅ GIVEN a Docker image URL
+  - WHEN deployment triggered
+  - THEN service running in < 2 minutes
+- ✅ GIVEN a monorepo with multiple projects
+  - WHEN code pushed
+  - THEN only affected projects redeployed
+- ✅ GIVEN unknown framework
+  - WHEN detection fails
+  - THEN fallback to generic container with manual config
+
+### Success Metrics
+
+- 85% zero-config deployment success
+- 95% framework detection accuracy
+- < 3 min average deployment time
+- 98% successful first deployment rate
+
+---
+
+### 🔐 F1: Authentication & Authorization (RBAC)
+
+### Description
+
+Complete authentication system with multi-provider support and granular role-based access control.
+
+### Functional Requirements
+
+### Authentication Methods
+
+1. **OAuth Providers**
+   - GitHub OAuth (primary)
+   - Google OAuth
+   - GitLab OAuth
+   - SAML SSO (Enterprise)
+2. **Email/Password**
+   - Registration with email verification
+   - Password reset flow
+   - 2FA support (TOTP)
+3. **API Keys**
+   - Scoped permissions
+   - Expiration dates
+   - Usage tracking
+   - Rate limiting
+
+### Authorization Roles
+
+| Role      | Permissions                 | Scope |
+| --------- | --------------------------- | ----- |
+| **Owner** | • Full organization control |
+
+• Billing management
+• Delete organization
+• All Admin permissions | Organization |
+| **Admin** | • Create/delete projects
+• Manage members
+• Configure integrations
+• All Developer permissions | Organization/Project |
+| **Developer** | • Deploy services
+• Manage secrets
+• View logs/metrics
+• Create preview envs | Project/Environment |
+| **Viewer** | • Read-only access
+• View services
+• View logs
+• Export reports | Project/Environment |
+
+### Technical Requirements
+
+```tsx
+interface AuthContext {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    avatar?: string;
+  };
+
+  organization: {
+    id: string;
+    name: string;
+    plan: 'free' | 'pro' | 'enterprise';
+  };
+
+  permissions: Permission[];
+
+  tokens: {
+    access: string;
+    refresh: string;
+    expiresAt: Date;
+  };
+}
+
+interface Permission {
+  resource: 'org' | 'project' | 'service' | 'secret';
+  action: 'create' | 'read' | 'update' | 'delete';
+  scope?: string; // project-id, env-name, etc
+}
 ```
 
-**Telas**: Conexão de registry, Form de Deploy, Painel de Serviço (status, logs)
+### Acceptance Criteria
 
-### 2. Preview Environment por PR
+- ✅ OAuth login completes in < 2s (p50)
+- ✅ RBAC denies unauthorized actions with proper 403 responses
+- ✅ API Keys work for CI/CD with scoped permissions
+- ✅ Token refresh happens seamlessly without re-login
+- ✅ All actions are logged in audit trail
 
-**Passos (UI/CI)**: Abrir PR → Pipeline chama `capsule preview create --branch feature-x` → Link público no PR → QA valida → Merge → Auto-teardown
+---
 
-**Telas**: Lista de Previews, Detalhe do Preview (URL, status, TTL, custo estimado)
+### 🚀 F2: One-Click Deploy
 
-### 3. Rollout/Canary e rollback
+### Description
 
-**Passos (UI)**: Serviço → Nova versão → Definir % (ex.: 10%) → Monitorar métricas (p95, erro rate) → Promover/rollback
+Streamlined deployment of container images with intelligent defaults and health monitoring.
 
-**CLI**:
+### Functional Requirements
 
-```bash
-capsule canary start --service api --percent 10
-capsule canary promote|rollback
+1. **Registry Integration**
+   - Docker Hub (public/private)
+   - GitHub Container Registry (GHCR)
+   - Amazon ECR
+   - Custom registries with credentials
+2. **Deployment Configuration**
+   - Auto-detect exposed ports
+   - Generate health check endpoints
+   - Environment variable management
+   - Resource limits (CPU/Memory)
+   - Replica count
+3. **Deployment Process**
+   - Pull image with retry logic
+   - Rolling update strategy
+   - Health check validation
+   - Automatic rollback on failure
+   - Real-time log streaming
+
+### API Specification
+
+```yaml
+POST /api/v1/services
+Content-Type: application/json
+
+{
+  "name": "api-service",
+  "image": "[ghcr.io/org/api:v1.2.3](http://ghcr.io/org/api:v1.2.3)",
+  "ports": [{
+    "container": 3000,
+    "protocol": "http"
+  }],
+  "env": {
+    "NODE_ENV": "production",
+    "API_KEY": "@secret:api-key"
+  },
+  "resources": {
+    "cpu": "500m",
+    "memory": "512Mi"
+  },
+  "healthCheck": {
+    "path": "/health",
+    "interval": 30,
+    "timeout": 10
+  },
+  "replicas": {
+    "min": 2,
+    "max": 10
+  }
+}
+
+Response: 201 Created
+{
+  "id": "svc_abc123",
+  "status": "deploying",
+  "url": "[https://api-service.capsule.app](https://api-service.capsule.app)",
+  "endpoints": {
+    "public": "[https://api-service.capsule.app](https://api-service.capsule.app)",
+    "internal": "api-service.internal:3000"
+  }
+}
 ```
 
-**Telas**: Controle de Tráfego por Rota, Painel de Métricas por versão
+---
 
-## Technical Architecture
+## 🏗️ Technical Architecture
 
-### Diagrama lógico descritivo
-
-- Portal (Vite/React) → API Gateway (BFF NestJS)
-- API Gateway → Control Plane (orquestra deploy/scale/rotas, gerencia estado declarativo)
-- Control Plane → Runners/Workers (executores de deploy, coleta de health/logs/metrics)
-- Control Plane → Managed Brokers (RabbitMQ/Redis) e integrações externas (Vault, registries)
-- Data Plane: serviços do usuário (pods/tasks) com sidecars opcionais (mesh-lite)
-- External State: bancos de dados e storages gerenciados externos à Capsule
-
-### Diagrama Visual da Arquitetura
+### System Architecture Overview
 
 ```mermaid
 graph TB
     subgraph "Client Layer"
-        Portal[Portal Web<br/>React + Vite]
-        CLI[Capsule CLI]
-        SDK[SDKs]
+        Portal["🖥️ Portal Web<br/>(React + Vite + Tailwind)"]
+        CLI["⌨️ Capsule CLI<br/>(TypeScript)"]
+        SDK["📚 SDKs<br/>(TS, Go, Python)"]
     end
 
-    subgraph "API Layer"
-        Gateway[API Gateway<br/>NestJS BFF]
+    subgraph "API Gateway Layer"
+        Gateway["🚪 API Gateway<br/>(NestJS BFF)<br/>Rate Limiting, Auth"]
+        GraphQL["📊 GraphQL<br/>(Optional)"]
     end
 
     subgraph "Control Plane"
-        CP[Control Plane<br/>Orchestrator]
-        Deploy[Deploy Service]
-        Billing[Billing Service]
-        Auth[Auth Service]
+        AuthSvc["🔐 Auth Service<br/>(Users, Orgs, RBAC)"]
+        DeploySvc["🚀 Deploy Service<br/>(Orchestration)"]
+        ConfigSvc["⚙️ Config Service<br/>(Secrets, Env Vars)"]
+        BillingSvc["💰 Billing Service<br/>(Usage, Costs)"]
+
+        subgraph "Core Services"
+            Scheduler["📅 Scheduler<br/>(Deploy Queue)"]
+            StateManager["📝 State Manager<br/>(Desired vs Actual)"]
+            EventBus["📨 Event Bus<br/>(Domain Events)"]
+        end
     end
 
     subgraph "Data Plane"
-        Runner[Deploy Runners]
-        Services[User Services<br/>Containers]
-        Brokers[Managed Brokers<br/>RabbitMQ/Redis]
+        Runners["🏃 Deploy Runners<br/>(K8s Operators)"]
+        Services["📦 User Services<br/>(Containers)"]
+        Sidecars["🔗 Sidecars<br/>(Envoy Proxy)"]
+
+        subgraph "Infrastructure Services"
+            DNS["🔍 Internal DNS<br/>(CoreDNS)"]
+            LoadBalancer["⚖️ Load Balancer<br/>(HAProxy/Nginx)"]
+            ServiceMesh["🕸️ Service Mesh<br/>(Istio Lite)"]
+        end
+
+        subgraph "Managed Services"
+            RabbitMQ["🐰 RabbitMQ<br/>(Message Broker)"]
+            Redis["⚡ Redis<br/>(Cache/PubSub)"]
+        end
     end
 
-    subgraph "Infrastructure"
-        DB[(PostgreSQL)]
-        Vault[HashiCorp Vault]
-        Registry[Container Registry]
-        Metrics[Prometheus/Grafana]
+    subgraph "Storage Layer"
+        Postgres[("🗄️ PostgreSQL<br/>(Primary DB)")]
+        S3[("📁 S3/Minio<br/>(Object Storage)")]
+        Vault[("🔒 HashiCorp Vault<br/>(Secrets)")]
     end
 
+    subgraph "Observability Stack"
+        Prometheus["📈 Prometheus<br/>(Metrics)"]
+        Loki["📜 Loki<br/>(Logs)"]
+        Tempo["🔍 Tempo<br/>(Traces)"]
+        Grafana["📊 Grafana<br/>(Dashboards)"]
+    end
+
+    %% Client connections
     Portal --> Gateway
     CLI --> Gateway
     SDK --> Gateway
 
-    Gateway --> CP
-    Gateway --> Deploy
-    Gateway --> Billing
-    Gateway --> Auth
+    %% Gateway connections
+    Gateway --> GraphQL
+    GraphQL --> AuthSvc
+    GraphQL --> DeploySvc
+    GraphQL --> ConfigSvc
+    GraphQL --> BillingSvc
 
-    CP --> Runner
-    CP --> Brokers
-    Runner --> Services
+    %% Control Plane connections
+    DeploySvc --> Scheduler
+    Scheduler --> StateManager
+    StateManager --> EventBus
+    EventBus --> Runners
 
-    CP --> DB
-    CP --> Vault
-    Runner --> Registry
-    Services --> Metrics
+    %% Data Plane connections
+    Runners --> Services
+    Services --> Sidecars
+    Sidecars --> ServiceMesh
+    ServiceMesh --> DNS
+    ServiceMesh --> LoadBalancer
 
-    Services -.->|Internal DNS| Services
-    Services -.->|Pub/Sub| Brokers
+    Services --> RabbitMQ
+    Services --> Redis
+
+    %% Storage connections
+    AuthSvc --> Postgres
+    DeploySvc --> Postgres
+    ConfigSvc --> Vault
+    Services --> S3
+
+    %% Observability connections
+    Services -.-> Prometheus
+    Services -.-> Loki
+    Services -.-> Tempo
+    Prometheus --> Grafana
+    Loki --> Grafana
+    Tempo --> Grafana
+
+    style Portal fill:#e1f5fe
+    style CLI fill:#e1f5fe
+    style SDK fill:#e1f5fe
+    style Gateway fill:#fff3e0
+    style AuthSvc fill:#f3e5f5
+    style DeploySvc fill:#f3e5f5
+    style ConfigSvc fill:#f3e5f5
+    style BillingSvc fill:#f3e5f5
+    style Services fill:#e8f5e9
+    style Postgres fill:#ffebee
+    style Vault fill:#ffebee
+    style Prometheus fill:#fce4ec
+    style Grafana fill:#fce4ec
 ```
 
-### Contratos de API mínimos (Deploy Lifecycle)
-
-### Iniciar serviço
-
-```json
-// POST /services/{id}/start
-
-// Request
-{
-    "image": "[ghcr.io/org/api:1.2.3](http://ghcr.io/org/api:1.2.3)",
-    "env": [
-        {
-            "key": "NODE_ENV",
-            "value": "prod"
-        }
-    ],
-    "resources": {
-        "cpu": "500m",
-        "memory": "512Mi"
-    },
-    "health": {
-        "path": "/health",
-        "timeoutSec": 2,
-        "intervalSec": 5
-    }
-}
-
-// Response
-{
-    "deploymentId": "dep_123",
-    "status": "starting"
-}
-```
-
-### Health check
-
-```json
-// GET /deployments/{deploymentId}/health
-
-// Response
-{
-  "status": "healthy",
-  "checks": [
-    {
-      "name": "http",
-      "status": "pass",
-      "latencyMs": 45
-    }
-  ]
-}
-```
-
-### Escalonar serviço
-
-```json
-// POST /services/{id}/scale
-
-// Request
-{
-    "policy": {
-        "type": "cpu",
-        "target": 70,
-        "min": 2,
-        "max": 8,
-        "cooldownSec": 60
-    }
-}
-
-// Response
-{
-    "status": "accepted",
-    "replicas": {
-        "prev": 2,
-        "desired": 4
-    }
-}
-```
-
-### Parar serviço
-
-```json
-// POST /services/{id}/stop
-
-// Request
-{
-    "drainTimeoutSec": 30
-}
-
-// Response
-{
-    "status": "stopping"
-}
-```
-
-### Requisitos de segurança
-
-- mTLS opt-in para tráfego service-to-service com rotação automática de certificados
-- RBAC por projeto/ambiente/serviço, integrado ao Gateway e Control Plane
-- Network policies deny-by-default com templates para habilitar rotas necessárias
-- Segredos: integração Vault-compatible, KMS para criptografia em repouso, auditoria de acesso
-
-## Developer Tools & CLI
-
-### Capsule CLI
-
-**Descrição**
-
-CLI completa para gerenciamento de recursos, desenvolvimento local e automação de workflows
-
-**Comandos principais**
-
-```bash
-# Auth & Setup
-capsule auth login
-capsule auth logout
-capsule context set <project>
-
-# Development
-capsule init                    # Inicializa projeto com capsule.yaml
-capsule dev                      # Ambiente de desenvolvimento local
-capsule validate                 # Valida configuração
-
-# Deployment
-capsule deploy [--env <env>]    # Deploy do projeto
-capsule rollback <deployment-id>
-capsule preview create --branch <branch>
-
-# Resources
-capsule services list
-capsule services logs <service-id> [--follow]
-capsule services exec <service-id> -- <command>
-capsule services port-forward <service-id> <local>:<remote>
-
-# Brokers
-capsule broker create <type> [--plan <plan>]
-capsule broker bind <broker-id> <service-id>
-
-# Secrets & Config
-capsule secrets set KEY=value
-capsule secrets list
-capsule config edit [--env <env>]
-
-# Monitoring
-capsule status
-capsule metrics <service-id>
-capsule events [--follow]
-```
-
-### Code Generators
-
-**Descrição**
-
-Generators para scaffolding rápido seguindo best practices
-
-**Generators disponíveis**
-
-```bash
-# Nx Generators customizados
-nx g @capsule/plugin:service <name>        # Novo microserviço
-nx g @capsule/plugin:context <name>        # Novo bounded context DDD
-nx g @capsule/plugin:feature <name>        # Nova feature FSD no frontend
-nx g @capsule/plugin:component <name>      # Componente no design system
-
-# Templates inclusos
-- Dockerfile otimizado multi-stage
-- GitHub Actions workflow para preview envs
-- Configuração de health checks
-- Network policies templates
-- Capsule.yaml com best practices
-```
-
-**Exemplo de generator de serviço**
-
-```bash
-$ nx g @capsule/plugin:service payment
-
-CREATE apps/service-payment/
-├── src/
-│   ├── main.ts
-│   ├── app.module.ts
-│   └── health/
-│       └── health.controller.ts
-├── Dockerfile
-├── capsule.yaml
-├── project.json
-└── tsconfig.json
-
-CREATE libs/contexts/payment/
-├── domain/
-├── application/
-└── infrastructure/
-
-UPDATE nx.json
-UPDATE tsconfig.base.json
-```
-
-### Local Development Tools
-
-**Capsule Dev Server**
-
-- Emulação local do ambiente Capsule
-- Hot reload com watchers
-- Service discovery local
-- Logs agregados
-- Mock de brokers
-
-```bash
-# Inicia ambiente local
-capsule dev
-
-# Output
-🚀 Capsule Dev Server
-   Portal:    [http://localhost:3000](http://localhost:3000)
-   API:       [http://localhost:4000](http://localhost:4000)
-   Services:
-     - api:     [http://localhost:5001](http://localhost:5001) [healthy]
-     - worker:  running [healthy]
-   Brokers:
-     - redis:   [localhost:6379](http://localhost:6379)
-   Watching for changes...
-```
-
-### IDE Extensions
-
-**VS Code Extension**
-
-- Syntax highlighting para capsule.yaml
-- Autocomplete de configurações
-- Validação em tempo real
-- Comandos integrados na command palette
-- Visualização de logs inline
-- Debug configuration automática
-
-**Features da extensão**
-
-- IntelliSense para capsule.yaml
-- Snippets para configurações comuns
-- Integração com Capsule CLI
-- Port forwarding visual
-- Log streaming no terminal integrado
-
-### Migration Tools
-
-**Importadores automáticos**
-
-```bash
-# Importa de outras plataformas
-capsule import heroku <app-name>
-capsule import vercel <project-id>
-capsule import docker-compose <file>
-capsule import k8s <manifests-dir>
-
-# Valida migração
-capsule import --dry-run <source>
-
-# Exporta configuração
-capsule export --format <helm|terraform|k8s>
-```
-
-### Observability Tools
-
-**Debug & Profiling**
-
-```bash
-# Debug remoto
-capsule debug <service-id> --port 9229
-
-# Profiling
-capsule profile cpu <service-id> --duration 30s
-capsule profile memory <service-id>
-capsule profile trace <request-id>
-
-# Análise de custos
-capsule cost analyze [--last 30d]
-capsule cost forecast
-```
-
-### CI/CD Integrations
-
-**GitHub Actions**
-
-```yaml
-# .github/workflows/capsule.yml
-- uses: capsule/setup-cli@v1
-- uses: capsule/preview-env@v1
-  with:
-    auto-destroy: true
-    ttl: 24h
-```
-
-**GitLab CI**
-
-```yaml
-# .gitlab-ci.yml
-include:
-  - remote: [https://capsule.io/ci/gitlab.yml](https://capsule.io/ci/gitlab.yml)
-
-preview:
-  extends: .capsule-preview
-  environment:
-    name: preview/$CI_MERGE_REQUEST_IID
-    url: [https://$CI_MERGE_REQUEST_IID.preview.capsule.io](https://$CI_MERGE_REQUEST_IID.preview.capsule.io)
-    on_stop: preview_stop
-    auto_stop_in: 24 hours
-
-preview_stop:
-  extends: .capsule-preview-stop
-  environment:
-    name: preview/$CI_MERGE_REQUEST_IID
-    action: stop
-```
-
-### SDK & Client Libraries
-
-**Linguagens suportadas**
-
-- TypeScript/JavaScript: `@capsule/sdk`
-- Go: [`github.com/capsule/go-sdk`](http://github.com/capsule/go-sdk)
-- Python: `capsule-sdk`
-- Rust: `capsule-rs`
-
-**Exemplo TypeScript SDK**
-
-```tsx
-import { CapsuleClient } from '@capsule/sdk'
-
-const capsule = new CapsuleClient({
-  apiKey: process.env.CAPSULE_API_KEY
-})
-
-// Deploy programático
-const deployment = await [capsule.services](http://capsule.services).deploy({
-  image: '[ghcr.io/org/api:latest](http://ghcr.io/org/api:latest)',
-  env: { NODE_ENV: 'production' },
-  replicas: 2
-})
-
-// Monitoring
-const metrics = await capsule.metrics.query({
-  service: 'api',
-  metric: 'request_rate',
-  period: '1h'
-})
-
-// Gerenciar secrets
-await capsule.secrets.set('DATABASE_URL', 'postgres://...')
-
-// Criar preview environment
-const preview = await capsule.previews.create({
-  branch: 'feature-xyz',
-  ttl: '24h'
-})
-```
-
-### Development Workflow Automation
-
-**Capsule Workflows**
-
-```yaml
-# .capsule/workflows/release.yaml
-name: Production Release
-on:
-  push:
-    tags: [v*]
-
-steps:
-  - validate:
-      config: capsule.yaml
-
-  - test:
-      services: [api, worker]
-
-  - deploy:
-      environment: production
-      strategy: blue-green
-      health-wait: 5m
-
-  - notify:
-      slack: deployments
-```
-
-### Impacto nos MVPs
-
-**MVP1 deve incluir:**
-
-- CLI básica (auth, deploy, logs)
-- Generator de projeto inicial
-- Capsule.yaml schema
-
-**MVP2 deve incluir:**
-
-- VS Code extension
-- Generators avançados
-- GitHub Actions integration
-
-**MVP3 deve incluir:**
-
-- SDKs completos
-- Migration tools
-- Workflow automation
-
-## Development Roadmap
-
-### Milestones (MVP1 → MVP3)
-
-### MVP1 (Base operável)
-
-- **Entregáveis**: Deploy one-click (1), Service Discovery (3), Config & Secrets (5), Observability minimal (6)
-- **Critérios de aceitação**: Onboarding p50 < 15min; deploy p50 < 60s; logs/health disponíveis; DNS interno funcional com políticas básicas
-- **T-shirt sizing (epics)**: Control Plane básico (L), Deploy Runner (M), Registry integration (S), Logs/Health (M)
-
-### MVP2 (Fluxo de entrega segura)
-
-- **Entregáveis**: Preview Envs (7), Blue/Green & Canary (2), Network Policies GUI (9)
-- **Critérios de aceitação**: 80% dos PRs com preview; rollback < 30s; políticas aplicáveis via UI sem YAML
-- **T-shirt sizing**: Preview orchestration (M), Traffic manager (M), GUI policies (S)
-
-### MVP3 (Confiabilidade e portabilidade)
-
-- **Entregáveis**: Managed Broker (4), Portable Export/Import (10), Autoscaling (8)
-- **Critérios de aceitação**: Provisionamento broker p90 < 3min; export/import idempotente validado; redução de custo via autoscaling ≥ 20%
-- **T-shirt sizing**: Broker provisioner (L), IaC exporter/importer (M), Autoscaler (M)
-
-### Epics/tickets sugeridos (exemplos)
-
-- CP-001 Control Plane: modelo declarativo de app/serviço (M)
-- CP-002 Deploy Runner: orquestração e lifecycle (M)
-- NET-010 Service Discovery e DNS interno (M)
-- SEC-020 RBAC e policies deny-by-default (M)
-- OBS-030 Logs/traces/métricas mínimas (M)
-- REL-040 Canary/Blue-Green por rota (M)
-- PRE-050 Preview environments (M)
-- BRK-060 Broker provisioner (L)
-- EXP-070 Export/Import YAML/Helm/Terraform (M)
-- GUI-080 Network Policies GUI (S)
-
-## Logical Dependency Chain
-
-1. Modelo declarativo de App/Serviço
-2. Integração com Registry (auth/secret)
-3. Control Plane básico (start/stop/health)
-4. Deploy Runner/Workers
-5. Service Discovery + DNS interno
-6. Observability mínima (logs/metrics/trace)
-7. RBAC + Network policies deny-by-default
-8. Preview orchestration (depende 1–7)
-9. Traffic manager (Blue/Green/Canary) (depende 6–7)
-10. Autoscaling (depende 6)
-11. Broker provisioner (depende 7)
-12. Export/Import IaC (depende 1)
-
-### Blockers técnicos
-
-- Isolamento multi-tenant de broker (namespaces/vhosts, rate-limits)
-- Controle de custos para previews (quotas, TTL, hibernação/cold-start)
-
-## Risks and Mitigations
-
-### Isolamento de brokers gerenciados
-
-**Mitigação**: vhosts/virtual clusters por tenant, namespaces, TLS obrigatório, rate-limits e quotas por conexão/throughput
-
-### Custo de previews
-
-**Mitigação**: TTL obrigatório, hibernação automática fora do horário, orçamentos por projeto e autoscaling mínimo = 0 quando possível
-
-### Vendor lock-in
-
-**Mitigação**: Export/Import para Kubernetes/Helm/Terraform, evitar recursos proprietários no data plane
-
-### Complexidade de mesh
-
-**Mitigação**: mesh-lite opt-in (mTLS, retries, timeouts) e escopo controlado
-
-### Segurança de segredos
-
-**Mitigação**: Vault-compatible + KMS, rotação automática, auditoria, zero exposição em logs
-
-### Limitações WebSocket/Ingress
-
-**Mitigação**: keepalives documentados, timeouts ajustáveis, rotas diretas opcionais
-
-## Appendix
-
-## Código de Exemplo Completo
-
-### Frontend com Zustand
-
-```tsx
-// features/deploy-app/model/useDeployStore.ts
-import { create } from 'zustand';
-
-type State = {
-  lastDeployment?: string;
-  setLastDeployment: (id: string) => void;
-};
-
-export const useDeployStore = create<State>((set) => ({
-  lastDeployment: undefined,
-  setLastDeployment: (id) => set({ lastDeployment: id }),
-}));
-```
-
-### Endpoints de API
-
-```json
-// POST /auth/signup
-{
-  "email": "[user@example.com](mailto:user@example.com)",
-  "password": "SecurePass123!",
-  "name": "John Doe",
-  "organizationName": "Acme Corp"
-}
-
-// POST /services/{id}/deployments
-{
-  "strategy": "canary",
-  "image": "[ghcr.io/org/api:v2](http://ghcr.io/org/api:v2)",
-  "canaryPercent": 10
-}
-```
-
-### Exemplo de declaração YAML
-
-```yaml
-app: myapp
-services:
-  - name: api
-    image: [ghcr.io/acme/api:1.2.3](http://ghcr.io/acme/api:1.2.3)
-    protocol: http
-    port: 8080
-    env:
-      - NODE_ENV=prod
-    scalingPolicy:
-      type: cpu
-      target: 70
-      min: 2
-      max: 5
-```
-
-## Notas Finais
-
-- Stateful (bancos de dados) fora de escopo
-- Redis somente pub/sub
-- Tráfego intra-plataforma incluso
-
-### Arquitetura de Implementação
-
-### Backend (Monorepo NestJS/Nx — Domain-Driven Hexagon)
-
-- Monorepo com Nx aplicando DDD + Arquitetura Hexagonal
-- Bounded contexts em libs/contexts/\*
-- Camadas:
-  - **Domain**: entities, value objects, aggregates, domain events
-  - **Application**: use cases (serviços de aplicação), ports (interfaces), DTOs
-  - **Infrastructure**: adapters (HTTP, message), repositories, mapeamentos
-- API Gateway como BFF para o Portal e fachada para serviços
-- Microserviços por contexto de domínio
-- Ports & Adapters para RabbitMQ, Redis, PostgreSQL (e outros providers)
-
-### Estrutura macro do monorepo
+### Domain-Driven Design Structure
 
 ```
-monorepo/
-├── apps/
-│   ├── api-gateway/        # NestJS API Gateway (BFF)
-│   ├── service-auth/       # NestJS Microserviço (contexto Auth)
-│   ├── service-deploy/     # NestJS Microserviço (contexto Deploy)
-│   ├── service-billing/    # NestJS Microserviço (contexto Billing)
-│   └── portal/             # Vite + React + Tailwind
-├── libs/
-│   ├── contexts/           # Backend DDD Contexts
-│   │   ├── auth/
-│   │   │   ├── domain/
-│   │   │   ├── application/
-│   │   │   └── infrastructure/
-│   │   ├── deploy/
-│   │   │   ├── domain/
-│   │   │   ├── application/
-│   │   │   └── infrastructure/
-│   │   └── billing/
-│   ├── shared/             # Compartilhado Full-Stack
-│   │   ├── dto/            # DTOs TypeScript (backend/frontend)
-│   │   └── types/          # Tipos compartilhados
-│   └── ui/                 # Frontend components library
-│       └── components/
+📁 monorepo/
+├── 📁 apps/
+│   ├── 📁 api-gateway/          # BFF for Portal
+│   ├── 📁 service-auth/         # Authentication & RBAC
+│   ├── 📁 service-deploy/       # Deployment orchestration
+│   ├── 📁 service-config/       # Configuration management
+│   ├── 📁 service-billing/      # Usage and billing
+│   ├── 📁 worker-deployer/      # Async deployment jobs
+│   ├── 📁 worker-scaler/        # Autoscaling decisions
+│   └── 📁 portal/               # React frontend
+│
+├── 📁 libs/
+│   ├── 📁 contexts/             # DDD Bounded Contexts
+│   │   ├── 📁 auth/
+│   │   │   ├── 📁 domain/
+│   │   │   │   ├── 📁 entities/
+│   │   │   │   │   ├── User.entity.ts
+│   │   │   │   │   ├── Organization.entity.ts
+│   │   │   │   │   └── ApiKey.entity.ts
+│   │   │   │   ├── 📁 value-objects/
+│   │   │   │   │   ├── Email.vo.ts
+│   │   │   │   │   ├── Role.vo.ts
+│   │   │   │   │   └── Permission.vo.ts
+│   │   │   │   └── 📁 events/
+│   │   │   │       └── UserCreated.event.ts
+│   │   │   ├── 📁 application/
+│   │   │   │   ├── 📁 use-cases/
+│   │   │   │   ├── 📁 ports/
+│   │   │   │   └── 📁 dtos/
+│   │   │   └── 📁 infrastructure/
+│   │   │       ├── 📁 adapters/
+│   │   │       └── 📁 repositories/
+│   │   │
+│   │   ├── 📁 deployment/
+│   │   ├── 📁 configuration/
+│   │   └── 📁 billing/
+│   │
+│   ├── 📁 shared/               # Shared across contexts
+│   │   ├── 📁 kernel/           # Shared domain primitives
+│   │   ├── 📁 infrastructure/   # Cross-cutting concerns
+│   │   └── 📁 types/            # TypeScript types
+│   │
+│   └── 📁 ui/                   # Frontend component library
+│       ├── 📁 components/
+│       ├── 📁 hooks/
+│       └── 📁 utils/
+│
+├── 📁 tools/
+│   ├── 📁 generators/           # Nx generators
+│   └── 📁 scripts/              # Build & deploy scripts
+│
 ├── nx.json
 ├── package.json
 └── tsconfig.base.json
 ```
 
-### Exemplo de bounded context completo (Deploy)
+### API Design Principles
 
-```
-libs/contexts/deploy/
-├── domain/
-│   ├── entities/
-│   │   └── AppEntity.ts
-│   ├── value-objects/
-│   └── events/
-├── application/
-│   ├── use-cases/
-│   │   └── CreateDeployUseCase.ts
-│   ├── ports/
-│   │   ├── DeployRepository.port.ts
-│   │   └── ContainerRegistry.port.ts
-│   └── dtos/
-└── infrastructure/
-    ├── adapters/
-    │   ├── NestDeployController.ts
-    │   ├── PostgresDeployRepository.ts
-    │   └── RabbitMQEventPublisher.ts
-    └── module.ts
+### RESTful API Standards
+
+```yaml
+# Resource naming
+GET    /api/v1/organizations
+GET    /api/v1/organizations/{id}
+POST   /api/v1/organizations
+PATCH  /api/v1/organizations/{id}
+DELETE /api/v1/organizations/{id}
+
+# Nested resources
+GET    /api/v1/organizations/{id}/projects
+POST   /api/v1/projects/{id}/services
+GET    /api/v1/services/{id}/deployments
+
+# Actions as sub-resources
+POST   /api/v1/services/{id}/deploy
+POST   /api/v1/services/{id}/rollback
+POST   /api/v1/services/{id}/scale
+
+# Query parameters
+GET    /api/v1/services?status=running&env=production
+GET    /api/v1/logs?service={id}&since=2024-01-01&limit=100
+
+# Pagination
+GET    /api/v1/deployments?page=2&per_page=20
+Response Headers:
+  X-Total-Count: 200
+  X-Page: 2
+  X-Per-Page: 20
+  Link: <...?page=3>; rel="next", <...?page=1>; rel="prev"
 ```
 
-### Exemplo de bounded context Auth
+### Error Handling
 
+```json
+{
+  "error": {
+    "code": "RESOURCE_NOT_FOUND",
+    "message": "Service with ID 'svc_123' not found",
+    "details": {
+      "resource_type": "service",
+      "resource_id": "svc_123"
+    },
+    "request_id": "req_abc123",
+    "timestamp": "2024-01-15T10:30:00Z"
+  }
+}
 ```
-libs/contexts/auth/
-├── domain/
-│   ├── entities/
-│   │   ├── User.entity.ts
-│   │   ├── Organization.entity.ts
-│   │   ├── Member.entity.ts
-│   │   └── ApiKey.entity.ts
-│   ├── value-objects/
-│   │   ├── Email.vo.ts
-│   │   ├── Role.vo.ts
-│   │   └── Permission.vo.ts
-│   └── events/
-│       ├── UserCreated.event.ts
-│       ├── OrganizationCreated.event.ts
-│       └── MemberInvited.event.ts
-├── application/
-│   ├── use-cases/
-│   │   ├── SignUpUseCase.ts
-│   │   ├── SignInUseCase.ts
-│   │   ├── RefreshTokenUseCase.ts
-│   │   ├── CreateApiKeyUseCase.ts
-│   │   ├── InviteMemberUseCase.ts
-│   │   └── UpdateRoleUseCase.ts
-│   ├── ports/
-│   │   ├── UserRepository.port.ts
-│   │   ├── TokenService.port.ts
-│   │   ├── EmailService.port.ts
-│   │   └── OAuthProvider.port.ts
-│   └── dtos/
-│       ├── SignIn.dto.ts
-│       ├── SignUp.dto.ts
-│       └── CreateApiKey.dto.ts
-└── infrastructure/
-    ├── adapters/
-    │   ├── NestAuthController.ts
-    │   ├── PostgresUserRepository.ts
-    │   ├── JwtTokenService.ts
-    │   ├── GitHubOAuthProvider.ts
-    │   └── SendGridEmailService.ts
-    ├── guards/
-    │   ├── JwtAuthGuard.ts
-    │   ├── ApiKeyGuard.ts
-    │   └── RbacGuard.ts
-    └── module.ts
+
+---
+
+## 🛠️ Developer Experience
+
+### CLI Tool Specifications
+
+### Installation & Setup
+
+```bash
+# Installation methods
+npm install -g @capsule/cli
+brew install capsule
+curl -sSL [https://get.capsule.dev](https://get.capsule.dev) | sh
+
+# Initial setup
+capsule auth login
+capsule init
 ```
+
+### Core Commands
+
+```bash
+# Project Management
+capsule init [--template <template>]     # Initialize new project
+capsule validate                         # Validate configuration
+capsule status                          # Show project status
+
+# Deployment Commands
+capsule deploy [service] [--env <env>]  # Deploy service(s)
+capsule rollback <deployment-id>        # Rollback deployment
+capsule promote <from-env> <to-env>     # Promote between environments
+
+# Service Management
+capsule services list                   # List all services
+capsule services logs <service> [-f]    # View/follow logs
+capsule services exec <service> -- <cmd> # Execute command
+capsule services restart <service>      # Restart service
+capsule services scale <service> <num>  # Scale service
+
+# Environment Management
+capsule env list                        # List environments
+capsule env create <name>               # Create environment
+capsule env clone <from> <to>           # Clone environment
+
+# Preview Environments
+capsule preview create --branch <branch> # Create preview
+capsule preview list                    # List previews
+capsule preview destroy <id>            # Destroy preview
+
+# Configuration & Secrets
+capsule config set KEY=value            # Set config
+capsule secrets set KEY=value           # Set secret
+capsule secrets list                    # List secrets
+
+# Monitoring & Debugging
+capsule metrics <service>               # View metrics
+capsule trace <request-id>              # Trace request
+capsule debug <service> [--port 9229]   # Remote debugging
+
+# Cost Management
+capsule cost current                    # Current month costs
+capsule cost forecast                   # Cost forecast
+capsule cost breakdown [--by service]   # Detailed breakdown
+
+# Import/Export
+capsule import <source> [--dry-run]     # Import from other platforms
+capsule export --format <format>        # Export configuration
+```
+
+### Configuration File Schema
+
+```yaml
+# capsule.yaml
+version: '1.0'
+
+# Project metadata
+project:
+  name: 'my-awesome-app'
+  description: 'E-commerce platform'
+  team: 'platform-team'
+
+# Environments
+environments:
+  development:
+    variables:
+      NODE_ENV: 'development'
+      LOG_LEVEL: 'debug'
+
+  staging:
+    variables:
+      NODE_ENV: 'staging'
+      LOG_LEVEL: 'info'
+    preview:
+      enabled: true
+      ttl: '24h'
+
+  production:
+    variables:
+      NODE_ENV: 'production'
+      LOG_LEVEL: 'warn'
+    protection:
+      enabled: true
+      required_reviews: 2
+
+# Services configuration
+services:
+  api:
+    # Source configuration
+    source:
+      type: 'dockerfile'
+      path: './apps/api'
+      dockerfile: 'Dockerfile'
+
+    # Or use image directly
+    # image: "[ghcr.io/org/api:latest](http://ghcr.io/org/api:latest)"
+
+    # Runtime configuration
+    runtime:
+      command: ['node', 'dist/main.js']
+      port: 3000
+      protocol: 'http'
+
+    # Resources
+    resources:
+      cpu: '500m'
+      memory: '512Mi'
+
+    # Health checks
+    health:
+      path: '/health'
+      interval: 30
+      timeout: 10
+      retries: 3
+
+    # Scaling
+    scaling:
+      min: 2
+      max: 10
+      metrics:
+        - type: 'cpu'
+          target: 70
+        - type: 'rps'
+          target: 1000
+
+    # Environment variables
+    env:
+      DATABASE_URL: '@secret:database-url'
+      REDIS_URL: '@broker:redis'
+      API_KEY: '@secret:api-key'
+
+    # Dependencies
+    depends_on:
+      - 'database-migration'
+
+  frontend:
+    source:
+      type: 'static'
+      path: './apps/frontend/dist'
+
+    # CDN configuration
+    cdn:
+      enabled: true
+      cache_control: 'public, max-age=3600'
+
+    # Routing
+    routes:
+      - path: '/*'
+        rewrite: '/index.html'
+
+  worker:
+    source:
+      type: 'dockerfile'
+      path: './apps/worker'
+
+    runtime:
+      protocol: 'worker'
+
+    # Queue configuration
+    queues:
+      - name: 'email-queue'
+        broker: 'rabbitmq'
+      - name: 'payment-queue'
+        broker: 'rabbitmq'
+
+    scaling:
+      min: 1
+      max: 5
+      metrics:
+        - type: 'queue-depth'
+          target: 100
+
+# Managed brokers
+brokers:
+  rabbitmq:
+    type: 'rabbitmq'
+    plan: 'small'
+    version: '3.11'
+
+  redis:
+    type: 'redis'
+    plan: 'small'
+    version: '7.0'
+    mode: 'pubsub'
+
+# Network policies
+network:
+  policies:
+    - name: 'api-policy'
+      ingress:
+        - from: 'internet'
+          ports: [443]
+      egress:
+        - to: 'database'
+          ports: [5432]
+        - to: 'redis'
+          ports: [6379]
+
+    - name: 'worker-policy'
+      ingress: []
+      egress:
+        - to: 'rabbitmq'
+          ports: [5672]
+        - to: 'external-api'
+          ports: [443]
+
+# Observability
+observability:
+  logs:
+    level: 'info'
+    format: 'json'
+    retention: '7d'
+
+  metrics:
+    enabled: true
+    interval: 30
+
+  tracing:
+    enabled: true
+    sampling: 0.1
+
+# Cost controls
+cost:
+  budget:
+    monthly: 1000
+    alerts:
+      - threshold: 70
+        channel: 'email'
+      - threshold: 90
+        channel: 'slack'
+
+  optimization:
+    idle_shutdown: true
+    idle_timeout: '30m'
+```
+
+### SDK Examples
+
+### TypeScript/JavaScript SDK
+
+```tsx
+import { CapsuleClient } from '@capsule/sdk';
+
+// Initialize client
+const capsule = new CapsuleClient({
+  apiKey: process.env.CAPSULE_API_KEY,
+  projectId: process.env.CAPSULE_PROJECT_ID
+});
+
+// Deploy a service
+const deployment = await [capsule.services](http://capsule.services).deploy({
+  name: 'api-service',
+  image: '[ghcr.io/org/api:v2.0.0](http://ghcr.io/org/api:v2.0.0)',
+  env: {
+    NODE_ENV: 'production'
+  },
+  scaling: {
+    min: 2,
+    max: 10
+  }
+});
+
+// Monitor deployment
+const status = await capsule.deployments.getStatus([deployment.id](http://deployment.id));
+
+// Stream logs
+const logStream = [capsule.services](http://capsule.services).logs('api-service', {
+  follow: true,
+  since: '10m'
+});
+
+logStream.on('data', (log) => {
+  console.log(log);
+});
+
+// Get metrics
+const metrics = await [capsule.services](http://capsule.services).metrics('api-service', {
+  period: '1h',
+  metrics: ['cpu', 'memory', 'rps']
+});
+
+// Manage secrets
+await capsule.secrets.set('API_KEY', 'secret-value');
+const secrets = await capsule.secrets.list();
+
+// Cost analysis
+const costs = await capsule.billing.getCurrentMonth();
+const forecast = await capsule.billing.forecast();
+```
+
+### Python SDK
+
+```python
+from capsule import CapsuleClient
+import os
+
+# Initialize client
+client = CapsuleClient(
+    api_key=os.environ['CAPSULE_API_KEY'],
+    project_id=os.environ['CAPSULE_PROJECT_ID']
+)
+
+# Deploy a service
+deployment = [client.services](http://client.services).deploy(
+    name='api-service',
+    image='[ghcr.io/org/api:v2.0.0](http://ghcr.io/org/api:v2.0.0)',
+    env={
+        'NODE_ENV': 'production'
+    },
+    scaling={
+        'min': 2,
+        'max': 10
+    }
+)
+
+# Monitor deployment
+status = client.deployments.get_status([deployment.id](http://deployment.id))
+
+# Stream logs
+for log in [client.services](http://client.services).logs('api-service', follow=True):
+    print(log)
+
+# Get metrics
+metrics = [client.services](http://client.services).metrics(
+    'api-service',
+    period='1h',
+    metrics=['cpu', 'memory', 'rps']
+)
+
+# Manage secrets
+client.secrets.set('API_KEY', 'secret-value')
+secrets = client.secrets.list()
+
+# Cost analysis
+costs = client.billing.get_current_month()
+forecast = client.billing.forecast()
+```
+
+---
+
+## 📅 Implementation Roadmap
+
+### Development Phases
+
+```mermaid
+gantt
+    title Capsule Development Roadmap
+    dateFormat YYYY-MM-DD
+
+    section MVP1 - Foundation
+    Auth & RBAC           :2025-01-01, 30d
+    Core Platform         :2025-01-15, 45d
+    Service Discovery     :2025-02-01, 30d
+    Basic Observability   :2025-02-15, 30d
+    One-Click Deploy      :2025-03-01, 30d
+
+    section MVP2 - Developer Experience
+    Preview Environments  :2025-03-15, 30d
+    Blue/Green Deploy     :2025-04-01, 30d
+    Network Policies GUI  :2025-04-15, 30d
+    CLI Enhancement       :2025-05-01, 30d
+
+    section MVP3 - Scale & Enterprise
+    Managed Brokers       :2025-05-15, 45d
+    Autoscaling           :2025-06-01, 30d
+    Export/Import         :2025-06-15, 30d
+    Enterprise Features   :2025-07-01, 45d
+```
+
+### MVP1: Foundation (Q1 2025)
+
+### Goals
+
+- ✅ Basic platform operational
+- ✅ Core deployment functionality
+- ✅ Essential developer tools
+
+### Deliverables
+
+| Feature             | Priority | Success Criteria                      |
+| ------------------- | -------- | ------------------------------------- |
+| Auth & RBAC         | P0       | OAuth login < 2s, API keys functional |
+| Nx Auto-detection   | P0       | 80% zero-config success rate          |
+| One-Click Deploy    | P0       | Deploy time < 60s (p50)               |
+| Service Discovery   | P0       | DNS resolution < 100ms                |
+| Config Management   | P0       | Secrets never exposed in logs         |
+| Basic Observability | P0       | Logs searchable < 2s                  |
+
+### Technical Milestones
+
+1. **Week 1-2**: Project setup, monorepo structure
+2. **Week 3-4**: Auth service with OAuth providers
+3. **Week 5-8**: Core deployment engine
+4. **Week 9-10**: Service discovery and DNS
+5. **Week 11-12**: Observability stack
+6. **Week 13-14**: Testing and stabilization
+
+### MVP2: Developer Experience (Q2 2025)
+
+### Goals
+
+- ✅ Streamlined development workflow
+- ✅ Advanced deployment strategies
+- ✅ Visual management tools
+
+### Deliverables
+
+| Feature              | Priority | Success Criteria             |
+| -------------------- | -------- | ---------------------------- |
+| Preview Environments | P1       | 80% of PRs with preview      |
+| Blue/Green Deploy    | P1       | Rollback < 30s               |
+| Canary Deployments   | P1       | Automatic rollback on errors |
+| Network Policies GUI | P1       | 90% policies via UI          |
+| Enhanced CLI         | P1       | All operations available     |
+| VS Code Extension    | P2       | IntelliSense for config      |
+
+### MVP3: Scale & Enterprise (Q3 2025)
+
+### Goals
+
+- ✅ Production-ready for enterprise
+- ✅ Cost optimization features
+- ✅ Vendor-agnostic portability
+
+### Deliverables
+
+| Feature         | Priority | Success Criteria           |
+| --------------- | -------- | -------------------------- |
+| Managed Brokers | P2       | Provisioning < 3min        |
+| Autoscaling     | P2       | 20% cost reduction         |
+| Export/Import   | P2       | K8s/Helm/Terraform support |
+| SAML SSO        | P2       | Enterprise auth support    |
+| Audit Logs      | P2       | Compliance ready           |
+| Multi-region    | P3       | Global deployment          |
+
+---
+
+## 📊 Success Metrics & KPIs
+
+### Business Metrics
+
+### Growth Metrics
+
+- **Monthly Active Teams**: Target 1000 by end of Year 1
+- **Revenue Growth**: 20% MoM for first 6 months
+- **Customer Acquisition Cost**: < $500 per customer
+- **Lifetime Value**: > $10,000 per customer
+- **Churn Rate**: < 3% monthly for paying customers
+
+### Engagement Metrics
+
+- **Weekly Active Usage**: > 70% of registered teams
+- **Services per Account**: Average 5+ services
+- **Deployment Frequency**: 10+ per week per team
+- **Preview Environment Adoption**: > 50% of PRs
+
+### Technical Metrics
+
+### Performance Metrics
+
+- **Time to First Deploy**: < 5 minutes (p50)
+- **Deployment Success Rate**: > 99%
+- **API Response Time**: < 200ms (p95)
+- **Availability**: > 99.9% uptime
+
+### Developer Experience Metrics
+
+- **Onboarding Completion**: > 80% in first session
+- **CLI Usage**: > 60% of users
+- **Documentation Satisfaction**: > 4.5/5 rating
+- **Support Ticket Resolution**: < 4 hours (p50)
+
+### Operational Metrics
+
+### Infrastructure Efficiency
+
+- **Resource Utilization**: > 70% average
+- **Cost per Service**: 30% lower than self-managed
+- **Autoscaling Accuracy**: < 5% over-provisioning
+- **Incident Rate**: < 1 per month per 100 services
+
+---
+
+## 🚨 Risk Analysis & Mitigation
+
+### Technical Risks
+
+| Risk                               | Impact | Probability | Mitigation Strategy       |
+| ---------------------------------- | ------ | ----------- | ------------------------- |
+| **Multi-tenant isolation failure** | High   | Low         | • Strict network policies |
+
+• Resource quotas
+• Security audits
+• Penetration testing |
+| **Scaling bottlenecks** | High | Medium | • Horizontal scaling design
+• Load testing
+• Cache layers
+• CDN usage |
+| **Data loss** | Critical | Low | • Automated backups
+• Multi-region replication
+• Disaster recovery plan
+• Regular restore tests |
+| **Vendor lock-in concerns** | Medium | Medium | • Export functionality
+• Open standards
+• Kubernetes compatibility
+• Avoid proprietary APIs |
+
+### Business Risks
+
+| Risk              | Impact | Probability | Mitigation Strategy  |
+| ----------------- | ------ | ----------- | -------------------- |
+| **Slow adoption** | High   | Medium      | • Generous free tier |
+
+• Migration tools
+• Onboarding assistance
+• Community building |
+| **Competition from cloud providers** | High | Medium | • Superior DX
+• Faster innovation
+• Niche focus
+• Cost advantages |
+| **Pricing model issues** | Medium | Medium | • Usage-based pricing
+• Transparent costs
+• Cost alerts
+• Optimization tools |
+
+### Security Risks
+
+| Risk                | Impact   | Probability | Mitigation Strategy  |
+| ------------------- | -------- | ----------- | -------------------- |
+| **Secret exposure** | Critical | Low         | • Encryption at rest |
+
+• Vault integration
+• Audit logging
+• Secret rotation |
+| **DDoS attacks** | High | Medium | • Rate limiting
+• CDN protection
+• Auto-scaling
+• Traffic filtering |
+| **Supply chain attacks** | High | Low | • Image scanning
+• Dependency updates
+• SBOM generation
+• Vulnerability alerts |
+
+---
+
+## 📝 Appendix
+
+### A. Glossary
+
+| Term                       | Definition                                                          |
+| -------------------------- | ------------------------------------------------------------------- |
+| **BFF**                    | Backend for Frontend - API specifically designed for frontend needs |
+| **Bounded Context**        | DDD concept - cohesive model boundary                               |
+| **Canary Deployment**      | Gradual rollout to subset of users                                  |
+| **CQRS**                   | Command Query Responsibility Segregation                            |
+| **DDD**                    | Domain-Driven Design                                                |
+| **Event Sourcing**         | Storing state changes as event sequence                             |
+| **Hexagonal Architecture** | Ports and adapters pattern                                          |
+| **mTLS**                   | Mutual TLS - two-way authentication                                 |
+| **OTLP**                   | OpenTelemetry Protocol                                              |
+| **RBAC**                   | Role-Based Access Control                                           |
+| **Service Mesh**           | Infrastructure layer for service communication                      |
+| **Sidecar**                | Container deployed alongside main service                           |
+
+### B. Competitive Analysis
+
+| Feature              | Capsule   | Vercel       | Render        | Heroku     | Railway    |
+| -------------------- | --------- | ------------ | ------------- | ---------- | ---------- |
+| Nx Monorepo Support  | ✅ Native | ⚠️ Limited   | ❌            | ❌         | ⚠️ Limited |
+| Microservices        | ✅ Full   | ⚠️ Functions | ✅            | ⚠️ Limited | ✅         |
+| Preview Environments | ✅        | ✅           | ✅            | ✅         | ✅         |
+| Managed Brokers      | ✅        | ❌           | ⚠️ Redis only | ⚠️ Limited | ⚠️ Limited |
+| Service Mesh         | ✅        | ❌           | ❌            | ❌         | ❌         |
+| Export to K8s        | ✅        | ❌           | ❌            | ❌         | ❌         |
+| Cost Transparency    | ✅ Full   | ⚠️           | ✅            | ⚠️         | ✅         |
+| Self-hosting Option  | ✅        | ❌           | ❌            | ❌         | ❌         |
+
+### C. API Examples
+
+### Service Deployment
+
+```bash
+curl -X POST [https://api.capsule.dev/v1/services](https://api.capsule.dev/v1/services) \
+  -H "Authorization: Bearer ${API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "api-service",
+    "image": "[ghcr.io/org/api:latest](http://ghcr.io/org/api:latest)",
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }'
+```
+
+### Canary Deployment
+
+```bash
+curl -X POST [https://api.capsule.dev/v1/services/svc_123/canary](https://api.capsule.dev/v1/services/svc_123/canary) \
+  -H "Authorization: Bearer ${API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "image": "[ghcr.io/org/api:v2](http://ghcr.io/org/api:v2)",
+    "percentage": 10,
+    "duration": "30m"
+  }'
+```
+
+### Preview Environment
+
+```bash
+curl -X POST [https://api.capsule.dev/v1/previews](https://api.capsule.dev/v1/previews) \
+  -H "Authorization: Bearer ${API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "branch": "feature/new-ui",
+    "ttl": "24h"
+  }'
+```
+
+### D. References & Resources
+
+### Technical Documentation
+
+- [Kubernetes API Reference](https://kubernetes.io/docs/reference/)
+- [OpenTelemetry Specification](https://opentelemetry.io/docs/)
+- [Nx Documentation](https://nx.dev/)
+- [NestJS Documentation](https://nestjs.com/)
+- [Domain-Driven Design Reference](https://www.domainlanguage.com/ddd/)
+
+### Industry Reports
+
+- State of DevOps Report 2024
+- CNCF Survey Results
+- Developer Experience Index
+
+### Compliance & Security
+
+- SOC 2 Type II Requirements
+- GDPR Compliance Guidelines
+- OWASP Top 10
+- CIS Kubernetes Benchmark
+
+---
+
+## 📞 Contact & Support
+
+**Product Owner**: [product@capsule.dev](mailto:product@capsule.dev)
+
+**Technical Lead**: [tech@capsule.dev](mailto:tech@capsule.dev)
+
+**Documentation**: [docs.capsule.dev](http://docs.capsule.dev)
+
+**Community**: [discord.gg/capsule](http://discord.gg/capsule)
+
+---
+
+_This document is a living specification and will be updated as the product evolves._
