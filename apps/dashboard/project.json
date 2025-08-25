@@ -1,9 +1,0 @@
-{
-  "name": "@acme/dashboard",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["scope:admin", "type:web", "arch:feature-sliced"],
-  "sourceRoot": "apps/dashboard/src",
-  "projectType": "application",
-  "// targets": "to see all targets run: nx show project @acme/dashboard --web",
-  "targets": {}
-}

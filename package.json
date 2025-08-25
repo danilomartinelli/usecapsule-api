@@ -118,7 +118,6 @@
     "libs/shared/*",
     "libs/contexts/billing",
     "libs/contexts/deploy",
-    "libs/contexts/discovery",
-    "libs/ui/*"
+    "libs/contexts/discovery"
   ]
 }
