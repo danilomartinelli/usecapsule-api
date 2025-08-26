@@ -10,7 +10,7 @@
       "@nx/react/typings/image.d.ts"
     ]
   },
-  "files": ["src/test-setup.ts"],
+  "files": ["test-setup.ts"],
   "include": [
     "jest.config.ts",
     "src/**/*.test.ts",

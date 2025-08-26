@@ -5,8 +5,13 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "style": "./dist/index.css",
   "exports": {
     "./package.json": "./package.json",
+    "./styles": {
+      "development": "./src/styles/globals.css",
+      "default": "./dist/index.css"
+    },
     ".": {
       "development": "./src/index.ts",
       "types": "./dist/index.d.ts",

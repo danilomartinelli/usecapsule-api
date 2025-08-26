@@ -1,4 +1,4 @@
-import './styles.css';
+import './styles/globals.css';
 
 // Export Utils
 export * from './utils/cx';

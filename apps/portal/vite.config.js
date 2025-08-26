@@ -1,5 +1,5 @@
-/// <reference types='vitest' />
 import { reactRouter } from '@react-router/dev/vite';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig(() => ({
@@ -13,11 +13,7 @@ export default defineConfig(() => ({
     port: 4200,
     host: 'localhost',
   },
-  plugins: [!process.env.VITEST && reactRouter()],
-  // Uncomment this if you are using workers.
-  // worker: {
-  //  plugins: [ nxViteTsPaths() ],
-  // },
+  plugins: [reactRouter(), tailwindcss()],
   build: {
     outDir: './dist',
     emptyOutDir: true,
