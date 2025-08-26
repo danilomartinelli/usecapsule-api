@@ -1,14 +1,12 @@
-# Core Platform Features
+# Capsule - Core Platform Features
 
-# 📋 Product Requirements Document (PRD) - Capsule Platform
+> Version: 2.0.0
 
-> **Version**: 2.0.0
+> Last Updated: 2025-08-24
 
-> **Last Updated**: 2025-08-24
+> Status: In Planning
 
-> **Status**: In Planning
-
-> **Document Type**: Technical Product Specification
+> Document Type: Technical Product Specification
 
 ---
 
@@ -29,13 +27,13 @@ Capsule é a **plataforma de deployment e gerenciamento de aplicações cloud-na
 
 ### Core Value Proposition
 
-**"Deploy anything, anywhere, in minutes - from simple containers to complex architectures"**
+**“Deploy anything, anywhere, in minutes - from simple containers to complex architectures”**
 
 ### Three Pillars of Capsule
 
-1. **🚀 Universal Deployment**: Suporte para qualquer stack tecnológico
-2. **🔍 Complete Observability**: Monitoramento, logs, traces e métricas em um só lugar
-3. **👥 Team Collaboration**: Preview environments, RBAC, e workflows integrados
+1. **🚀 Universal Deployment**: Support for any technology stack
+2. **🔍 Complete Observability**: Monitoring, logs, traces and metrics in one place
+3. **👥 Team Collaboration**: Preview environments, RBAC, and integrated workflows
 
 ### Key Success Metrics
 
@@ -50,7 +48,7 @@ Capsule é a **plataforma de deployment e gerenciamento de aplicações cloud-na
 
 ### 1. Current Market Problems
 
-### 1.1 For Developers and Startups
+#### 1.1 For Developers and Startups
 
 - **🚧 Complexidade Desnecessária**
   - Configurar Kubernetes, service mesh, observability e CI/CD pode levar semanas
@@ -65,7 +63,7 @@ Capsule é a **plataforma de deployment e gerenciamento de aplicações cloud-na
   - Falta de expertise específica em Kubernetes
   - Dependência de consultores externos caros
 
-### 1.2 For Growing Companies
+#### 1.2 For Growing Companies
 
 - **🔄 Migração Dolorosa**
   - Sair de PaaS simples (Heroku/Render) para arquitetura robusta é complexo
@@ -82,7 +80,7 @@ Capsule é a **plataforma de deployment e gerenciamento de aplicações cloud-na
 
 ### 2. Market Opportunity
 
-### 2.1 Why Now?
+#### 2.1 Why Now?
 
 1. **📦 Monorepos são o novo padrão**
    - Nx tem 2M+ downloads semanais
@@ -107,7 +105,7 @@ Capsule é a **plataforma de deployment e gerenciamento de aplicações cloud-na
 
 ### Primary Personas
 
-### 1. 🚀 Startup CTO/Tech Lead
+#### 1. 🚀 Startup CTO/Tech Lead
 
 - **Company Size**: 50-200 funcionários
 - **Team Size**: 5-20 developers, 0-2 DevOps
@@ -122,7 +120,7 @@ Capsule é a **plataforma de deployment e gerenciamento de aplicações cloud-na
   - Redução de 50% no tempo gasto com DevOps
   - Custos previsíveis e controláveis
 
-### 2. 🏢 Scale-up Engineering Manager
+#### 2. 🏢 Scale-up Engineering Manager
 
 - **Company Size**: 200-1000 funcionários
 - **Team Size**: Multiple squads, 20-100 developers
@@ -137,7 +135,7 @@ Capsule é a **plataforma de deployment e gerenciamento de aplicações cloud-na
   - Redução de incidentes relacionados a deploy
   - Visibilidade completa de custos por equipe
 
-### 3. 🛠️ Full-stack Developer
+#### 3. 🛠️ Full-stack Developer
 
 - **Experience**: 2-10 anos
 - **Responsibilities**: Frontend + Backend + Basic DevOps
@@ -207,7 +205,7 @@ Baseando-se no dashboard real da Capsule, a plataforma oferece um conjunto compl
 
 - **Automatic PR Environments**: Criação automática para cada pull request
 - **Branch-based Deploys**: Environment isolado por branch (feature/payment-flow, etc)
-- **Public URLs**: Links compartilháveis ([pr-123.preview.capsule.dev](http://pr-123.preview.capsule.dev))
+- **Public URLs**: Links compartilháveis (_pr-123.preview.capsule.dev_)
 - **Status Tracking**: Active, Building, Failed com timestamps
 - **Quick Actions**: Deploy, destroy, logs, terminal access
 
@@ -256,22 +254,24 @@ Baseando-se no dashboard real da Capsule, a plataforma oferece um conjunto compl
 | P2       | ⚖️ Autoscaling                 | MVP3 | Medium | Medium | Infra     |
 | P2       | 🏆 Compliance Automation       | MVP3 | High   | High   | Security  |
 
-### Detailed Feature Specifications#### 🪄 F0: Universal Smart Deploy
+### Detailed Feature Specifications
 
-### Description
+### 🪄 F0: Universal Smart Deploy
+
+#### Description
 
 Sistema inteligente de deployment que detecta automaticamente o tipo de aplicação e configura o ambiente ideal, suportando múltiplos paradigmas de deployment.
 
-### Supported Deployment Methods
+#### Supported Deployment Methods
 
-### 1. 📦 **Container-based Deploy**
+##### 1. 📦 **Container-based Deploy**
 
 - Docker images de qualquer registry (Docker Hub, GHCR, ECR, privados)
 - Dockerfile no repositório com build automático
 - Docker Compose para orquestração multi-container
 - Import de Kubernetes manifests existentes
 
-### 2. 🎯 **Monorepo Auto-detection**
+##### 2. 🎯 **Monorepo Auto-detection**
 
 - **Nx**: Detecção via nx.json e project.json
 - **Turborepo**: Parse de turbo.json
@@ -279,22 +279,22 @@ Sistema inteligente de deployment que detecta automaticamente o tipo de aplicaç
 - **Rush**: Rush.json configuration
 - **Yarn/PNPM Workspaces**: Workspace detection
 
-### 3. 📡 **Source Code Deploy**
+##### 3. 📡 **Deploy de Código-Fonte**
 
-- **Node.js**: package.json auto-detection
+- **Node.js**: detecção automática de package.json
 - **Python**: requirements.txt, Pipfile, pyproject.toml
-- **Go**: go.mod analysis
-- **Java**: Maven/Gradle support
-- **Ruby**: Gemfile parsing
-- **.NET**: Project file detection
+- **Go**: análise de go.mod
+- **Java**: suporte a Maven/Gradle
+- **Ruby**: análise de Gemfile
+- **.NET**: detecção de arquivos de projeto
 
-### 4. 🌐 **Static Sites & SPAs**
+##### 4. 🌐 **Sites Estáticos e SPAs**
 
-- Auto-detect build outputs
-- CDN deployment with edge optimization
-- Framework-specific optimizations
+- Detecção automática de artefatos de build
+- Deployment em CDN com otimização de borda
+- Otimizações específicas por framework
 
-### Intelligent Configuration
+#### Intelligent Configuration
 
 ```tsx
 interface SmartDeployConfig {
@@ -329,24 +329,24 @@ interface SmartDeployConfig {
 }
 ```
 
-### Framework-Specific Features
+#### Framework-Specific Features
 
-| Framework       | Auto-Detection                | Optimizations                               |
-| --------------- | ----------------------------- | ------------------------------------------- |
-| **Next.js**     | package.json + next.config    | SSR/SSG/ISR, Image optimization, API routes |
-| **React**       | package.json + public/        | SPA routing, CDN distribution               |
-| **Vue**         | package.json + vue.config     | Build optimization, Route handling          |
-| **Angular**     | angular.json                  | AOT compilation, Service workers            |
-| **NestJS**      | @nestjs/core in deps          | Microservice mode, Health checks            |
-| **Express**     | express in deps               | Cluster mode, Graceful shutdown             |
-| **Django**      | [manage.py](http://manage.py) | Static files, Migrations, WSGI/ASGI         |
-| **Rails**       | Gemfile + Rakefile            | Asset pipeline, Database tasks              |
-| **Spring Boot** | pom.xml/gradle                | Actuator integration, JVM tuning            |
-| **Laravel**     | composer.json + artisan       | Queue workers, Scheduling                   |
-| **FastAPI**     | fastapi in deps               | ASGI server, OpenAPI docs                   |
-| **Flask**       | flask in deps                 | WSGI config, Static files                   |
+| Framework       | Auto-Detection             | Optimizations                               |
+| --------------- | -------------------------- | ------------------------------------------- |
+| **Next.js**     | package.json + next.config | SSR/SSG/ISR, Image optimization, API routes |
+| **React**       | package.json + public/     | SPA routing, CDN distribution               |
+| **Vue**         | package.json + vue.config  | Build optimization, Route handling          |
+| **Angular**     | angular.json               | AOT compilation, Service workers            |
+| **NestJS**      | @nestjs/core in deps       | Microservice mode, Health checks            |
+| **Express**     | express in deps            | Cluster mode, Graceful shutdown             |
+| **Django**      | manage.py                  | Static files, Migrations, WSGI/ASGI         |
+| **Rails**       | Gemfile + Rakefile         | Asset pipeline, Database tasks              |
+| **Spring Boot** | pom.xml/gradle             | Actuator integration, JVM tuning            |
+| **Laravel**     | composer.json + artisan    | Queue workers, Scheduling                   |
+| **FastAPI**     | fastapi in deps            | ASGI server, OpenAPI docs                   |
+| **Flask**       | flask in deps              | WSGI config, Static files                   |
 
-### Acceptance Criteria
+#### Acceptance Criteria
 
 - ✅ GIVEN any GitHub/GitLab/Bitbucket repository
   - WHEN connected to platform
@@ -361,7 +361,7 @@ interface SmartDeployConfig {
   - WHEN detection fails
   - THEN fallback to generic container with manual config
 
-### Success Metrics
+#### Success Metrics
 
 - 85% zero-config deployment success
 - 95% framework detection accuracy
@@ -372,13 +372,13 @@ interface SmartDeployConfig {
 
 ### 🔐 F1: Authentication & Authorization (RBAC)
 
-### Description
+#### Description
 
 Complete authentication system with multi-provider support and granular role-based access control.
 
-### Functional Requirements
+#### Functional Requirements
 
-### Authentication Methods
+##### Authentication Methods
 
 1. **OAuth Providers**
    - GitHub OAuth (primary)
@@ -395,29 +395,16 @@ Complete authentication system with multi-provider support and granular role-bas
    - Usage tracking
    - Rate limiting
 
-### Authorization Roles
+##### Authorization Roles
 
-| Role      | Permissions                 | Scope |
-| --------- | --------------------------- | ----- |
-| **Owner** | • Full organization control |
+| Role          | Permissions                                                                                                      | Scope                |
+| ------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------- |
+| **Owner**     | • Full organization control<br>• Billing management<br>• Delete organization<br>• All Admin permissions         | Organization         |
+| **Admin**     | • Create/delete projects<br>• Manage members<br>• Configure integrations<br>• All Developer permissions         | Organization/Project |
+| **Developer** | • Deploy services<br>• Manage secrets<br>• View logs/metrics<br>• Create preview envs                           | Project/Environment  |
+| **Viewer**    | • Read-only access<br>• View services<br>• View logs<br>• Export reports                                        | Project/Environment  |
 
-• Billing management
-• Delete organization
-• All Admin permissions | Organization |
-| **Admin** | • Create/delete projects
-• Manage members
-• Configure integrations
-• All Developer permissions | Organization/Project |
-| **Developer** | • Deploy services
-• Manage secrets
-• View logs/metrics
-• Create preview envs | Project/Environment |
-| **Viewer** | • Read-only access
-• View services
-• View logs
-• Export reports | Project/Environment |
-
-### Technical Requirements
+#### Technical Requirements
 
 ```tsx
 interface AuthContext {
@@ -450,7 +437,7 @@ interface Permission {
 }
 ```
 
-### Acceptance Criteria
+#### Acceptance Criteria
 
 - ✅ OAuth login completes in < 2s (p50)
 - ✅ RBAC denies unauthorized actions with proper 403 responses
@@ -462,11 +449,11 @@ interface Permission {
 
 ### 🚀 F2: One-Click Deploy
 
-### Description
+#### Description
 
 Streamlined deployment of container images with intelligent defaults and health monitoring.
 
-### Functional Requirements
+#### Functional Requirements
 
 1. **Registry Integration**
    - Docker Hub (public/private)
@@ -486,7 +473,7 @@ Streamlined deployment of container images with intelligent defaults and health 
    - Automatic rollback on failure
    - Real-time log streaming
 
-### API Specification
+#### API Specification
 
 ```yaml
 POST /api/v1/services
@@ -494,7 +481,7 @@ Content-Type: application/json
 
 {
   "name": "api-service",
-  "image": "[ghcr.io/org/api:v1.2.3](http://ghcr.io/org/api:v1.2.3)",
+  "image": "ghcr.io/org/api:v1.2.3",
   "ports": [{
     "container": 3000,
     "protocol": "http"
@@ -522,9 +509,9 @@ Response: 201 Created
 {
   "id": "svc_abc123",
   "status": "deploying",
-  "url": "[https://api-service.capsule.app](https://api-service.capsule.app)",
+  "url": "https://api-service.capsule.app",
   "endpoints": {
-    "public": "[https://api-service.capsule.app](https://api-service.capsule.app)",
+    "public": "https://api-service.capsule.app",
     "internal": "api-service.internal:3000"
   }
 }
@@ -710,7 +697,7 @@ graph TB
 
 ### API Design Principles
 
-### RESTful API Standards
+#### RESTful API Standards
 
 ```yaml
 # Resource naming
@@ -743,17 +730,14 @@ Response Headers:
   Link: <...?page=3>; rel="next", <...?page=1>; rel="prev"
 ```
 
-### Error Handling
+#### Error Handling
 
 ```json
 {
   "error": {
     "code": "RESOURCE_NOT_FOUND",
     "message": "Service with ID 'svc_123' not found",
-    "details": {
-      "resource_type": "service",
-      "resource_id": "svc_123"
-    },
+    "details": { "resource_type": "service", "resource_id": "svc_123" },
     "request_id": "req_abc123",
     "timestamp": "2024-01-15T10:30:00Z"
   }
@@ -766,20 +750,20 @@ Response Headers:
 
 ### CLI Tool Specifications
 
-### Installation & Setup
+#### Installation & Setup
 
 ```bash
 # Installation methods
 npm install -g @capsule/cli
 brew install capsule
-curl -sSL [https://get.capsule.dev](https://get.capsule.dev) | sh
+curl -sSL https://get.capsule.dev | sh
 
 # Initial setup
 capsule auth login
 capsule init
 ```
 
-### Core Commands
+#### Core Commands
 
 ```bash
 # Project Management
@@ -829,7 +813,7 @@ capsule import <source> [--dry-run]     # Import from other platforms
 capsule export --format <format>        # Export configuration
 ```
 
-### Configuration File Schema
+#### Configuration File Schema
 
 ```yaml
 # capsule.yaml
@@ -847,7 +831,6 @@ environments:
     variables:
       NODE_ENV: 'development'
       LOG_LEVEL: 'debug'
-
   staging:
     variables:
       NODE_ENV: 'staging'
@@ -855,7 +838,6 @@ environments:
     preview:
       enabled: true
       ttl: '24h'
-
   production:
     variables:
       NODE_ENV: 'production'
@@ -872,28 +854,27 @@ services:
       type: 'dockerfile'
       path: './apps/api'
       dockerfile: 'Dockerfile'
-
     # Or use image directly
-    # image: "[ghcr.io/org/api:latest](http://ghcr.io/org/api:latest)"
-
+    # image: "ghcr.io/org/api:latest"
+    
     # Runtime configuration
     runtime:
       command: ['node', 'dist/main.js']
       port: 3000
       protocol: 'http'
-
+    
     # Resources
     resources:
       cpu: '500m'
       memory: '512Mi'
-
+    
     # Health checks
     health:
       path: '/health'
       interval: 30
       timeout: 10
       retries: 3
-
+    
     # Scaling
     scaling:
       min: 2
@@ -903,47 +884,47 @@ services:
           target: 70
         - type: 'rps'
           target: 1000
-
+    
     # Environment variables
     env:
       DATABASE_URL: '@secret:database-url'
       REDIS_URL: '@broker:redis'
       API_KEY: '@secret:api-key'
-
+    
     # Dependencies
     depends_on:
       - 'database-migration'
-
+      
   frontend:
     source:
       type: 'static'
       path: './apps/frontend/dist'
-
+    
     # CDN configuration
     cdn:
       enabled: true
       cache_control: 'public, max-age=3600'
-
+    
     # Routing
     routes:
       - path: '/*'
         rewrite: '/index.html'
-
+        
   worker:
     source:
       type: 'dockerfile'
       path: './apps/worker'
-
+    
     runtime:
       protocol: 'worker'
-
+    
     # Queue configuration
     queues:
       - name: 'email-queue'
         broker: 'rabbitmq'
       - name: 'payment-queue'
         broker: 'rabbitmq'
-
+    
     scaling:
       min: 1
       max: 5
@@ -957,7 +938,6 @@ brokers:
     type: 'rabbitmq'
     plan: 'small'
     version: '3.11'
-
   redis:
     type: 'redis'
     plan: 'small'
@@ -976,7 +956,6 @@ network:
           ports: [5432]
         - to: 'redis'
           ports: [6379]
-
     - name: 'worker-policy'
       ingress: []
       egress:
@@ -991,11 +970,9 @@ observability:
     level: 'info'
     format: 'json'
     retention: '7d'
-
   metrics:
     enabled: true
     interval: 30
-
   tracing:
     enabled: true
     sampling: 0.1
@@ -1009,7 +986,6 @@ cost:
         channel: 'email'
       - threshold: 90
         channel: 'slack'
-
   optimization:
     idle_shutdown: true
     idle_timeout: '30m'
@@ -1017,7 +993,7 @@ cost:
 
 ### SDK Examples
 
-### TypeScript/JavaScript SDK
+#### TypeScript/JavaScript SDK
 
 ```tsx
 import { CapsuleClient } from '@capsule/sdk';
@@ -1029,9 +1005,9 @@ const capsule = new CapsuleClient({
 });
 
 // Deploy a service
-const deployment = await [capsule.services](http://capsule.services).deploy({
+const deployment = await capsule.services.deploy({
   name: 'api-service',
-  image: '[ghcr.io/org/api:v2.0.0](http://ghcr.io/org/api:v2.0.0)',
+  image: 'ghcr.io/org/api:v2.0.0',
   env: {
     NODE_ENV: 'production'
   },
@@ -1042,10 +1018,10 @@ const deployment = await [capsule.services](http://capsule.services).deploy({
 });
 
 // Monitor deployment
-const status = await capsule.deployments.getStatus([deployment.id](http://deployment.id));
+const status = await capsule.deployments.getStatus(deployment.id);
 
 // Stream logs
-const logStream = [capsule.services](http://capsule.services).logs('api-service', {
+const logStream = capsule.services.logs('api-service', {
   follow: true,
   since: '10m'
 });
@@ -1055,7 +1031,7 @@ logStream.on('data', (log) => {
 });
 
 // Get metrics
-const metrics = await [capsule.services](http://capsule.services).metrics('api-service', {
+const metrics = await capsule.services.metrics('api-service', {
   period: '1h',
   metrics: ['cpu', 'memory', 'rps']
 });
@@ -1069,7 +1045,7 @@ const costs = await capsule.billing.getCurrentMonth();
 const forecast = await capsule.billing.forecast();
 ```
 
-### Python SDK
+#### Python SDK
 
 ```python
 from capsule import CapsuleClient
@@ -1082,9 +1058,9 @@ client = CapsuleClient(
 )
 
 # Deploy a service
-deployment = [client.services](http://client.services).deploy(
+deployment = client.services.deploy(
     name='api-service',
-    image='[ghcr.io/org/api:v2.0.0](http://ghcr.io/org/api:v2.0.0)',
+    image='ghcr.io/org/api:v2.0.0',
     env={
         'NODE_ENV': 'production'
     },
@@ -1095,14 +1071,14 @@ deployment = [client.services](http://client.services).deploy(
 )
 
 # Monitor deployment
-status = client.deployments.get_status([deployment.id](http://deployment.id))
+status = client.deployments.get_status(deployment.id)
 
 # Stream logs
-for log in [client.services](http://client.services).logs('api-service', follow=True):
+for log in client.services.logs('api-service', follow=True):
     print(log)
 
 # Get metrics
-metrics = [client.services](http://client.services).metrics(
+metrics = client.services.metrics(
     'api-service',
     period='1h',
     metrics=['cpu', 'memory', 'rps']
@@ -1150,13 +1126,13 @@ gantt
 
 ### MVP1: Foundation (Q1 2025)
 
-### Goals
+#### Goals
 
 - ✅ Basic platform operational
 - ✅ Core deployment functionality
 - ✅ Essential developer tools
 
-### Deliverables
+#### Deliverables
 
 | Feature             | Priority | Success Criteria                      |
 | ------------------- | -------- | ------------------------------------- |
@@ -1167,7 +1143,7 @@ gantt
 | Config Management   | P0       | Secrets never exposed in logs         |
 | Basic Observability | P0       | Logs searchable < 2s                  |
 
-### Technical Milestones
+#### Technical Milestones
 
 1. **Week 1-2**: Project setup, monorepo structure
 2. **Week 3-4**: Auth service with OAuth providers
@@ -1178,13 +1154,13 @@ gantt
 
 ### MVP2: Developer Experience (Q2 2025)
 
-### Goals
+#### Goals
 
 - ✅ Streamlined development workflow
 - ✅ Advanced deployment strategies
 - ✅ Visual management tools
 
-### Deliverables
+#### Deliverables
 
 | Feature              | Priority | Success Criteria             |
 | -------------------- | -------- | ---------------------------- |
@@ -1197,13 +1173,13 @@ gantt
 
 ### MVP3: Scale & Enterprise (Q3 2025)
 
-### Goals
+#### Goals
 
 - ✅ Production-ready for enterprise
 - ✅ Cost optimization features
 - ✅ Vendor-agnostic portability
 
-### Deliverables
+#### Deliverables
 
 | Feature         | Priority | Success Criteria           |
 | --------------- | -------- | -------------------------- |
@@ -1220,7 +1196,7 @@ gantt
 
 ### Business Metrics
 
-### Growth Metrics
+#### Growth Metrics
 
 - **Monthly Active Teams**: Target 1000 by end of Year 1
 - **Revenue Growth**: 20% MoM for first 6 months
@@ -1228,7 +1204,7 @@ gantt
 - **Lifetime Value**: > $10,000 per customer
 - **Churn Rate**: < 3% monthly for paying customers
 
-### Engagement Metrics
+#### Engagement Metrics
 
 - **Weekly Active Usage**: > 70% of registered teams
 - **Services per Account**: Average 5+ services
@@ -1237,14 +1213,14 @@ gantt
 
 ### Technical Metrics
 
-### Performance Metrics
+#### Performance Metrics
 
 - **Time to First Deploy**: < 5 minutes (p50)
 - **Deployment Success Rate**: > 99%
 - **API Response Time**: < 200ms (p95)
 - **Availability**: > 99.9% uptime
 
-### Developer Experience Metrics
+#### Developer Experience Metrics
 
 - **Onboarding Completion**: > 80% in first session
 - **CLI Usage**: > 60% of users
@@ -1253,7 +1229,7 @@ gantt
 
 ### Operational Metrics
 
-### Infrastructure Efficiency
+#### Infrastructure Efficiency
 
 - **Resource Utilization**: > 70% average
 - **Cost per Service**: 30% lower than self-managed
@@ -1266,61 +1242,28 @@ gantt
 
 ### Technical Risks
 
-| Risk                               | Impact | Probability | Mitigation Strategy       |
-| ---------------------------------- | ------ | ----------- | ------------------------- |
-| **Multi-tenant isolation failure** | High   | Low         | • Strict network policies |
-
-• Resource quotas
-• Security audits
-• Penetration testing |
-| **Scaling bottlenecks** | High | Medium | • Horizontal scaling design
-• Load testing
-• Cache layers
-• CDN usage |
-| **Data loss** | Critical | Low | • Automated backups
-• Multi-region replication
-• Disaster recovery plan
-• Regular restore tests |
-| **Vendor lock-in concerns** | Medium | Medium | • Export functionality
-• Open standards
-• Kubernetes compatibility
-• Avoid proprietary APIs |
+| Risk                               | Impact   | Probability | Mitigation Strategy                                                                                                   |
+| ---------------------------------- | -------- | ----------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Multi-tenant isolation failure** | High     | Low         | • Strict network policies<br>• Resource quotas<br>• Security audits<br>• Penetration testing                         |
+| **Scaling bottlenecks**            | High     | Medium      | • Horizontal scaling design<br>• Load testing<br>• Cache layers<br>• CDN usage                                       |
+| **Data loss**                      | Critical | Low         | • Automated backups<br>• Multi-region replication<br>• Disaster recovery plan<br>• Regular restore tests             |
+| **Vendor lock-in concerns**        | Medium   | Medium      | • Export functionality<br>• Open standards<br>• Kubernetes compatibility<br>• Avoid proprietary APIs                 |
 
 ### Business Risks
 
-| Risk              | Impact | Probability | Mitigation Strategy  |
-| ----------------- | ------ | ----------- | -------------------- |
-| **Slow adoption** | High   | Medium      | • Generous free tier |
-
-• Migration tools
-• Onboarding assistance
-• Community building |
-| **Competition from cloud providers** | High | Medium | • Superior DX
-• Faster innovation
-• Niche focus
-• Cost advantages |
-| **Pricing model issues** | Medium | Medium | • Usage-based pricing
-• Transparent costs
-• Cost alerts
-• Optimization tools |
+| Risk                                 | Impact | Probability | Mitigation Strategy                                                                                     |
+| ------------------------------------ | ------ | ----------- | ------------------------------------------------------------------------------------------------------- |
+| **Slow adoption**                    | High   | Medium      | • Generous free tier<br>• Migration tools<br>• Onboarding assistance<br>• Community building           |
+| **Competition from cloud providers** | High   | Medium      | • Superior DX<br>• Faster innovation<br>• Niche focus<br>• Cost advantages                             |
+| **Pricing model issues**             | Medium | Medium      | • Usage-based pricing<br>• Transparent costs<br>• Cost alerts<br>• Optimization tools                  |
 
 ### Security Risks
 
-| Risk                | Impact   | Probability | Mitigation Strategy  |
-| ------------------- | -------- | ----------- | -------------------- |
-| **Secret exposure** | Critical | Low         | • Encryption at rest |
-
-• Vault integration
-• Audit logging
-• Secret rotation |
-| **DDoS attacks** | High | Medium | • Rate limiting
-• CDN protection
-• Auto-scaling
-• Traffic filtering |
-| **Supply chain attacks** | High | Low | • Image scanning
-• Dependency updates
-• SBOM generation
-• Vulnerability alerts |
+| Risk                     | Impact   | Probability | Mitigation Strategy                                                                                              |
+| ------------------------ | -------- | ----------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Secret exposure**      | Critical | Low         | • Encryption at rest<br>• Vault integration<br>• Audit logging<br>• Secret rotation                             |
+| **DDoS attacks**         | High     | Medium      | • Rate limiting<br>• CDN protection<br>• Auto-scaling<br>• Traffic filtering                                    |
+| **Supply chain attacks** | High     | Low         | • Image scanning<br>• Dependency updates<br>• SBOM generation<br>• Vulnerability alerts                         |
 
 ---
 
@@ -1358,38 +1301,38 @@ gantt
 
 ### C. API Examples
 
-### Service Deployment
+#### Service Deployment
 
 ```bash
-curl -X POST [https://api.capsule.dev/v1/services](https://api.capsule.dev/v1/services) \
+curl -X POST https://api.capsule.dev/v1/services \
   -H "Authorization: Bearer ${API_KEY}" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "api-service",
-    "image": "[ghcr.io/org/api:latest](http://ghcr.io/org/api:latest)",
+    "image": "ghcr.io/org/api:latest",
     "env": {
       "NODE_ENV": "production"
     }
   }'
 ```
 
-### Canary Deployment
+#### Canary Deployment
 
 ```bash
-curl -X POST [https://api.capsule.dev/v1/services/svc_123/canary](https://api.capsule.dev/v1/services/svc_123/canary) \
+curl -X POST https://api.capsule.dev/v1/services/svc_123/canary \
   -H "Authorization: Bearer ${API_KEY}" \
   -H "Content-Type: application/json" \
   -d '{
-    "image": "[ghcr.io/org/api:v2](http://ghcr.io/org/api:v2)",
+    "image": "ghcr.io/org/api:v2",
     "percentage": 10,
     "duration": "30m"
   }'
 ```
 
-### Preview Environment
+#### Preview Environment
 
 ```bash
-curl -X POST [https://api.capsule.dev/v1/previews](https://api.capsule.dev/v1/previews) \
+curl -X POST https://api.capsule.dev/v1/previews \
   -H "Authorization: Bearer ${API_KEY}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -1400,7 +1343,7 @@ curl -X POST [https://api.capsule.dev/v1/previews](https://api.capsule.dev/v1/pr
 
 ### D. References & Resources
 
-### Technical Documentation
+#### Technical Documentation
 
 - [Kubernetes API Reference](https://kubernetes.io/docs/reference/)
 - [OpenTelemetry Specification](https://opentelemetry.io/docs/)
@@ -1408,13 +1351,13 @@ curl -X POST [https://api.capsule.dev/v1/previews](https://api.capsule.dev/v1/pr
 - [NestJS Documentation](https://nestjs.com/)
 - [Domain-Driven Design Reference](https://www.domainlanguage.com/ddd/)
 
-### Industry Reports
+#### Industry Reports
 
 - State of DevOps Report 2024
 - CNCF Survey Results
 - Developer Experience Index
 
-### Compliance & Security
+#### Compliance & Security
 
 - SOC 2 Type II Requirements
 - GDPR Compliance Guidelines
