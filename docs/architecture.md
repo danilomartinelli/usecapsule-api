@@ -1,18 +1,18 @@
-# Arquitetura Técnica - Capsule
+# Technical Architecture - Capsule Platform
 
-Este documento detalha a arquitetura técnica do projeto Capsule, incluindo decisões de design, padrões utilizados e estrutura do sistema.
+This document details the technical architecture of the Capsule project, including design decisions, patterns used, and system structure.
 
-## 🏗️ Visão Geral da Arquitetura
+## 🏗️ Architecture Overview
 
-### Princípios Arquiteturais
+### Architectural Principles
 
-- **Domain-Driven Design (DDD)** - Organização por bounded contexts
-- **Hexagonal Architecture** - Isolamento de domínio via ports & adapters
-- **Event-Driven Architecture** - Comunicação assíncrona via eventos
-- **Feature-Sliced Design (FSD)** - Organização frontend escalável
-- **Monorepo com Nx** - Gerenciamento eficiente de múltiplos projetos
+- **Domain-Driven Design (DDD)** - Organization by bounded contexts
+- **Hexagonal Architecture** - Domain isolation via ports & adapters
+- **Event-Driven Architecture** - Asynchronous communication via events
+- **Feature-Sliced Design (FSD)** - Scalable frontend organization
+- **Nx Monorepo** - Efficient management of multiple projects
 
-### Diagrama de Alto Nível
+### High-Level Architecture Diagram
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -34,46 +34,48 @@ Este documento detalha a arquitetura técnica do projeto Capsule, incluindo deci
 
 ```
 
-## 🏛️ Estrutura do Monorepo
+## 🏛️ Monorepo Structure
 
-### Organização por Camadas
+### Current Implementation Status
+
+⚠️ **Note**: The project is in early development stage. Many features described in the vision are not yet implemented.
+
+### Layer Organization
 
 ```
-capsule/
-├── apps/                    # Aplicações executáveis
-│   ├── portal/             # Frontend React (Dashboard)
-│   ├── api-gateway/        # Backend NestJS (BFF)
-├── libs/                    # Bibliotecas compartilhadas
-│   ├── contexts/           # Bounded Contexts (Backend)
-│   │   ├── deploy/         # Contexto de Deploy
-│   │   ├── billing/        # Contexto de Cobrança
-│   │   └── discovery/      # Contexto de Service Discovery
-│   ├── shared/             # Compartilhado Full-Stack
-│   │   ├── dto/            # DTOs compartilhados
-│   │   └── types/          # Tipos compartilhados
-│   └── ui/                 # Frontend-only
-│       └── react/          # Biblioteca de componentes
-├── tools/                   # Ferramentas de desenvolvimento
-│   ├── cli/                # CLI oficial
-│   ├── generators/         # Generators customizados
-│   └── dev-server/         # Servidor de desenvolvimento local
-├── docs/                    # Documentação interna do projeto
-└── [public-docs build]      # Documentação pública hospedada
+acme/ (Capsule Platform)
+├── apps/                    # Executable applications
+│   ├── api-gateway/        # NestJS BFF API (✅ Implemented)
+│   ├── portal/             # React + Vite Dashboard (✅ Implemented - Basic)
+│   ├── service-auth/       # NestJS Auth Service (✅ Implemented - Scaffold)
+│   ├── api-gateway-e2e/    # API E2E Tests (✅ Implemented)
+│   └── portal-e2e/         # Portal E2E Tests (✅ Implemented)
+├── libs/                    # Shared libraries
+│   ├── contexts/           # DDD Bounded Contexts
+│   │   └── auth/          # Authentication context (✅ Implemented - Basic)
+│   ├── shared/             # Full-Stack shared code
+│   │   ├── dto/           # Shared DTOs (✅ Implemented - Basic)
+│   │   └── types/         # Shared TypeScript types (✅ Implemented - Basic)
+│   └── ui/                 # Frontend components
+│       └── react/         # React component library (✅ Implemented - Basic)
+├── docs/                    # Project documentation
+│   ├── architecture.md    # This file
+│   └── core-features.md   # Platform features specification
+└── docker-compose.yml      # Local development infrastructure (✅ Implemented)
 ```
 
-### Regras de Dependências
+### Dependency Rules
 
-#### ✅ Dependências Permitidas
+#### ✅ Allowed Dependencies
 
 ```
 Frontend Apps → UI Libraries
 Frontend Apps → Shared Libraries
 Backend Apps → Context Libraries
 Backend Apps → Shared Libraries
-Tools → Shared Libraries
 ```
 
-#### ❌ Dependências Proibidas
+#### ❌ Prohibited Dependencies
 
 ```
 Backend Apps → UI Libraries
@@ -83,494 +85,232 @@ Context Libraries → Other Context Libraries (via imports)
 
 ## 🎯 Bounded Contexts (DDD)
 
-### Contexto de Deploy
+### Current Implementation
 
-**Responsabilidade**: Gerenciamento do ciclo de vida de aplicações e serviços.
+Currently, only the **Auth Context** has been scaffolded with basic structure. Other contexts (Deploy, Billing, Discovery) are planned but not yet implemented.
 
-#### Estrutura Hexagonal
+### Auth Context (Implemented)
 
-```
-libs/contexts/deploy/
-├── domain/                 # Camada de Domínio
-│   ├── entities/          # Entidades de negócio
-│   │   ├── AppEntity.ts
-│   │   └── ServiceEntity.ts
-│   ├── value-objects/     # Objetos de valor
-│   │   ├── ImageRef.ts
-│   │   └── HealthStatus.ts
-│   ├── events/            # Eventos de domínio
-│   │   ├── AppDeployedEvent.ts
-│   │   └── ServiceScaledEvent.ts
-│   └── repositories/      # Interfaces de repositório
-│       └── AppRepository.port.ts
-├── application/           # Camada de Aplicação
-│   ├── use-cases/        # Casos de uso
-│   │   ├── DeployAppUseCase.ts
-│   │   └── ScaleServiceUseCase.ts
-│   ├── ports/            # Portas (interfaces)
-│   │   ├── ContainerRegistry.port.ts
-│   │   └── RuntimeOrchestrator.port.ts
-│   └── dtos/             # DTOs de aplicação
-│       └── DeployAppDto.ts
-└── infrastructure/        # Camada de Infraestrutura
-    ├── adapters/         # Adaptadores
-    │   ├── NestDeployController.ts
-    │   ├── PostgresAppRepository.ts
-    │   └── DockerRuntimeAdapter.ts
-    └── module.ts         # Módulo NestJS
-```
+**Responsibility**: User authentication and authorization management.
 
-#### Exemplo de Use Case
-
-```typescript
-// application/use-cases/DeployAppUseCase.ts
-export class DeployAppUseCase {
-  constructor(private readonly appRepo: AppRepositoryPort, private readonly registry: ContainerRegistryPort, private readonly runtime: RuntimeOrchestratorPort, private readonly eventPublisher: EventPublisherPort) {}
-
-  async execute(dto: DeployAppDto): Promise<AppEntity> {
-    // 1. Validar imagem no registry
-    const image = await this.registry.fetchImageMetadata(dto.imageRef);
-
-    // 2. Criar entidade de aplicação
-    const app = AppEntity.create({
-      name: dto.name,
-      image: image.digest,
-      environment: dto.environment,
-    });
-
-    // 3. Persistir aplicação
-    await this.appRepo.save(app);
-
-    // 4. Deploy no runtime
-    await this.runtime.deploy(app);
-
-    // 5. Publicar evento
-    await this.eventPublisher.publish(new AppDeployedEvent(app.id));
-
-    return app;
-  }
-}
-```
-
-### Contexto de Billing
-
-**Responsabilidade**: Gerenciamento de cobrança, quotas e limites de uso.
-
-### Contexto de Discovery
-
-**Responsabilidade**: Service discovery, DNS interno e políticas de rede.
-
-## 🎨 Frontend (Feature-Sliced Design)
-
-### Estrutura FSD
+#### Current Structure
 
 ```
-apps/portal/src/
-├── app/                    # Inicialização da aplicação
-│   ├── providers/         # Context providers
-│   ├── router/            # Configuração de rotas
-│   └── styles/            # Estilos globais
-├── pages/                 # Páginas/Rotas
-│   ├── dashboard/         # Dashboard principal
-│   ├── services/          # Lista de serviços
-│   └── settings/          # Configurações
-├── widgets/               # Blocos de UI compostos
-│   ├── header/            # Header da aplicação
-│   ├── sidebar/           # Sidebar de navegação
-│   └── service-card/      # Card de serviço
-├── features/              # Features de negócio
-│   ├── deploy-app/        # Feature de deploy
-│   ├── manage-service/    # Gerenciamento de serviço
-│   └── view-logs/         # Visualização de logs
-├── entities/              # Entidades de domínio
-│   ├── app/               # Entidade App
-│   ├── service/           # Entidade Service
-│   └── user/              # Entidade User
-└── shared/                # Código compartilhado
-    ├── ui/                # Componentes de UI
-    ├── api/               # API clients
-    └── lib/               # Utilitários
+libs/contexts/auth/
+├── src/
+│   ├── index.ts           # Public exports
+│   └── lib/
+│       ├── context-auth.ts    # Basic auth context (scaffold)
+│       └── context-auth.spec.ts # Tests
+├── jest.config.ts
+├── package.json
+├── project.json           # Nx project configuration
+└── tsconfig.json
 ```
 
-### Exemplo de Feature
+### Planned Contexts (Not Yet Implemented)
 
-```typescript
-// features/deploy-app/ui/DeployForm.tsx
-export function DeployForm() {
-  const [image, setImage] = useState('');
-  const deploy = useDeploy();
+#### Deploy Context (Planned)
+**Responsibility**: Application and service lifecycle management.
+- Status: 📋 Planned for future implementation
+- Will handle deployments, scaling, and service orchestration
 
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        deploy.mutate({ image });
-      }}
-    >
-      <input placeholder="ghcr.io/org/api:tag" value={image} onChange={(e) => setImage(e.target.value)} />
-      <button>Deploy</button>
-      {deploy.isSuccess && <p>Deployment iniciado</p>}
-    </form>
-  );
-}
+#### Billing Context (Planned)
+**Responsibility**: Billing management, quotas, and usage limits.
+- Status: 📋 Planned for future implementation
+- Will handle usage tracking and cost management
 
-// features/deploy-app/model/useDeploy.ts
-export function useDeploy() {
-  const setLastDeployment = useDeployStore((s) => s.setLastDeployment);
+#### Discovery Context (Planned)
+**Responsibility**: Service discovery, internal DNS, and network policies.
+- Status: 📋 Planned for future implementation
+- Will handle service mesh and internal routing
 
-  return useMutation({
-    mutationFn: deployClient.start,
-    onSuccess: (res) => setLastDeployment(res.deploymentId),
-  });
-}
+## 🎨 Frontend Architecture
+
+### Current Implementation
+
+The portal application uses React with React Router v7 and Vite. Currently in basic implementation stage.
+
+#### Current Structure
+```
+apps/portal/
+├── app/
+│   ├── app.tsx            # Main app component (basic)
+│   ├── app-nav.tsx        # Navigation component
+│   ├── entry.client.tsx   # Client entry point
+│   ├── entry.server.tsx   # Server entry point
+│   ├── root.tsx           # Root layout
+│   ├── routes.tsx         # Route configuration
+│   ├── routes/
+│   │   └── about.tsx      # About page
+│   └── styles/
+│       └── index.css      # Tailwind CSS imports
+├── public/
+│   └── favicon.ico
+├── vite.config.js         # Vite configuration
+└── react-router.config.ts # React Router configuration
 ```
 
-## 🛠️ Ferramentas de Desenvolvimento
+### Planned Feature-Sliced Design Structure
 
-### CLI (@usecapsule/cli)
+The following FSD structure is planned but not yet implemented:
 
-**Arquitetura**: Aplicação Node.js com TypeScript e esbuild.
-
-#### Estrutura de Comandos
-
-```typescript
-// Estrutura hierárquica
-capsule auth login
-capsule services deploy
-capsule broker create rabbitmq
-
-// Implementação de comando
-export class DeployCommand {
-  static command = 'deploy';
-  static description = 'Deploy a service to Capsule';
-  static options = [
-    { name: 'image', type: 'string', required: true },
-    { name: 'env', type: 'string', default: 'production' }
-  ];
-
-  async execute(options: DeployOptions) {
-    // Implementação
-  }
-}
+```
+apps/portal/app/           # Future structure
+├── pages/                 # Route pages
+├── widgets/               # Composite UI blocks
+├── features/              # Business features
+├── entities/              # Domain entities
+└── shared/                # Shared code
 ```
 
-### Generators (@usecapsule/generators)
+## 🛠️ Current Technology Stack
 
-**Arquitetura**: Plugin Nx com templates customizados.
+### Backend (NestJS)
+- **Framework**: NestJS v11 with Express
+- **Language**: TypeScript v5.8.2
+- **Testing**: Jest for unit and e2e tests
+- **Build**: Webpack with SWC for transpilation
 
-#### Estrutura de Generators
+### Frontend (React)
+- **Framework**: React v19 with React Router v7.2
+- **Build Tool**: Vite v6
+- **Styling**: Tailwind CSS v4 with Vite plugin
+- **UI Library**: Custom React component library (@acme/ui-react)
+- **Testing**: Jest with Testing Library
 
-```typescript
-// Generators disponíveis
-export class ServiceGenerator {
-  static name = 'service';
-  static description = 'Generate a new Capsule microservice';
+### Infrastructure (Docker)
+- **PostgreSQL 15**: Primary database
+- **Redis 7**: Caching and pub/sub
+- **RabbitMQ 3**: Message broker
+- **HashiCorp Vault**: Secrets management
 
-  static schema = {
-    name: {
-      type: 'string',
-      required: true,
-      pattern: '^[a-z][a-z0-9-]*[a-z0-9]$',
-    },
-    context: {
-      type: 'string',
-      description: 'Bounded context name',
-    },
-  };
+### Development Tools
+- **Monorepo**: Nx v21.4.1
+- **Package Manager**: npm with workspaces
+- **Linting**: ESLint v9 with TypeScript ESLint
+- **Testing**: Jest v30, Playwright for e2e
+- **CI/CD**: Configured for Nx affected commands
 
-  async generate(options: ServiceOptions) {
-    // Gera estrutura hexagonal completa
-  }
-}
-```
+## 🛠️ Development Tools (Planned)
 
-### Dev Server (@usecapsule/dev-server)
+### CLI Tool (Not Yet Implemented)
 
-**Arquitetura**: Aplicação Node.js para desenvolvimento local.
+**Status**: 📋 Planned - The CLI tool described below is part of the future vision.
 
-#### Funcionalidades
+The CLI tool, custom generators, and development server are part of the planned roadmap but not yet implemented.
 
-- **Orquestração local**: Emula ambiente Capsule com Docker Compose
-- **Proxy reverso**: Roteamento local para serviços
-- **Health checks**: Monitoramento de saúde dos serviços
-- **Log aggregation**: Agregação de logs centralizada
-- **Hot reload**: Recarregamento automático de configurações
+## 🔄 Communication Between Layers
 
-#### Estrutura
+### Current Implementation
 
-```typescript
-// Orquestrador principal
-export class DevOrchestrator {
-  async start() {
-    // Inicia containers (Redis, RabbitMQ, PostgreSQL)
-    // Configura proxy reverso
-    // Inicia health checker
-    // Configura log aggregator
-  }
-}
-```
+The project currently uses a simple REST API pattern with NestJS controllers and services. Event-driven architecture is planned but not yet implemented.
 
-## 🔄 Comunicação entre Camadas
+### API Structure
+- **API Gateway**: Runs on port 3000 with `/api` prefix
+- **Auth Service**: Basic NestJS service structure (not yet functional)
+- **Portal**: Communicates with API Gateway via HTTP
 
-### Event-Driven Architecture
+## 🔒 Security
 
-```typescript
-// Eventos de domínio
-export class AppDeployedEvent {
-  constructor(public readonly appId: string, public readonly imageDigest: string, public readonly deployedAt: Date) {}
-}
+### Current Security Setup
 
-// Event handlers
-@EventsHandler(AppDeployedEvent)
-export class AppDeployedHandler {
-  async handle(event: AppDeployedEvent) {
-    // Atualizar métricas
-    // Notificar stakeholders
-    // Trigger workflows
-  }
-}
-```
+- **HashiCorp Vault**: Available in Docker Compose for secrets management
+- **Environment Variables**: Currently used for configuration
+- **CORS**: To be configured in NestJS
+- **Authentication**: Not yet implemented
 
-### API Contracts
+### Planned Security Features
 
-```typescript
-// DTOs compartilhados
-export interface DeployAppDto {
-  name: string;
-  imageRef: string;
-  environment: string;
-  resources?: {
-    cpu: string;
-    memory: string;
-  };
-}
-
-// API responses
-export interface DeployAppResponse {
-  appId: string;
-  status: 'deploying' | 'deployed' | 'failed';
-  deploymentId: string;
-}
-```
-
-## 🔒 Segurança
-
-### Autenticação e Autorização
-
-- **JWT Tokens** para autenticação
-- **RBAC** por projeto/ambiente/serviço
-- **mTLS** opcional para service-to-service
-- **Vault** para gerenciamento de secrets
-
-### Network Policies
-
-```yaml
-# Políticas de rede
-- name: public-api
-  ingress:
-    - from: internet
-      to: http:443
-  egress:
-    - to: dns
-    - to: external-apis-whitelist
-
-- name: internal-service
-  ingress:
-    - from: app-services-only
-  egress:
-    - to: broker
-    - to: dns
-```
+- JWT token authentication
+- Role-based access control (RBAC)
+- OAuth integration
+- API rate limiting
 
 ## 📊 Observability
 
-### Logging
+### Current Setup
 
-```typescript
-// Logging estruturado
-export class Logger {
-  info(message: string, context?: Record<string, any>) {
-    console.log(
-      JSON.stringify({
-        level: 'info',
-        message,
-        timestamp: new Date().toISOString(),
-        service: 'capsule-api',
-        ...context,
-      })
-    );
-  }
-}
+- **Logging**: NestJS built-in Logger service
+- **Testing**: Jest for unit tests, Playwright for e2e tests
+
+### Planned Observability Stack
+
+- Prometheus for metrics collection
+- Grafana for visualization
+- OpenTelemetry for distributed tracing
+- Structured logging with correlation IDs
+
+## 🚀 Deployment & Infrastructure
+
+### Local Development
+
+The project includes a comprehensive Docker Compose setup for local development:
+
+```yaml
+# Available services in docker-compose.yml
+- PostgreSQL 15: Database (port 5432)
+- Redis 7: Cache and pub/sub (port 6379)  
+- RabbitMQ 3: Message broker (ports 5672, 15672)
+- HashiCorp Vault: Secrets management (port 8200)
 ```
 
-### Métricas
+### Production Deployment
 
-- **Prometheus** para coleta de métricas
-- **Grafana** para visualização
-- **OpenTelemetry** para traces
-- **Health checks** automáticos
+Production deployment strategy is not yet defined. The platform will support container-based deployments with Kubernetes as the primary orchestration platform.
 
-### Health Checks
+## 🔧 Configuration
 
-```typescript
-// Health check endpoint
-@Controller('health')
-export class HealthController {
-  @Get()
-  async check(): Promise<HealthCheckResult> {
-    return {
-      status: 'healthy',
-      checks: [
-        {
-          name: 'database',
-          status: 'pass',
-          latencyMs: 45,
-        },
-        {
-          name: 'redis',
-          status: 'pass',
-          latencyMs: 12,
-        },
-      ],
-    };
-  }
-}
-```
+### Current Configuration
 
-## 🚀 Deploy e Infraestrutura
+Environment variables are used for configuration. No `.env` file exists yet - configuration must be set manually.
 
-### Container Strategy
-
-- **Multi-stage builds** para otimização
-- **Non-root users** para segurança
-- **Health checks** obrigatórios
-- **Resource limits** configuráveis
-
-### Service Discovery
-
-- **DNS interno** (svc.internal)
-- **Load balancing** automático
-- **Circuit breakers** para resiliência
-- **Retry policies** configuráveis
-
-## 🔧 Configuração
-
-### Environment Variables
+### Docker Services Credentials
 
 ```bash
-# API Configuration
-CAPSULE_API_URL=https://api.capsule.io
-CAPSULE_API_KEY=your-api-key
-
-# Database
-DATABASE_URL=postgresql://user:pass@localhost:5432/capsule
+# PostgreSQL
+POSTGRES_DB=usecapsule_dev
+POSTGRES_USER=usecapsule
+POSTGRES_PASSWORD=usecapsule_dev_password
 
 # Redis
-REDIS_URL=redis://localhost:6379
+REDIS_PASSWORD=usecapsule_dev_password
+
+# RabbitMQ
+RABBITMQ_DEFAULT_USER=usecapsule
+RABBITMQ_DEFAULT_PASS=usecapsule_dev_password
 
 # Vault
-VAULT_URL=https://vault.capsule.io
-VAULT_TOKEN=your-vault-token
+VAULT_DEV_ROOT_TOKEN_ID=usecapsule-dev-token
 ```
 
-### Configuration Files
+## 🧪 Testing
 
-```yaml
-# capsule.yaml
-app: myapp
-services:
-  - name: api
-    image: ghcr.io/org/api:latest
-    protocol: http
-    port: 8080
-    env:
-      - NODE_ENV=production
-    health:
-      path: /health
-      timeoutSec: 2
-      intervalSec: 5
+### Current Test Setup
+
+- **Unit Tests**: Jest configured for all projects
+- **E2E Tests**: 
+  - Playwright for portal-e2e
+  - Jest for api-gateway-e2e
+- **Test Commands**:
+  ```bash
+  npx nx test api-gateway
+  npx nx test portal
+  npx nx e2e portal-e2e
+  npx nx e2e api-gateway-e2e
+  ```
+
+### Test Coverage
+
+Run tests with coverage:
+```bash
+npx nx test api-gateway --coverage
 ```
 
-## 📈 Performance e Escalabilidade
+## 📚 References
 
-### Caching Strategy
-
-- **Redis** para cache distribuído
-- **In-memory cache** para dados frequentes
-- **CDN** para assets estáticos
-- **Database connection pooling**
-
-### Scaling Policies
-
-```yaml
-# Autoscaling configuration
-scalingPolicy:
-  type: cpu
-  target: 70
-  min: 2
-  max: 8
-  cooldownSec: 60
-```
-
-## 🔄 CI/CD Pipeline
-
-### Stages
-
-1. **Build** - Compilação e testes
-2. **Preview** - Ambiente efêmero por PR
-3. **Staging** - Validação antes de produção
-4. **Production** - Deploy com canary/blue-green
-
-### GitHub Actions
-
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: capsule/setup-cli@v1
-      - run: capsule deploy --env production
-```
-
-## 🧪 Testes
-
-### Test Strategy
-
-- **Unit tests** para lógica de negócio
-- **Integration tests** para APIs
-- **E2E tests** para fluxos críticos
-- **Performance tests** para benchmarks
-
-### Test Structure
-
-```typescript
-// Unit test example
-describe('DeployAppUseCase', () => {
-  it('should deploy app successfully', async () => {
-    const useCase = new DeployAppUseCase(mockAppRepo, mockRegistry, mockRuntime, mockEventPublisher);
-
-    const result = await useCase.execute({
-      name: 'test-app',
-      imageRef: 'ghcr.io/org/app:latest',
-    });
-
-    expect(result.name).toBe('test-app');
-    expect(mockRuntime.deploy).toHaveBeenCalledWith(result);
-  });
-});
-```
-
-## 📚 Referências
-
-- [Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)
-- [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/)
-- [Feature-Sliced Design](https://feature-sliced.design/)
 - [Nx Documentation](https://nx.dev/)
 - [NestJS Documentation](https://nestjs.com/)
+- [React Router Documentation](https://reactrouter.com/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+- [Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)

@@ -2,11 +2,63 @@
 
 > Version: 2.0.0
 
-> Last Updated: 2025-08-24
+> Last Updated: 2025-08-27
 
-> Status: In Planning
+> Status: Early Development (Pre-MVP)
 
-> Document Type: Technical Product Specification
+> Document Type: Product Vision & Technical Specification
+
+⚠️ **Important Note**: This document describes the complete vision for the Capsule platform. The project is currently in early development stage with basic scaffolding. Most features described here are planned but not yet implemented.
+
+---
+
+## 📌 Current Implementation Status
+
+### What's Currently Implemented
+
+✅ **Basic Infrastructure**
+- Nx monorepo structure configured
+- Docker Compose for local development (PostgreSQL, Redis, RabbitMQ, Vault)
+- TypeScript configuration across all projects
+
+✅ **Backend Services (Scaffolded)**
+- `api-gateway`: NestJS BFF running on port 3000 with `/api` prefix
+- `service-auth`: Basic NestJS service structure (not functional)
+- Basic health check endpoints
+
+✅ **Frontend Application (Basic)**
+- `portal`: React 19 + React Router v7 + Vite setup
+- Tailwind CSS v4 integration
+- Basic routing structure
+- Shared UI component library setup
+
+✅ **Shared Libraries**
+- `@acme/contexts-auth`: Authentication context (scaffold only)
+- `@acme/shared-dto`: DTO library (scaffold only)
+- `@acme/shared-types`: Shared TypeScript types (scaffold only)
+- `@acme/ui-react`: React component library with Tailwind
+
+✅ **Testing Infrastructure**
+- Jest for unit tests
+- Playwright for e2e tests
+- Test configurations for all projects
+
+### What's NOT Yet Implemented
+
+❌ **Core Platform Features**
+- No authentication system
+- No deployment functionality
+- No service orchestration
+- No monitoring or observability
+- No CLI tool
+- No preview environments
+- No cost tracking
+
+❌ **Business Logic**
+- No domain logic in bounded contexts
+- No use cases implemented
+- No database models or migrations
+- No API endpoints beyond health checks
 
 ---
 
@@ -14,7 +66,7 @@
 
 ### Product Vision Statement
 
-Capsule é a **plataforma de deployment e gerenciamento de aplicações cloud-native** que simplifica a jornada do código à produção. Oferecemos uma experiência unificada para deploy de containers, microserviços, e aplicações full-stack - desde aplicações simples até arquiteturas empresariais complexas.
+Capsule is the **cloud-native application deployment and management platform** that simplifies the journey from code to production. We offer a unified experience for deploying containers, microservices, and full-stack applications - from simple applications to complex enterprise architectures.
 
 **Diferencial único**: Enquanto outras plataformas focam em nichos específicos (Vercel para Next.js, Heroku para apps simples), Capsule oferece flexibilidade total com a simplicidade de um PaaS, suportando:
 

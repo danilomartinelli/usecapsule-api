@@ -24,7 +24,7 @@ Capsule transforms weeks of infrastructure setup into minutes of configuration-f
 
 **Why it's important**: Eliminates the need for DevOps expertise and reduces deployment time from hours to minutes. Teams can focus on building features instead of managing infrastructure.
 
-**How it works**:
+**How it works**: 
 - Auto-detection engine analyzes your codebase structure
 - Supports any Docker container out of the box
 - Monorepo-aware with intelligent service discovery
