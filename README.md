@@ -1,7 +1,5 @@
 # Capsule
 
-<a alt="Capsule logo" href="https://usecapsule.com.br" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danilomartinelli/usecapsule/main/public/logo.png" width="149"></a>
-
 ✨ **Capsule** - Cloud-native application deployment and management platform ✨
 
 > **Current Status**: Early Development (Pre-MVP) - Basic infrastructure scaffolding in place
@@ -46,7 +44,7 @@ Comprehensive documentation is available in the `docs/` folder:
 
 ## Project Structure
 
-```
+```text
 acme/                       # Monorepo root
 ├── apps/                   # Applications
 │   ├── api-gateway/       # NestJS BFF API (✅ Implemented)
@@ -104,6 +102,7 @@ npx nx graph                    # View dependency graph
 ⚠️ **Early Development Phase**
 
 **✅ Implemented:**
+
 - Basic Nx monorepo structure
 - NestJS API gateway scaffold
 - React portal with Tailwind CSS
@@ -111,11 +110,13 @@ npx nx graph                    # View dependency graph
 - Jest and Playwright testing
 
 **🚧 In Progress:**
+
 - Authentication system
 - Service deployment functionality
 - API endpoints implementation
 
 **📋 Planned:**
+
 - CLI tool
 - Preview environments
 - Monitoring and observability
@@ -125,11 +126,12 @@ See [Core Features](./docs/core-features.md) for the complete product vision.
 
 ## Resources
 
-- **Documentation**: [docs/](./docs/) folder
+- **Documentation**: [docs/](./docs/getting-started.md) Getting Started
 - **Nx Graph**: Run `npx nx graph` to visualize dependencies
 - **Issues**: [GitHub Issues](https://github.com/capsule-dev/capsule/issues)
 
 ### External Resources
+
 - [Nx Documentation](https://nx.dev)
 - [NestJS Documentation](https://docs.nestjs.com)
 - [React Documentation](https://react.dev)
