@@ -43,7 +43,7 @@ This document details the technical architecture of the Capsule project, includi
 ### Layer Organization
 
 ```
-acme/ (Capsule Platform)
+usecapsule/ (Capsule Platform)
 ├── apps/                    # Executable applications
 │   ├── api-gateway/        # NestJS BFF API (✅ Implemented)
 │   ├── portal/             # React + Vite Dashboard (✅ Implemented - Basic)
@@ -176,7 +176,7 @@ apps/portal/app/           # Future structure
 - **Framework**: React v19 with React Router v7.2
 - **Build Tool**: Vite v6
 - **Styling**: Tailwind CSS v4 with Vite plugin
-- **UI Library**: Custom React component library (@acme/ui-react)
+- **UI Library**: Custom React component library (@usecapsule/ui-react)
 - **Testing**: Jest with Testing Library
 
 ### Infrastructure (Docker)

@@ -1,5 +1,5 @@
 {
-  "name": "@acme/service-auth",
+  "name": "@usecapsule/service-auth",
   "version": "0.0.1",
   "private": true,
   "dependencies": {}

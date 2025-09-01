@@ -1,8 +1,8 @@
 {
-  "name": "@acme/api-gateway-e2e",
+  "name": "@usecapsule/api-gateway-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "implicitDependencies": ["@acme/api-gateway"],
+  "implicitDependencies": ["@usecapsule/api-gateway"],
   "targets": {
     "e2e": {
       "executor": "@nx/jest:jest",
@@ -11,7 +11,7 @@
         "jestConfig": "apps/api-gateway-e2e/jest.config.ts",
         "passWithNoTests": true
       },
-      "dependsOn": ["@acme/api-gateway:build", "@acme/api-gateway:serve"]
+      "dependsOn": ["@usecapsule/api-gateway:build", "@usecapsule/api-gateway:serve"]
     }
   }
 }

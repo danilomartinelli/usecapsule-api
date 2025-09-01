@@ -33,10 +33,10 @@
 - Shared UI component library setup
 
 ✅ **Shared Libraries**
-- `@acme/contexts-auth`: Authentication context (scaffold only)
-- `@acme/shared-dto`: DTO library (scaffold only)
-- `@acme/shared-types`: Shared TypeScript types (scaffold only)
-- `@acme/ui-react`: React component library with Tailwind
+- `@usecapsule/contexts-auth`: Authentication context (scaffold only)
+- `@usecapsule/shared-dto`: DTO library (scaffold only)
+- `@usecapsule/shared-types`: Shared TypeScript types (scaffold only)
+- `@usecapsule/ui-react`: React component library with Tailwind
 
 ✅ **Testing Infrastructure**
 - Jest for unit tests

@@ -1,5 +1,5 @@
 export default {
-  displayName: '@acme/portal',
+  displayName: '@usecapsule/portal',
   preset: '../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/test-setup.ts'],
   transform: {

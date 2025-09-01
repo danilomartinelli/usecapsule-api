@@ -45,7 +45,7 @@ Comprehensive documentation is available in the `docs/` folder:
 ## Project Structure
 
 ```text
-acme/                       # Monorepo root
+usecapsule/                 # Monorepo root
 ├── apps/                   # Applications
 │   ├── api-gateway/       # NestJS BFF API (✅ Implemented)
 │   ├── portal/            # React dashboard (✅ Basic implementation)

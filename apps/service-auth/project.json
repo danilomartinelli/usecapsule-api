@@ -1,5 +1,5 @@
 {
-  "name": "@acme/service-auth",
+  "name": "@usecapsule/service-auth",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/service-auth/src",
   "projectType": "application",
@@ -49,15 +49,15 @@
       "defaultConfiguration": "development",
       "dependsOn": ["build"],
       "options": {
-        "buildTarget": "@acme/service-auth:build",
+        "buildTarget": "@usecapsule/service-auth:build",
         "runBuildTargetDependencies": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "@acme/service-auth:build:development"
+          "buildTarget": "@usecapsule/service-auth:build:development"
         },
         "production": {
-          "buildTarget": "@acme/service-auth:build:production"
+          "buildTarget": "@usecapsule/service-auth:build:production"
         }
       }
     },

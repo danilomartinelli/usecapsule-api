@@ -153,10 +153,10 @@ libs/
 
 The project uses TypeScript path mappings configured in `tsconfig.base.json`:
 
-- `@acme/contexts-auth`: Maps to `libs/contexts/auth`
-- `@acme/shared-dto`: Maps to `libs/shared/dto`
-- `@acme/shared-types`: Maps to `libs/shared/types`
-- `@acme/ui-react`: Maps to `libs/ui/react`
+- `@usecapsule/contexts-auth`: Maps to `libs/contexts/auth`
+- `@usecapsule/shared-dto`: Maps to `libs/shared/dto`
+- `@usecapsule/shared-types`: Maps to `libs/shared/types`
+- `@usecapsule/ui-react`: Maps to `libs/ui/react`
 
 ## Backend Services Configuration
 

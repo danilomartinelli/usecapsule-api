@@ -24,7 +24,7 @@ export default defineConfig({
   },
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npx nx run @acme/portal:dev',
+    command: 'npx nx run @usecapsule/portal:dev',
     url: 'http://localhost:4200',
     reuseExistingServer: true,
     cwd: workspaceRoot,

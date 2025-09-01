@@ -1,5 +1,5 @@
 {
-  "name": "@acme/shared-dto",
+  "name": "@usecapsule/shared-dto",
   "version": "0.0.1",
   "private": true,
   "type": "module",

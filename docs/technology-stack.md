@@ -245,22 +245,22 @@ This document provides a comprehensive overview of all technologies used in the 
 
 ### Internal Libraries ✅ Implemented
 
-#### @acme/contexts-auth
+#### @usecapsule/contexts-auth
 - **Purpose**: Authentication bounded context
 - **Status**: Scaffold only
 - **Location**: `libs/contexts/auth`
 
-#### @acme/shared-dto
+#### @usecapsule/shared-dto
 - **Purpose**: Shared Data Transfer Objects
 - **Status**: Scaffold only
 - **Location**: `libs/shared/dto`
 
-#### @acme/shared-types
+#### @usecapsule/shared-types
 - **Purpose**: Shared TypeScript type definitions
 - **Status**: Scaffold only
 - **Location**: `libs/shared/types`
 
-#### @acme/ui-react
+#### @usecapsule/ui-react
 - **Purpose**: Shared React components
 - **Status**: Basic implementation
 - **Location**: `libs/ui/react`

@@ -10,7 +10,7 @@ const swcJestConfig = JSON.parse(
 swcJestConfig.swcrc = false;
 
 export default {
-  displayName: '@acme/api-gateway',
+  displayName: '@usecapsule/api-gateway',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

@@ -345,7 +345,7 @@ export * from './lib/product.types';
 
 3. **Use in both frontend and backend**:
 ```typescript
-import { Product } from '@acme/shared-types';
+import { Product } from '@usecapsule/shared-types';
 ```
 
 ## Debugging

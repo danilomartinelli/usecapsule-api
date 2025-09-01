@@ -1,5 +1,5 @@
 {
-  "name": "@acme/api-gateway",
+  "name": "@usecapsule/api-gateway",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/api-gateway/src",
   "projectType": "application",
@@ -49,15 +49,15 @@
       "defaultConfiguration": "development",
       "dependsOn": ["build"],
       "options": {
-        "buildTarget": "@acme/api-gateway:build",
+        "buildTarget": "@usecapsule/api-gateway:build",
         "runBuildTargetDependencies": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "@acme/api-gateway:build:development"
+          "buildTarget": "@usecapsule/api-gateway:build:development"
         },
         "production": {
-          "buildTarget": "@acme/api-gateway:build:production"
+          "buildTarget": "@usecapsule/api-gateway:build:production"
         }
       }
     },

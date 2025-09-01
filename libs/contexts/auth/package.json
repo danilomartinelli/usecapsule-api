@@ -1,5 +1,5 @@
 {
-  "name": "@acme/context-auth",
+  "name": "@usecapsule/context-auth",
   "version": "0.0.1",
   "private": true,
   "main": "./dist/index.js",
