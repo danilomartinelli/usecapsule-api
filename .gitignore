@@ -69,12 +69,16 @@ node_modules/
 # Editor directories and files
 .idea
 .vscode
-.claude
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Task files
+# AI
+.claude
+CLAUDE.md
+.mcp.*
+.github/instructions
 .taskmaster
+
