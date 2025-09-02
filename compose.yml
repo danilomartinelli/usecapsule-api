@@ -1,3 +1,5 @@
+name: usecapsule-api
+
 services:
   # PostgreSQL Database
   postgres:

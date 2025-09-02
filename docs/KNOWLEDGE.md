@@ -195,7 +195,7 @@ The system automatically:
 ```yaml
 Analyzed Files:
   - package.json, requirements.txt, go.mod, Gemfile
-  - Dockerfile, docker-compose.yml
+  - Dockerfile, compose.yml
   - Configuration files (.env, config/*, settings.*)
   - Build scripts (Makefile, build.gradle, pom.xml)
 ```
@@ -925,7 +925,7 @@ Azure Resources:
 **Local Development Setup**
 
 ```yaml
-# Generated docker-compose.yml
+# Generated compose.yml
 version: '3.9'
 
 services:

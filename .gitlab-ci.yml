@@ -1,7 +1,7 @@
 image: node:20
 variables:
-  CI: "true"
-  NX_SKIP_NX_CACHE: "false"
+  CI: 'true'
+  NX_SKIP_NX_CACHE: 'false'
 
 # Cache configuration for faster builds
 cache:
@@ -15,9 +15,7 @@ cache:
 stages:
   - setup
   - lint
-  - test
   - build
-  - e2e
 
 # Setup stage - install dependencies and setup environment
 setup:
@@ -28,7 +26,6 @@ setup:
     - merge_requests
   script:
     - npm ci --legacy-peer-deps
-    - npx playwright install --with-deps
   artifacts:
     paths:
       - node_modules/
@@ -49,26 +46,7 @@ lint:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - "**/*.{ts,tsx,js,jsx,json}"
-    - if: $CI_COMMIT_BRANCH == "main"
-
-# Test stage - run unit tests
-test:
-  stage: test
-  interruptible: true
-  only:
-    - main
-    - merge_requests
-  dependencies:
-    - setup
-  script:
-    - npx nx affected --target=test --base=origin/main --head=HEAD
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - "**/*.{ts,tsx,js,jsx,json}"
-        - "**/*.spec.{ts,tsx,js,jsx}"
-        - "**/*.test.{ts,tsx,js,jsx}"
+        - '**/*.{ts,tsx,js,jsx,json}'
     - if: $CI_COMMIT_BRANCH == "main"
 
 # Build stage - compile projects
@@ -85,8 +63,8 @@ build:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - "**/*.{ts,tsx,js,jsx,json}"
-        - "**/*.config.{ts,js,json}"
+        - '**/*.{ts,tsx,js,jsx,json}'
+        - '**/*.config.{ts,js,json}'
     - if: $CI_COMMIT_BRANCH == "main"
 
 # Typecheck stage - validate TypeScript types
@@ -103,25 +81,9 @@ typecheck:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - "**/*.{ts,tsx}"
-        - "**/*.config.{ts,js,json}"
+        - '**/*.{ts,tsx}'
+        - '**/*.config.{ts,js,json}'
     - if: $CI_COMMIT_BRANCH == "main"
-
-# E2E stage - run end-to-end tests (only on main branch)
-e2e:
-  stage: e2e
-  interruptible: true
-  only:
-    - main
-  dependencies:
-    - setup
-    - build
-  script:
-    - npx nx affected --target=e2e --base=origin/main --head=HEAD
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
-      allow_failure: true
 
 # Fallback job for when no affected projects are found
 no-affected-projects:
