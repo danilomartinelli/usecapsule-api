@@ -1,0 +1,293 @@
+name: Dependency Security Audit
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  push:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/dependency-audit.yml'
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+    inputs:
+      audit_level:
+        description: 'Minimum audit level to fail on'
+        required: false
+        default: 'moderate'
+        type: choice
+        options:
+          - low
+          - moderate
+          - high
+          - critical
+
+jobs:
+  security-audit:
+    name: Security Vulnerability Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run NPM Audit
+      id: npm_audit
+      run: |
+        AUDIT_LEVEL="${{ github.event.inputs.audit_level || 'moderate' }}"
+        echo "Running npm audit with level: $AUDIT_LEVEL"
+        
+        # Run audit and capture result
+        npm audit --audit-level=$AUDIT_LEVEL --json > audit-report.json || AUDIT_EXIT=$?
+        
+        # Parse results
+        TOTAL=$(jq '.metadata.vulnerabilities.total' audit-report.json)
+        CRITICAL=$(jq '.metadata.vulnerabilities.critical' audit-report.json)
+        HIGH=$(jq '.metadata.vulnerabilities.high' audit-report.json)
+        MODERATE=$(jq '.metadata.vulnerabilities.moderate' audit-report.json)
+        LOW=$(jq '.metadata.vulnerabilities.low' audit-report.json)
+        
+        echo "vulnerabilities_total=$TOTAL" >> $GITHUB_OUTPUT
+        echo "vulnerabilities_critical=$CRITICAL" >> $GITHUB_OUTPUT
+        echo "vulnerabilities_high=$HIGH" >> $GITHUB_OUTPUT
+        echo "vulnerabilities_moderate=$MODERATE" >> $GITHUB_OUTPUT
+        echo "vulnerabilities_low=$LOW" >> $GITHUB_OUTPUT
+        
+        # Generate summary
+        echo "## 🔒 Security Audit Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+        echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+        echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+        echo "| Moderate | $MODERATE |" >> $GITHUB_STEP_SUMMARY
+        echo "| Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Total** | **$TOTAL** |" >> $GITHUB_STEP_SUMMARY
+        
+        # Exit with original audit status
+        exit ${AUDIT_EXIT:-0}
+    
+    - name: Upload Audit Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: npm-audit-report
+        path: audit-report.json
+    
+    - name: Create Issue for Critical Vulnerabilities
+      if: failure() && steps.npm_audit.outputs.vulnerabilities_critical > 0
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const critical = ${{ steps.npm_audit.outputs.vulnerabilities_critical }};
+          const high = ${{ steps.npm_audit.outputs.vulnerabilities_high }};
+          const total = ${{ steps.npm_audit.outputs.vulnerabilities_total }};
+          
+          const issueTitle = `🚨 ${critical} Critical Security Vulnerabilities Found`;
+          const issueBody = `
+          ## Security Alert
+          
+          The dependency audit has detected security vulnerabilities that require immediate attention:
+          
+          - **Critical**: ${critical}
+          - **High**: ${high}
+          - **Total**: ${total}
+          
+          ### Recommended Actions
+          1. Run \`npm audit\` locally to see details
+          2. Run \`npm audit fix\` to apply automatic fixes
+          3. Review and update any packages that cannot be automatically fixed
+          
+          ### Workflow Run
+          [View Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          cc @${{ github.repository_owner }}
+          `;
+          
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: issueTitle,
+            body: issueBody,
+            labels: ['security', 'dependencies', 'critical']
+          });
+
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check Licenses
+      run: |
+        echo "## 📜 License Compliance Check" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Install license checker
+        npm install -g license-checker
+        
+        # Get license summary
+        license-checker --summary --excludePrivatePackages > license-summary.txt
+        
+        # Check for problematic licenses
+        ALLOWED="MIT;ISC;Apache-2.0;BSD-3-Clause;BSD-2-Clause;0BSD;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0"
+        
+        if license-checker --onlyAllow "$ALLOWED" --excludePrivatePackages > /dev/null 2>&1; then
+          echo "✅ All licenses are compatible" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ Some licenses may not be compatible" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### License Summary" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat license-summary.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Upload License Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: license-report
+        path: license-summary.txt
+
+  outdated-check:
+    name: Check Outdated Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check Outdated Packages
+      run: |
+        echo "## 📦 Outdated Dependencies" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Get outdated packages
+        npm outdated --json > outdated.json || true
+        
+        # Count outdated packages
+        OUTDATED_COUNT=$(jq 'length' outdated.json)
+        
+        if [ "$OUTDATED_COUNT" -eq 0 ]; then
+          echo "✅ All dependencies are up to date!" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "Found $OUTDATED_COUNT outdated packages:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Current | Wanted | Latest |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Parse and display outdated packages
+          jq -r 'to_entries[] | "| \(.key) | \(.value.current) | \(.value.wanted) | \(.value.latest) |"' outdated.json >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Upload Outdated Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: outdated-report
+        path: outdated.json
+
+  create-update-pr:
+    name: Create Update PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    needs: [security-audit, license-check, outdated-check]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Update Dependencies
+      id: update
+      run: |
+        # Create branch
+        BRANCH_NAME="deps/automated-update-$(date +%Y%m%d)"
+        git checkout -b $BRANCH_NAME
+        
+        # Run safe updates
+        npm update
+        npm audit fix
+        
+        # Check if there are changes
+        if git diff --quiet package*.json; then
+          echo "No updates available"
+          echo "has_updates=false" >> $GITHUB_OUTPUT
+        else
+          echo "Updates found"
+          echo "has_updates=true" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Create Pull Request
+      if: steps.update.outputs.has_updates == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ steps.update.outputs.branch_name }}
+        title: 'chore(deps): Automated dependency updates'
+        body: |
+          ## 🤖 Automated Dependency Update
+          
+          This PR contains automated dependency updates from the weekly security scan.
+          
+          ### Changes
+          - Updated dependencies to latest patch/minor versions
+          - Applied automatic security fixes
+          
+          ### Testing Checklist
+          - [ ] All tests pass
+          - [ ] Build completes successfully
+          - [ ] No breaking changes detected
+          
+          ### Review
+          Please review the changes and ensure they don't introduce any breaking changes.
+          
+          ---
+          *This PR was automatically created by the dependency audit workflow*
+        labels: |
+          dependencies
+          automated
+        assignees: ${{ github.repository_owner }}

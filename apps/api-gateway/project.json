@@ -60,11 +60,6 @@
           "buildTarget": "@usecapsule/api-gateway:build:production"
         }
       }
-    },
-    "test": {
-      "options": {
-        "passWithNoTests": true
-      }
     }
   }
 }

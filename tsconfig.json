@@ -4,31 +4,13 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/api-gateway-e2e"
-    },
-    {
       "path": "./apps/api-gateway"
-    },
-    {
-      "path": "./apps/service-auth"
-    },
-    {
-      "path": "./libs/contexts/auth"
     },
     {
       "path": "./libs/shared/dto"
     },
     {
       "path": "./libs/shared/types"
-    },
-    {
-      "path": "./libs/ui/react"
-    },
-    {
-      "path": "./apps/portal-e2e"
-    },
-    {
-      "path": "./apps/portal"
     }
   ]
 }
