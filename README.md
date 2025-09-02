@@ -24,8 +24,8 @@ Capsule is a cloud-native application deployment platform that simplifies infras
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/usecapsule/capsule.git
-cd capsule
+git clone git@github.com:danilomartinelli/usecapsule-api.git
+cd usecapsule-api
 ```
 
 2. Install dependencies:
@@ -254,8 +254,8 @@ For detailed documentation, see:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/usecapsule/capsule/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/usecapsule/capsule/discussions)
+- **Issues**: [GitHub Issues](https://github.com/danilomartinelli/usecapsule-api/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/danilomartinelli/usecapsule-api/discussions)
 - **Security**: Report security vulnerabilities to <security@usecapsule.com>
 
 ## Roadmap

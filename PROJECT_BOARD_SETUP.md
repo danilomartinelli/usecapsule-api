@@ -4,7 +4,7 @@
 
 Como criar o Project Board no GitHub:
 
-1. **Acesse o repositório** em https://github.com/danilomartinelli/acme
+1. **Acesse o repositório** em https://github.com/danilomartinelli/usecapsule-api
 2. **Clique na aba "Projects"**
 3. **Clique em "New project"**
 4. **Selecione "Board" como template**
