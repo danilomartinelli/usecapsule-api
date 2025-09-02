@@ -45,21 +45,25 @@ Capsule provides:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        Portal (React 19)                      │
-│                   React Router 7, TypeScript                  │
+│              External Clients (Web, Mobile, SDKs)             │
+│                   REST API / GraphQL / WebSocket              │
 └─────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                   API Gateway (NestJS)                        │
-│              Authentication, Routing, Rate Limiting           │
+│        Authentication, Routing, Rate Limiting, Swagger        │
+│              Public/Private/Token-based Routes                │
 └─────────────────────────────────────────────────────────────┘
+                                │
+                          [RabbitMQ Bus]
                                 │
                 ┌───────────────┼───────────────┐
                 ▼               ▼               ▼
 ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
 │  Auth Service    │ │ Deploy Service   │ │ Monitor Service  │
 │    (NestJS)      │ │    (NestJS)      │ │    (NestJS)      │
+│  [RabbitMQ Only] │ │  [RabbitMQ Only] │ │  [RabbitMQ Only] │
 └──────────────────┘ └──────────────────┘ └──────────────────┘
                                 │
                                 ▼
@@ -69,22 +73,24 @@ Capsule provides:
 └─────────────────────────────────────────────────────────────┘
 ```
 
+**Note**: All microservices communicate exclusively through RabbitMQ message queues. Only the API Gateway exposes HTTP endpoints to external clients.
+
 ### 2.2 Technology Stack
 
-#### Frontend
+#### Frontend (Separate Repository)
 
-- **Framework**: React 19 with React Router 7
-- **Language**: TypeScript 5.8
-- **UI Components**: React Aria Components
-- **Styling**: TailwindCSS 4.1
-- **Build**: Vite 6.0
+- Web applications will be developed in a separate repository
+- Communication with backend services via API Gateway
+- Technology stack to be defined in web repository documentation
 
 #### Backend Services
 
 - **Framework**: NestJS 11
 - **Runtime**: Node.js 20+
 - **Language**: TypeScript 5.8
-- **Communication**: REST/GraphQL APIs, WebSockets
+- **API Gateway Communication**: REST/GraphQL APIs, WebSockets (external)
+- **Inter-service Communication**: RabbitMQ (event-driven architecture)
+- **API Documentation**: OpenAPI/Swagger (auto-generated)
 - **Build**: Webpack 5
 
 #### Infrastructure
@@ -102,18 +108,15 @@ Capsule provides:
 @usecapsule/source/
 ├── apps/
 │   ├── api-gateway/         # Main API BFF
-│   ├── service-auth/        # Authentication microservice
+│   ├── auth-service/        # Authentication microservice
 │   ├── service-deploy/      # Deployment orchestration (planned)
-│   ├── service-monitor/     # Monitoring & observability (planned)
-│   └── portal/              # React web application
+│   └── service-monitor/     # Monitoring & observability (planned)
 ├── libs/
 │   ├── contexts/
 │   │   └── auth/           # Authentication domain logic
-│   ├── shared/
-│   │   ├── dto/            # Data transfer objects
-│   │   └── types/          # TypeScript type definitions
-│   └── ui/
-│       └── react/          # Shared React components
+│   └── shared/
+│       ├── dto/            # Data transfer objects
+│       └── types/          # TypeScript type definitions
 └── infrastructure/
     ├── docker/             # Docker configurations
     └── k8s/               # Kubernetes manifests
@@ -618,7 +621,65 @@ CREATE TABLE organization_members (
 
 ## 5. API Specifications
 
-### 5.1 REST API Endpoints
+### 5.1 API Access Levels
+
+The Capsule API provides multiple access levels to support different use cases:
+
+#### Public Routes (No Authentication)
+- Health checks and status endpoints
+- OpenAPI/Swagger documentation
+- Public marketplace listings
+- Service discovery endpoints
+
+#### Token-Based Routes (API Key Authentication)
+- Developer API access via SDKs
+- CI/CD integrations
+- Third-party service integrations
+- Webhook endpoints
+
+#### Private Routes (JWT Authentication)
+- User dashboard access
+- Organization management
+- Internal admin operations
+- Sensitive configuration
+
+### 5.2 OpenAPI/Swagger Integration
+
+All API endpoints are automatically documented using OpenAPI 3.0 specification:
+
+```typescript
+// Automatically generated and available at:
+GET /api/documentation       # Swagger UI
+GET /api/documentation.json  # OpenAPI JSON spec
+GET /api/documentation.yaml  # OpenAPI YAML spec
+```
+
+### 5.3 SDK Support
+
+Official SDKs will be provided for:
+- **JavaScript/TypeScript**: @capsule/sdk-js
+- **Python**: capsule-sdk
+- **Go**: github.com/usecapsule/sdk-go
+- **CLI**: capsule-cli
+
+Example SDK usage:
+```typescript
+import { CapsuleClient } from '@capsule/sdk-js';
+
+const client = new CapsuleClient({
+  apiKey: 'cap_123456789',
+  baseURL: 'https://api.capsule.dev'
+});
+
+// Deploy a service
+await client.services.deploy({
+  name: 'my-api',
+  image: 'node:20',
+  environment: 'production'
+});
+```
+
+### 5.4 REST API Endpoints
 
 #### Authentication
 
@@ -828,17 +889,17 @@ type Subscription {
 - [ ] Health checks implementation
 - [ ] Basic resource management
 
-#### Sprint 5-6: Portal & Observability
+#### Sprint 5-6: API Development & Observability
 
-- [ ] React portal with dashboard
-- [ ] Real-time log streaming
+- [ ] Complete API Gateway implementation
+- [ ] Real-time log streaming via WebSockets
 - [ ] Basic metrics collection
 - [ ] Environment variables management
 
 **Deliverables**:
 
 - Working deployment platform
-- Basic web portal
+- Full REST API with documentation
 - API documentation
 - Local development environment
 
@@ -912,6 +973,26 @@ type Subscription {
 
 ```typescript
 // apps/api-gateway/src/main.ts
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  
+  // Swagger/OpenAPI setup
+  const config = new DocumentBuilder()
+    .setTitle('Capsule API')
+    .setDescription('Cloud-native deployment platform API')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addApiKey({ type: 'apiKey', name: 'X-API-Key', in: 'header' })
+    .build();
+  
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/documentation', app, document);
+  
+  await app.listen(3000);
+}
+
 @Module({
   imports: [
     AuthModule,
@@ -919,6 +1000,13 @@ type Subscription {
     ServiceModule,
     DeploymentModule,
     MonitoringModule,
+    RabbitMQModule.forRoot({
+      uri: 'amqp://localhost:5672',
+      exchanges: [
+        { name: 'capsule.events', type: 'topic' },
+        { name: 'capsule.commands', type: 'direct' },
+      ],
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
@@ -941,9 +1029,60 @@ type Subscription {
 export class AppModule {}
 ```
 
+#### Microservice Communication Pattern
+
+All microservices communicate exclusively through RabbitMQ, never exposing HTTP endpoints:
+
+```typescript
+// apps/service-auth/src/main.ts
+import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+
+async function bootstrap() {
+  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+    AppModule,
+    {
+      transport: Transport.RMQ,
+      options: {
+        urls: ['amqp://localhost:5672'],
+        queue: 'auth_queue',
+        queueOptions: {
+          durable: true,
+        },
+      },
+    },
+  );
+  await app.listen();
+}
+```
+
 #### Authentication Service
 
 ```typescript
+// apps/service-auth/src/auth/auth.controller.ts
+import { Controller } from '@nestjs/common';
+import { MessagePattern, EventPattern } from '@nestjs/microservices';
+
+@Controller()
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
+  @MessagePattern('auth.validate')
+  async validateUser(data: { email: string; password: string }) {
+    return this.authService.validateUser(data.email, data.password);
+  }
+
+  @MessagePattern('auth.generate-tokens')
+  async generateTokens(user: User) {
+    return this.authService.generateTokens(user);
+  }
+
+  @EventPattern('user.created')
+  async handleUserCreated(data: UserCreatedEvent) {
+    // Handle user creation event
+  }
+}
+
 // apps/service-auth/src/auth/auth.service.ts
 @Injectable()
 export class AuthService {

@@ -1,9 +1,0 @@
-{
-  "name": "@usecapsule/portal",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["scope:portal", "type:web", "arch:feature-sliced"],
-  "sourceRoot": "apps/portal/src",
-  "projectType": "application",
-  "// targets": "to see all targets run: nx show project @usecapsule/portal --web",
-  "targets": {}
-}

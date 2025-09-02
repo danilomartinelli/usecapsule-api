@@ -1,9 +1,0 @@
-{
-  "name": "@usecapsule/context-auth",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/contexts/auth/src",
-  "projectType": "library",
-  "tags": ["scope:contexts", "type:lib", "arch:hexagonal"],
-  "// targets": "to see all targets run: nx show project @usecapsule/context-auth --web",
-  "targets": {}
-}

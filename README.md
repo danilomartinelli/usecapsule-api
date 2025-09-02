@@ -59,21 +59,17 @@ nx run-many --target=serve --all
 # API Gateway
 nx serve api-gateway
 
-# Microservices
-nx serve auth-service # Coming Soon
-nx serve notification-service # Coming Soon
-# ...
-
-# Web Apps
-nx serve portal
-nx serve dashboard
+# Microservices (Coming Soon)
+nx serve auth-service
+nx serve notification-service
+nx serve deployment-service
 # ...
 ```
 
 ### Available Services
 
-- **Portal** - <http://localhost:4200> (React web application)
 - **API Gateway** - <http://localhost:3000> (Main API endpoint)
+- **Web Applications** - Hosted in separate repository (connects to API Gateway)
 
 ## Available Tools
 
@@ -103,6 +99,7 @@ nx run-many --target=test --all
 
 # Run tests for affected projects
 npm run affected:test
+```
 
 ### Code Quality
 
@@ -123,19 +120,11 @@ npm run graph
 @usecapsule/source/
 ├── apps/                      # Application projects
 │   ├── api-gateway/          # Main API Backend for Frontend
-│   ├── portal/               # React web application
-│   ├── dashboard/            # Admin dashboard (planned)
-│   ├── landing/              # Landing page (planned)
-│   └── *-service/             # Microservices
+│   └── *-service/            # Microservices (auth, notification, deployment, etc.)
 ├── libs/                     # Shared libraries
-│   ├── contexts/            # Domain-specific business logic
-│   │   ├── auth/           # Authentication context
-│   │   └── */              # Contexts for other microservices
-│   ├── shared/              # Shared utilities and types
-│   │   ├── dto/            # Data transfer objects
-│   │   └── types/          # TypeScript type definitions
-│   └── ui/                  # UI component libraries
-│       └── react/          # Shared React components
+│   └── shared/              # Shared utilities and types
+│       ├── dto/            # Data transfer objects
+│       └── types/          # TypeScript type definitions
 ├── infrastructure/          # Infrastructure configurations
 │   ├── docker/             # Docker configurations (planned)
 │   └── k8s/                # Kubernetes manifests (planned)
@@ -156,7 +145,6 @@ npm run graph
 | `npm run build:all` | Build all applications |
 | `npm run build:prod` | Build all applications for production |
 | `npm run affected:build` | Build only affected projects |
-| `npm run affected:test` | Test only affected projects |
 | `npm run affected:lint` | Lint only affected projects |
 | `npm run validate` | Run linting and tests for all projects |
 | `npm run graph` | View project dependency graph |
@@ -166,14 +154,13 @@ npm run graph
 
 - **Monorepo**: Nx 21.4
 - **Backend**: NestJS 11, Node.js 20+
-- **Frontend**: React 19, React Router 7, TailwindCSS 4.1
+- **Frontend**: Web applications in separate repository
 - **Language**: TypeScript 5.8
 - **Database**: PostgreSQL 15
 - **Cache**: Redis 7
 - **Message Queue**: RabbitMQ 3
 - **Secrets**: HashiCorp Vault
-- **Testing**: Jest, Playwright (planned)
-- **Build Tools**: Vite, Webpack
+- **Build Tools**: Webpack, SWC
 
 ## Environment Variables
 
