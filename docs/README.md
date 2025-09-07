@@ -5,12 +5,14 @@ Welcome to the Capsule platform documentation! This comprehensive guide covers e
 ## 📚 Documentation Structure
 
 ### 🏗️ [Architecture](./architecture/)
+
 - [System Overview](./architecture/overview.md) - High-level system architecture and design principles
 - Component diagrams and interaction patterns
 - Microservices communication patterns
 - Security and deployment architecture
 
 ### 🗄️ [Database](./database/)
+
 - [Database Architecture](./database/overview.md) - Complete database setup and migration guide
 - Database per service pattern
 - Slonik type-safe queries
@@ -18,18 +20,21 @@ Welcome to the Capsule platform documentation! This comprehensive guide covers e
 - Development and production guidelines
 
 ### 👨‍💻 [Development](./development/)
+
 - [Getting Started Guide](./development/setup.md) - Complete developer setup
 - Development workflow and best practices
 - Testing strategies and debugging
 - Code style and contribution guidelines
 
 ### 🔌 [API Documentation](./api/)
+
 - REST API reference and examples
 - Message patterns and RabbitMQ communication
 - Authentication and authorization
 - Rate limiting and error handling
 
 ### 🚀 [Deployment](./deployment/)
+
 - Docker and container configuration
 - Kubernetes deployment manifests
 - Environment configuration
@@ -40,7 +45,7 @@ Welcome to the Capsule platform documentation! This comprehensive guide covers e
 ### For Developers
 
 1. **Set up your environment**: Follow the [Getting Started Guide](./development/setup.md)
-2. **Understand the architecture**: Read the [System Overview](./architecture/overview.md)  
+2. **Understand the architecture**: Read the [System Overview](./architecture/overview.md)
 3. **Learn the database patterns**: Check out [Database Architecture](./database/overview.md)
 4. **Start contributing**: Follow our development workflow
 
@@ -64,7 +69,7 @@ Welcome to the Capsule platform documentation! This comprehensive guide covers e
   - Docker Compose for local development
   - PostgreSQL, Redis, RabbitMQ, and Vault services
 
-- **Database System** 
+- **Database System**
   - Database per service pattern with dedicated PostgreSQL instances
   - Slonik for type-safe database queries with connection pooling
   - Flyway for version-controlled database migrations
@@ -90,7 +95,7 @@ Welcome to the Capsule platform documentation! This comprehensive guide covers e
 
 - **Additional Services**
   - Project service for application management
-  - Deploy service for container orchestration  
+  - Deploy service for container orchestration
   - Monitor service for observability
   - Notification service for alerts
 
@@ -105,6 +110,7 @@ Welcome to the Capsule platform documentation! This comprehensive guide covers e
 ## 🛠️ Technology Stack
 
 ### Backend Services
+
 - **Framework**: NestJS 11 with TypeScript 5.8
 - **Runtime**: Node.js 20+
 - **Monorepo**: Nx 21.4
@@ -112,18 +118,21 @@ Welcome to the Capsule platform documentation! This comprehensive guide covers e
 - **Cache**: Redis 7
 
 ### Database & Persistence
+
 - **Database**: PostgreSQL 15 (dedicated instance per service)
 - **Query Builder**: Slonik (type-safe with connection pooling)
 - **Migrations**: Flyway (Docker-based with version control)
 - **Pattern**: Database per Service for complete data isolation
 
 ### Infrastructure & DevOps
+
 - **Containers**: Docker with multi-stage builds
 - **Orchestration**: Kubernetes (planned)
 - **Secrets Management**: HashiCorp Vault
 - **Development**: Docker Compose for local environment
 
 ### Monitoring & Observability
+
 - **Metrics**: Prometheus (planned)
 - **Visualization**: Grafana (planned)
 - **Logging**: Structured logging with NestJS Logger
@@ -134,6 +143,7 @@ Welcome to the Capsule platform documentation! This comprehensive guide covers e
 ### Microservices Architecture
 
 Capsule follows a pure microservices pattern:
+
 - **API Gateway**: Single HTTP entry point for external clients
 - **Service Communication**: RabbitMQ messages only (no service-to-service HTTP)
 - **Data Isolation**: Each service owns its database completely
@@ -142,19 +152,21 @@ Capsule follows a pure microservices pattern:
 ### Database per Service Pattern
 
 Each microservice has its own PostgreSQL database:
+
 ```
 ┌─────────────────┐    ┌──────────────────┐
 │   Auth Service  │───▶│  Auth PostgreSQL │
 └─────────────────┘    └──────────────────┘
 
 ┌─────────────────┐    ┌──────────────────┐
-│ Project Service │───▶│Project PostgreSQL│  
+│ Project Service │───▶│Project PostgreSQL│
 └─────────────────┘    └──────────────────┘
 ```
 
 Benefits:
+
 - **Complete data ownership** and isolation
-- **Independent scaling** based on service needs  
+- **Independent scaling** based on service needs
 - **Technology flexibility** per service
 - **Fault isolation** - database issues don't cascade
 
@@ -166,7 +178,7 @@ Using Slonik for compile-time type safety:
 // Type-safe queries with parameter binding
 const user = await pool.one(sql.typeAlias('user')`
   SELECT id, email, name, created_at
-  FROM users 
+  FROM users
   WHERE email = ${email} AND is_active = true
 `);
 
@@ -194,6 +206,7 @@ npm run migrate:auth:validate
 ```
 
 Migration files follow semantic versioning:
+
 - `V001__create_users_table.sql`
 - `V002__add_user_preferences.sql`
 - `V003__create_sessions_table.sql`
@@ -207,6 +220,7 @@ We welcome contributions! Here's how to get started:
    - [System Architecture](./architecture/overview.md)
 
 2. **Set up your environment**:
+
    ```bash
    git clone git@github.com:danilomartinelli/usecapsule-api.git
    cd usecapsule-api
@@ -231,17 +245,20 @@ We welcome contributions! Here's how to get started:
 ## 📞 Support & Resources
 
 ### Documentation
+
 - **Architecture**: [System Overview](./architecture/overview.md)
 - **Database**: [Complete Database Guide](./database/overview.md)
 - **Development**: [Getting Started](./development/setup.md)
 - **Product**: [Requirements Document](./PRD.md)
 
 ### Community
+
 - **Issues**: [GitHub Issues](https://github.com/danilomartinelli/usecapsule-api/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/danilomartinelli/usecapsule-api/discussions)
-- **Security**: Report security issues to security@usecapsule.com
+- **Security**: Report security issues to <security@usecapsule.com>
 
 ### External Resources
+
 - [NestJS Documentation](https://nestjs.com)
 - [Nx Documentation](https://nx.dev)
 - [Slonik Documentation](https://github.com/gajus/slonik)
