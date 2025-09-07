@@ -626,18 +626,21 @@ CREATE TABLE organization_members (
 The Capsule API provides multiple access levels to support different use cases:
 
 #### Public Routes (No Authentication)
+
 - Health checks and status endpoints
 - OpenAPI/Swagger documentation
 - Public marketplace listings
 - Service discovery endpoints
 
 #### Token-Based Routes (API Key Authentication)
+
 - Developer API access via SDKs
 - CI/CD integrations
 - Third-party service integrations
 - Webhook endpoints
 
 #### Private Routes (JWT Authentication)
+
 - User dashboard access
 - Organization management
 - Internal admin operations
@@ -657,12 +660,14 @@ GET /api/documentation.yaml  # OpenAPI YAML spec
 ### 5.3 SDK Support
 
 Official SDKs will be provided for:
+
 - **JavaScript/TypeScript**: @capsule/sdk-js
 - **Python**: capsule-sdk
 - **Go**: github.com/usecapsule/sdk-go
 - **CLI**: capsule-cli
 
 Example SDK usage:
+
 ```typescript
 import { CapsuleClient } from '@capsule/sdk-js';
 
@@ -977,7 +982,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Swagger/OpenAPI setup
   const config = new DocumentBuilder()
     .setTitle('Capsule API')
@@ -986,10 +991,10 @@ async function bootstrap() {
     .addBearerAuth()
     .addApiKey({ type: 'apiKey', name: 'X-API-Key', in: 'header' })
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/documentation', app, document);
-  
+
   await app.listen(3000);
 }
 

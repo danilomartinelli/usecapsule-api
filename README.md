@@ -40,7 +40,17 @@ npm install
 npm run docker:up
 ```
 
-4. Verify setup:
+4. Run database migrations:
+
+```bash
+# Run migrations for auth service
+npm run migrate:auth
+
+# Check migration status
+npm run migrate:auth:info
+```
+
+5. Verify setup:
 
 ```bash
 npm run setup
@@ -69,13 +79,14 @@ nx serve deployment-service
 ### Available Services
 
 - **API Gateway** - <http://localhost:3000> (Main API endpoint)
+- **Auth Service** - RabbitMQ microservice (no direct HTTP access)
 - **Web Applications** - Hosted in separate repository (connects to API Gateway)
 
 ## Available Tools
 
-- **PostgreSQL** - localhost:5432 (Database)
+- **Auth PostgreSQL** - localhost:5432 (Auth service database)
 - **Redis** - localhost:6379 (Cache)
-- **RabbitMQ** - localhost:15672 (Management UI)
+- **RabbitMQ** - localhost:5673 (AMQP), localhost:15673 (Management UI)
 - **Vault** - <http://localhost:8200> (Secrets management)
 
 ### Build
@@ -99,7 +110,37 @@ nx run-many --target=test --all
 
 # Run tests for affected projects
 npm run affected:test
+
+# Run specific service tests
+nx test auth-service
+nx test api-gateway
 ```
+
+### Database Migrations
+
+The project uses **Flyway** for database migrations with **Slonik** for type-safe queries.
+
+```bash
+# Auth Service Migrations
+npm run migrate:auth              # Run pending migrations
+npm run migrate:auth:info        # Check migration status  
+npm run migrate:auth:validate    # Validate migration files
+
+# Future services (when implemented)
+npm run migrate:project          # Project service migrations
+npm run migrate:deploy           # Deploy service migrations
+```
+
+#### Creating New Migrations
+
+1. Create SQL file in `infrastructure/migrations/[service]/`:
+```bash
+# Example: infrastructure/migrations/auth-service/V002__add_user_roles.sql
+```
+
+2. Follow naming convention: `V{version}__{description}.sql`
+
+3. Run migration: `npm run migrate:auth`
 
 ### Code Quality
 
@@ -126,8 +167,10 @@ npm run graph
 │       ├── dto/            # Data transfer objects
 │       └── types/          # TypeScript type definitions
 ├── infrastructure/          # Infrastructure configurations
-│   ├── docker/             # Docker configurations (planned)
-│   └── k8s/                # Kubernetes manifests (planned)
+│   ├── docker/             # Docker configurations  
+│   ├── flyway/             # Flyway migration configs
+│   └── migrations/         # Database migration files
+│       └── auth-service/   # Auth service migrations
 ├── public/                 # Public Assets
 ├── compose.yml             # Local development services
 ├── nx.json                 # Nx workspace configuration
@@ -142,6 +185,9 @@ npm run graph
 | `npm run docker:down` | Stop all Docker services |
 | `npm run docker:reset` | Reset and restart Docker services |
 | `npm run docker:logs` | View Docker service logs |
+| `npm run migrate:auth` | Run auth service database migrations |
+| `npm run migrate:auth:info` | Check auth service migration status |
+| `npm run migrate:auth:validate` | Validate auth service migrations |
 | `npm run build:all` | Build all applications |
 | `npm run build:prod` | Build all applications for production |
 | `npm run affected:build` | Build only affected projects |
@@ -156,7 +202,8 @@ npm run graph
 - **Backend**: NestJS 11, Node.js 20+
 - **Frontend**: Web applications in separate repository
 - **Language**: TypeScript 5.8
-- **Database**: PostgreSQL 15
+- **Database**: PostgreSQL 15 with Slonik (type-safe queries)
+- **Migrations**: Flyway (Docker-based)
 - **Cache**: Redis 7
 - **Message Queue**: RabbitMQ 3
 - **Secrets**: HashiCorp Vault
@@ -169,28 +216,31 @@ Each service uses environment variables for configuration. Create `.env` files i
 ```bash
 # apps/api-gateway/.env
 PORT=3000
-DATABASE_URL=postgresql://usecapsule:usecapsule_dev_password@localhost:5432/usecapsule_dev
 REDIS_URL=redis://:usecapsule_dev_password@localhost:6379
-RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5672
+RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5673
 
-# apps/auth-service/.env
-PORT=3001
+# apps/auth-service/.env (Microservice - no PORT needed)
 JWT_SECRET=your-jwt-secret
-DATABASE_URL=postgresql://usecapsule:usecapsule_dev_password@localhost:5432/usecapsule_dev
+AUTH_DB_HOST=localhost
+AUTH_DB_PORT=5432
+AUTH_DB_USER=usecapsule_auth
+AUTH_DB_PASSWORD=usecapsule_dev_password
+AUTH_DB_NAME=usecapsule_auth
+RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5673
 ```
 
 ## Docker Services
 
 The `compose.yml` provides the following services for local development:
 
-- **PostgreSQL**: Primary database (port 5432)
+- **Auth PostgreSQL**: Auth service database (port 5432)
 - **Redis**: Caching and session storage (port 6379)
-- **RabbitMQ**: Message broker (ports 5672, 15672)
+- **RabbitMQ**: Message broker (ports 5673, 15673)
 - **Vault**: Secrets management (port 8200)
 
 Default credentials for development:
 
-- Database: `usecapsule` / `usecapsule_dev_password`
+- Auth Database: `usecapsule_auth` / `usecapsule_dev_password`
 - RabbitMQ: `usecapsule` / `usecapsule_dev_password`
 - Redis: `usecapsule_dev_password`
 - Vault Token: `usecapsule-dev-token`
