@@ -1,8 +1,15 @@
 # Overview
 
-Capsule is a revolutionary cloud-native application deployment and management platform that transforms how development teams ship software. Built on the premise that infrastructure should empower, not hinder, Capsule provides a seamless bridge between local development and global production deployments.
+Capsule is a revolutionary cloud-native application deployment and management
+platform that transforms how development teams ship software. Built on the
+premise that infrastructure should empower, not hinder, Capsule provides a
+seamless bridge between local development and global production deployments.
 
-Our platform abstracts away the complexities of modern cloud infrastructure while maintaining the flexibility and power that enterprises demand. Whether you're deploying a simple containerized API or orchestrating a complex microservices architecture with hundreds of services, Capsule handles the heavy lifting so your team can focus on what matters: building exceptional products.
+Our platform abstracts away the complexities of modern cloud infrastructure
+while maintaining the flexibility and power that enterprises demand. Whether
+you're deploying a simple containerized API or orchestrating a complex
+microservices architecture with hundreds of services, Capsule handles the heavy
+lifting so your team can focus on what matters: building exceptional products.
 
 The platform represents a paradigm shift in deployment technology, combining the simplicity of traditional PaaS offerings with the power and flexibility of modern Kubernetes-based infrastructure. By leveraging intelligent automation, machine learning-driven optimization, and a developer-first approach, Capsule reduces deployment time from weeks to minutes while maintaining enterprise-grade security, compliance, and reliability standards.
 
@@ -10,7 +17,10 @@ The platform represents a paradigm shift in deployment technology, combining the
 
 ### The Infrastructure Complexity Crisis
 
-Modern software development faces an unprecedented infrastructure complexity crisis. Development teams are drowning in a sea of tools, configurations, and operational overhead that diverts precious resources from innovation to maintenance.
+Modern software development faces an unprecedented infrastructure complexity
+crisis. Development teams are drowning in a sea of tools, configurations, and
+operational overhead that diverts precious resources from innovation to
+maintenance.
 
 **Key Pain Points:**
 

@@ -13,21 +13,33 @@
 
 ### 1.1 Product Vision
 
-Capsule is a cloud-native application deployment and management platform that eliminates infrastructure complexity for development teams. Built on Kubernetes with a developer-first approach, it provides automated deployment, comprehensive observability, and zero vendor lock-in through Infrastructure as Code export capabilities.
+Capsule is a cloud-native application deployment and management platform that
+eliminates infrastructure complexity for development teams. Built on Kubernetes
+with a developer-first approach, it provides automated deployment, comprehensive
+observability, and zero vendor lock-in through Infrastructure as Code export
+capabilities.
 
 ### 1.2 Problem Statement
 
-Development teams spend 40-60% of their time on infrastructure tasks instead of building features. The complexity of modern cloud infrastructure, combined with a severe DevOps skill shortage affecting 75% of organizations, creates a significant bottleneck in software delivery. Teams need a platform that abstracts infrastructure complexity while maintaining flexibility and control.
+Development teams spend 40-60% of their time on infrastructure tasks instead of
+building features. The complexity of modern cloud infrastructure, combined with
+a severe DevOps skill shortage affecting 75% of organizations, creates a
+significant bottleneck in software delivery. Teams need a platform that
+abstracts infrastructure complexity while maintaining flexibility and control.
 
 ### 1.3 Solution Overview
 
 Capsule provides:
 
-- **Automated Deployment**: Git push to production in minutes with zero configuration
-- **Complete Observability**: Unified metrics, logging, and tracing out of the box
-- **Team Collaboration**: Preview environments, RBAC, and Git-integrated workflows
+- **Automated Deployment**: Git push to production in minutes with zero
+  configuration
+- **Complete Observability**: Unified metrics, logging, and tracing out of
+  the box
+- **Team Collaboration**: Preview environments, RBAC, and Git-integrated
+  workflows
 - **No Lock-in**: Export to standard Kubernetes/Terraform at any time
-- **Managed Services**: Production-ready databases and message brokers with one click
+- **Managed Services**: Production-ready databases and message brokers with
+  one click
 
 ### 1.4 Success Metrics
 

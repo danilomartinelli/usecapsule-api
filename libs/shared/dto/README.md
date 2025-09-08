@@ -2,11 +2,14 @@
 
 ## Data Transfer Objects
 
-Biblioteca compartilhada contendo todos os DTOs (Data Transfer Objects) utilizados na comunicação entre microserviços via RabbitMQ e nas respostas da API Gateway.
+Biblioteca compartilhada contendo todos os DTOs (Data Transfer Objects)
+utilizados na comunicação entre microserviços via RabbitMQ e nas respostas da
+API Gateway.
 
 ### Propósito
 
-- **Contratos unificados**: Define os contratos de dados entre todos os serviços
+- **Contratos unificados**: Define os contratos de dados entre todos os
+  serviços
 - **Type Safety**: Garante tipagem forte com TypeScript/NestJS
 - **Validação**: Integração com class-validator para validação automática
 - **Serialização**: Suporte a transformação de dados com class-transformer

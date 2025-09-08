@@ -1,19 +1,23 @@
 # Capsule Platform Documentation
 
-Welcome to the Capsule platform documentation! This comprehensive guide covers everything you need to know about developing, deploying, and maintaining the Capsule cloud-native application deployment platform.
+Welcome to the Capsule platform documentation! This comprehensive guide covers
+everything you need to know about developing, deploying, and maintaining the
+Capsule cloud-native application deployment platform.
 
 ## 📚 Documentation Structure
 
 ### 🏗️ [Architecture](./architecture/)
 
-- [System Overview](./architecture/overview.md) - High-level system architecture and design principles
+- [System Overview](./architecture/overview.md) - High-level system architecture
+  and design principles
 - Component diagrams and interaction patterns
 - Microservices communication patterns
 - Security and deployment architecture
 
 ### 🗄️ [Database](./database/)
 
-- [Database Architecture](./database/overview.md) - Complete database setup and migration guide
+- [Database Architecture](./database/overview.md) - Complete database setup and
+  migration guide
 - Database per service pattern
 - Slonik type-safe queries
 - Flyway migration system
@@ -147,7 +151,8 @@ Capsule follows a pure microservices pattern:
 - **API Gateway**: Single HTTP entry point for external clients
 - **Service Communication**: RabbitMQ messages only (no service-to-service HTTP)
 - **Data Isolation**: Each service owns its database completely
-- **Independent Deployment**: Services can be developed, tested, and deployed independently
+- **Independent Deployment**: Services can be developed, tested, and deployed
+  independently
 
 ### Database per Service Pattern
 

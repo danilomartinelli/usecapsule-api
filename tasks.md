@@ -1,6 +1,7 @@
 # Capsule Platform - Development Tasks & Status
 
-This document tracks the current implementation status, completed features, and upcoming tasks for the Capsule platform.
+This document tracks the current implementation status, completed features, and
+upcoming tasks for the Capsule platform.
 
 ## 📊 Implementation Status Overview
 
@@ -189,7 +190,8 @@ This document tracks the current implementation status, completed features, and 
 
 ### Development Environment
 
-- [ ] **RabbitMQ Ports**: Conflicts with other local services (using 5673 instead of 5672)
+- [ ] **RabbitMQ Ports**: Conflicts with other local services (using 5673
+  instead of 5672)
 - [ ] **Docker Networking**: Flyway container networking for migrations
 - [ ] **Environment Variables**: Better management across services
 
@@ -234,4 +236,5 @@ This document tracks the current implementation status, completed features, and 
 **Last Updated**: September 7, 2025
 **Next Review**: September 14, 2025
 
-*This document is updated weekly with progress and new tasks. For real-time status, check GitHub Issues and Pull Requests.*
+*This document is updated weekly with progress and new tasks. For real-time
+status, check GitHub Issues and Pull Requests.*

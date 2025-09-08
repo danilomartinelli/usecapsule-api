@@ -9,13 +9,15 @@
 
 ### Estrutura de Microserviços
 
-O Capsule utiliza uma arquitetura de microserviços com comunicação via RabbitMQ:
+O Capsule utiliza uma arquitetura de microserviços com comunicação via
+RabbitMQ:
 
 ```
 API Gateway (HTTP) → RabbitMQ → Microserviços
 ```
 
-**Importante**: Apenas o API Gateway expõe endpoints HTTP. Todos os microserviços comunicam-se exclusivamente via RabbitMQ.
+**Importante**: Apenas o API Gateway expõe endpoints HTTP. Todos os
+microserviços comunicam-se exclusivamente via RabbitMQ.
 
 ### Microserviços Planejados
 
@@ -128,11 +130,13 @@ export const DEPLOY_DB_CONFIG = createDatabaseConfig('deploy-service');
 ```typescript
 // Serviço de database compartilhado
 @Injectable()
-export class DatabaseService implements OnModuleDestroy, OnApplicationBootstrap {
+export class DatabaseService implements OnModuleDestroy,
+    OnApplicationBootstrap {
   private pool!: DatabasePool;
 
   async onApplicationBootstrap() {
-    const connectionString = `postgresql://${this.config.username}:${this.config.password}@${this.config.host}:${this.config.port}/${this.config.database}`;
+    const connectionString = 
+      `postgresql://${this.config.username}:${this.config.password}@${this.config.host}:${this.config.port}/${this.config.database}`;
     this.pool = await createPool(connectionString, {
       maximumPoolSize: 10,
       connectionTimeout: 5000,
@@ -436,4 +440,5 @@ chore: tarefas de manutenção
 
 ---
 
-*Última atualização: 2025-09-07 - Adicionado sistema de migrações com Slonik + Flyway*
+*Última atualização: 2025-09-07 - Adicionado sistema de migrações com
+Slonik + Flyway*

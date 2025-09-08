@@ -1,6 +1,7 @@
 # Database Architecture and Migrations
 
-This document describes the database architecture, migration system, and best practices for the Capsule platform.
+This document describes the database architecture, migration system, and best
+practices for the Capsule platform.
 
 ## Table of Contents
 
@@ -14,7 +15,9 @@ This document describes the database architecture, migration system, and best pr
 
 ## Overview
 
-Capsule uses a **Database per Service** pattern where each microservice has its own dedicated database instance. This ensures complete data isolation, independent scaling, and autonomous development cycles.
+Capsule uses a **Database per Service** pattern where each microservice has its
+own dedicated database instance. This ensures complete data isolation,
+independent scaling, and autonomous development cycles.
 
 ## Database per Service Pattern
 

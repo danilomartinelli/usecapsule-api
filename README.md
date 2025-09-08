@@ -1,15 +1,22 @@
 # Capsule
 
-Capsule is a cloud-native application deployment platform that simplifies infrastructure management for development teams. Built on Kubernetes with a developer-first approach, it enables automated deployments with zero vendor lock-in.
+Capsule is a cloud-native application deployment platform that simplifies
+infrastructure management for development teams. Built on Kubernetes with a
+developer-first approach, it enables automated deployments with zero vendor
+lock-in.
 
 ## Key Features
 
-- **Smart Deploy** - Automatic framework detection and optimized deployment configuration
-- **Complete Observability** - Built-in metrics, logging, and distributed tracing
+- **Smart Deploy** - Automatic framework detection and optimized deployment
+  configuration
+- **Complete Observability** - Built-in metrics, logging, and distributed
+  tracing
 - **Preview Environments** - Automatic environments for every pull request
-- **Managed Services** - Production-ready databases and message brokers with one click
+- **Managed Services** - Production-ready databases and message brokers with
+  one click
 - **No Lock-in** - Export to Kubernetes/Terraform at any time
-- **Team Collaboration** - Role-based access control and Git-integrated workflows
+- **Team Collaboration** - Role-based access control and Git-integrated
+  workflows
 
 ## Quick Start
 
@@ -78,16 +85,17 @@ nx serve deployment-service
 
 ### Available Services
 
-- **API Gateway** - <http://localhost:3000> (Main API endpoint)
+- **API Gateway** - http://localhost:3000 (Main API endpoint)
 - **Auth Service** - RabbitMQ microservice (no direct HTTP access)
-- **Web Applications** - Hosted in separate repository (connects to API Gateway)
+- **Web Applications** - Hosted in separate repository (connects to API
+  Gateway)
 
 ## Available Tools
 
 - **Auth PostgreSQL** - localhost:5432 (Auth service database)
 - **Redis** - localhost:6379 (Cache)
 - **RabbitMQ** - localhost:5673 (AMQP), localhost:15673 (Management UI)
-- **Vault** - <http://localhost:8200> (Secrets management)
+- **Vault** - http://localhost:8200 (Secrets management)
 
 ### Build
 
@@ -118,7 +126,8 @@ nx test api-gateway
 
 ### Database Migrations
 
-The project uses **Flyway** for database migrations with **Slonik** for type-safe queries.
+The project uses **Flyway** for database migrations with **Slonik** for
+type-safe queries.
 
 ```bash
 # Auth Service Migrations
@@ -211,7 +220,8 @@ npm run graph
 
 ## Environment Variables
 
-Each service uses environment variables for configuration. Create `.env` files in the respective app directories:
+Each service uses environment variables for configuration. Create `.env` files
+in the respective app directories:
 
 ```bash
 # apps/api-gateway/.env
@@ -245,7 +255,8 @@ Default credentials for development:
 - Redis: `usecapsule_dev_password`
 - Vault Token: `usecapsule-dev-token`
 
-**⚠️ Important**: These credentials are for development only. Never use them in production.
+**⚠️ Important**: These credentials are for development only. Never use them
+in production.
 
 ## Contributing
 
@@ -298,7 +309,8 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 For detailed documentation, see:
 
-- [Product Requirements Document](./docs/PRD.md) - Complete product specification
+- [Product Requirements Document](./docs/PRD.md) - Complete product
+  specification
 - [Knowledge Base](./docs/KNOWLEDGE.md) - API endpoints and usage
 - _Architecture Guide_ - System architecture details (coming soon)
 
@@ -306,7 +318,7 @@ For detailed documentation, see:
 
 - **Issues**: [GitHub Issues](https://github.com/danilomartinelli/usecapsule-api/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/danilomartinelli/usecapsule-api/discussions)
-- **Security**: Report security vulnerabilities to <security@usecapsule.com>
+- **Security**: Report security vulnerabilities to security@usecapsule.com
 
 ## Roadmap
 
