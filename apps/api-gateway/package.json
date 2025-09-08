@@ -1,10 +1,10 @@
 {
-  "name": "api-gateway",
-  "version": "0.0.1",
-  "description": "The API Gateway is the only component exposing HTTP endpoints. It handles all cross-cutting concerns and proxies requests to appropriate microservices via RabbitMQ.",
+  "name": "@usecapsule/api-gateway",
+  "version": "1.0.0",
+  "description": "Central HTTP entry point and request orchestrator for the Capsule platform. This service acts as the single public-facing API that receives all external HTTP/WebSocket requests and translates them into RabbitMQ messages for internal microservices. It handles cross-cutting concerns including authentication validation, rate limiting, request/response transformation, API composition from multiple services, and real-time WebSocket connections for live updates. The gateway implements the Backend for Frontend (BFF) pattern, providing optimized endpoints for different client types while maintaining a clean separation between external API contracts and internal service communication. It never contains business logic, serving purely as a translation and aggregation layer between HTTP clients and the message-driven microservice architecture.",
   "author": "Witek Team",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "ISC",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
