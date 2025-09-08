@@ -168,13 +168,22 @@ upcoming tasks for the Capsule platform.
    - [ ] Project ownership model
    - [ ] Environment variable storage
 
-5. **Code Quality & Infrastructure**
+5. **Developer Tools Infrastructure**
+   - [x] Create tools/ directory structure
+   - [x] CLI tool planning and specifications
+   - [x] SDK architecture design for all languages
+   - [ ] CLI basic command structure implementation
+   - [ ] Node.js SDK foundational setup
+
+6. **Code Quality & Infrastructure**
    - [x] Remove all testing infrastructure (Jest, e2e, spec files)
    - [x] Fix markdown linting warnings across all documentation
    - [x] Clean up dependencies and configurations
    - [x] Update documentation to reflect testing removal
 
-6. **Documentation Improvements**
+7. **Documentation Improvements**
+   - [x] Update README.md with tools and SDKs section
+   - [x] Update project structure documentation
    - [ ] API documentation with examples
    - [ ] Database schema documentation
    - [ ] Deployment guides
@@ -190,7 +199,7 @@ upcoming tasks for the Capsule platform.
 
 ### Development Environment
 
-- [ ] **RabbitMQ Ports**: Conflicts with other local services (using 5673
+- [ ] **RabbitMQ Ports**: Conflicts with other local services (using 5672
   instead of 5672)
 - [ ] **Docker Networking**: Flyway container networking for migrations
 - [ ] **Environment Variables**: Better management across services
@@ -230,6 +239,70 @@ upcoming tasks for the Capsule platform.
 - Basic deployment capabilities
 - Monitoring and logging
 - Production deployment setup
+
+## 🛠️ Developer Tools Roadmap
+
+### 📋 CLI Tool Development (Low Priority)
+
+**Phase 1: Foundation**
+- [ ] CLI project structure in `tools/cli/`
+- [ ] Command parsing and validation
+- [ ] Configuration management (.capsulerc)
+- [ ] API client integration
+
+**Phase 2: Core Commands**
+- [ ] `capsule auth login` - Authentication
+- [ ] `capsule deploy` - Application deployment
+- [ ] `capsule logs` - Log streaming
+- [ ] `capsule status` - Deployment status
+
+**Phase 3: Advanced Features**
+- [ ] `capsule env` - Environment variable management
+- [ ] `capsule scale` - Scaling operations
+- [ ] `capsule rollback` - Deployment rollback
+- [ ] Auto-completion and help system
+
+### 📚 SDK Development Roadmap (Low Priority)
+
+**Phase 1: Node.js/TypeScript SDK**
+- [ ] Core client implementation in `tools/sdk/node/`
+- [ ] TypeScript type definitions
+- [ ] Express.js middleware
+- [ ] Streaming log support
+
+**Phase 2: Go SDK**
+- [ ] Core client with context support
+- [ ] Gin middleware integration
+- [ ] Concurrent-safe operations
+- [ ] Error handling patterns
+
+**Phase 3: Python SDK**
+- [ ] Async/await client implementation
+- [ ] FastAPI middleware
+- [ ] Jupyter notebook integration
+- [ ] Pandas data frame support
+
+**Phase 4: Additional Languages**
+- [ ] PHP SDK (Laravel integration)
+- [ ] Ruby SDK (Rails generators)
+- [ ] Rust SDK (performance-critical apps)
+
+### 🎯 Tools Integration Milestones
+
+**Milestone 1: CLI MVP (Target: Month 6)**
+- Basic deployment commands
+- Configuration management
+- API authentication
+
+**Milestone 2: Node.js SDK (Target: Month 8)**
+- Complete SDK implementation
+- Framework integrations
+- npm package distribution
+
+**Milestone 3: Multi-Language Support (Target: Month 12)**
+- Go, Python, PHP SDKs
+- Package manager distribution
+- Comprehensive documentation
 
 ---
 

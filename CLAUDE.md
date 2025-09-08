@@ -66,6 +66,15 @@ microserviços comunicam-se exclusivamente via RabbitMQ.
 │   └── shared/            # Utilitários compartilhados
 │       ├── dto/          # Data Transfer Objects
 │       └── types/        # TypeScript types
+├── tools/                   # Ferramentas de desenvolvimento
+│   ├── cli/                # CLI do Capsule
+│   └── sdk/                # SDKs multi-linguagem
+│       ├── node/          # Node.js/TypeScript SDK
+│       ├── go/            # Go SDK
+│       ├── python/        # Python SDK
+│       ├── php/           # PHP SDK
+│       ├── ruby/          # Ruby SDK
+│       └── rust/          # Rust SDK
 └── infrastructure/        # Configurações de infra
     ├── docker/           # Docker configs
     ├── flyway/           # Configurações de migração
@@ -357,6 +366,69 @@ refactor: refatoração sem mudança de funcionalidade
 chore: tarefas de manutenção
 ```
 
+## 🛠️ Ferramentas de Desenvolvimento
+
+### CLI do Capsule
+
+O CLI permite gerenciar deployments via linha de comando:
+
+```bash
+# Estrutura planejada
+capsule auth login
+capsule deploy --name my-app --image node:18
+capsule logs my-app --follow
+capsule env set my-app DATABASE_URL=postgresql://...
+capsule scale my-app --replicas 3
+```
+
+### SDKs Multi-linguagem
+
+SDKs oficiais para integração com diferentes linguagens:
+
+#### Node.js/TypeScript
+```typescript
+import { Capsule } from '@usecapsule/sdk';
+
+const capsule = new Capsule({ apiKey: process.env.CAPSULE_API_KEY });
+const deployment = await capsule.deployments.create({
+  name: 'my-app',
+  image: 'node:18-alpine'
+});
+```
+
+#### Go
+```go
+client := capsule.NewClient(&capsule.Config{
+  APIKey: os.Getenv("CAPSULE_API_KEY"),
+})
+
+deployment, err := client.Deployments.Create(ctx, &capsule.DeploymentOptions{
+  Name: "my-go-app",
+  Image: "golang:1.21-alpine",
+})
+```
+
+#### Python
+```python
+from capsule import Capsule
+
+capsule = Capsule(api_key=os.getenv('CAPSULE_API_KEY'))
+deployment = capsule.deployments.create(
+  name='my-app',
+  image='python:3.11-slim'
+)
+```
+
+### Distribuição
+
+- **CLI**: Binário executável multiplataforma
+- **Node.js SDK**: npm (@usecapsule/sdk)
+- **Go SDK**: Go modules (github.com/usecapsule/go-sdk)
+- **Python SDK**: PyPI (capsule-sdk)
+- **PHP SDK**: Packagist (usecapsule/sdk)
+- **Ruby SDK**: RubyGems (capsule-sdk)
+- **Rust SDK**: crates.io (capsule-sdk)
+
 ## 📌 Checklist de Desenvolvimento
 
 ### Ao criar novo microserviço:
@@ -388,6 +460,30 @@ chore: tarefas de manutenção
 - [ ] Tratar erros adequadamente
 - [ ] Adicionar logs
 - [ ] Verificar performance
+
+### Ao desenvolver CLI:
+
+- [ ] Implementar parsing de comandos
+- [ ] Adicionar validação de argumentos
+- [ ] Configurar autenticação
+- [ ] Implementar client HTTP
+- [ ] Adicionar logs estruturados
+- [ ] Criar testes unitários
+- [ ] Documentar comandos
+- [ ] Implementar auto-complete
+
+### Ao desenvolver SDK:
+
+- [ ] Definir interface do client
+- [ ] Implementar autenticação
+- [ ] Adicionar validação de tipos
+- [ ] Implementar streaming (logs)
+- [ ] Tratar erros específicos da linguagem
+- [ ] Adicionar middleware para frameworks
+- [ ] Criar exemplos de uso
+- [ ] Documentar API completa
+- [ ] Configurar distribuição (npm, PyPI, etc.)
+- [ ] Implementar testes de integração
 
 ## 🆘 Suporte e Recursos
 

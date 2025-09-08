@@ -12,7 +12,10 @@ async function bootstrap() {
     {
       transport: Transport.RMQ,
       options: {
-        urls: [process.env.RABBITMQ_URL || 'amqp://usecapsule:usecapsule_dev_password@localhost:5673'],
+        urls: [
+          process.env.RABBITMQ_URL ||
+            'amqp://usecapsule:usecapsule_dev_password@localhost:5672',
+        ],
         queue: 'auth_service_queue',
         queueOptions: {
           durable: true,

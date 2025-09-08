@@ -85,7 +85,7 @@ nx serve deployment-service
 
 ### Available Services
 
-- **API Gateway** - http://localhost:3000 (Main API endpoint)
+- **API Gateway** - <http://localhost:3000> (Main API endpoint)
 - **Auth Service** - RabbitMQ microservice (no direct HTTP access)
 - **Web Applications** - Hosted in separate repository (connects to API
   Gateway)
@@ -94,8 +94,8 @@ nx serve deployment-service
 
 - **Auth PostgreSQL** - localhost:5432 (Auth service database)
 - **Redis** - localhost:6379 (Cache)
-- **RabbitMQ** - localhost:5673 (AMQP), localhost:15673 (Management UI)
-- **Vault** - http://localhost:8200 (Secrets management)
+- **RabbitMQ** - localhost:5672 (AMQP), localhost:15672 (Management UI)
+- **Vault** - <http://localhost:8200> (Secrets management)
 
 ### Build
 
@@ -110,7 +110,6 @@ npm run build:prod
 npm run affected:build
 ```
 
-
 ### Database Migrations
 
 The project uses **Flyway** for database migrations with **Slonik** for
@@ -119,7 +118,7 @@ type-safe queries.
 ```bash
 # Auth Service Migrations
 npm run migrate:auth              # Run pending migrations
-npm run migrate:auth:info        # Check migration status  
+npm run migrate:auth:info        # Check migration status
 npm run migrate:auth:validate    # Validate migration files
 
 # Future services (when implemented)
@@ -130,6 +129,7 @@ npm run migrate:deploy           # Deploy service migrations
 #### Creating New Migrations
 
 1. Create SQL file in `infrastructure/migrations/[service]/`:
+
 ```bash
 # Example: infrastructure/migrations/auth-service/V002__add_user_roles.sql
 ```
@@ -162,11 +162,21 @@ npm run graph
 │   └── shared/              # Shared utilities and types
 │       ├── dto/            # Data transfer objects
 │       └── types/          # TypeScript type definitions
+├── tools/                   # Development tools and SDKs
+│   ├── cli/                # Command Line Interface tool
+│   └── sdk/                # Multi-language SDKs
+│       ├── node/          # Node.js/TypeScript SDK
+│       ├── go/            # Go SDK
+│       ├── python/        # Python SDK
+│       ├── php/           # PHP SDK
+│       ├── ruby/          # Ruby SDK
+│       └── rust/          # Rust SDK
 ├── infrastructure/          # Infrastructure configurations
-│   ├── docker/             # Docker configurations  
+│   ├── docker/             # Docker configurations
 │   ├── flyway/             # Flyway migration configs
 │   └── migrations/         # Database migration files
 │       └── auth-service/   # Auth service migrations
+├── docs/                   # Documentation
 ├── public/                 # Public Assets
 ├── compose.yml             # Local development services
 ├── nx.json                 # Nx workspace configuration
@@ -214,7 +224,7 @@ in the respective app directories:
 # apps/api-gateway/.env
 PORT=3000
 REDIS_URL=redis://:usecapsule_dev_password@localhost:6379
-RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5673
+RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5672
 
 # apps/auth-service/.env (Microservice - no PORT needed)
 JWT_SECRET=your-jwt-secret
@@ -223,7 +233,7 @@ AUTH_DB_PORT=5432
 AUTH_DB_USER=usecapsule_auth
 AUTH_DB_PASSWORD=usecapsule_dev_password
 AUTH_DB_NAME=usecapsule_auth
-RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5673
+RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5672
 ```
 
 ## Docker Services
@@ -232,7 +242,7 @@ The `compose.yml` provides the following services for local development:
 
 - **Auth PostgreSQL**: Auth service database (port 5432)
 - **Redis**: Caching and session storage (port 6379)
-- **RabbitMQ**: Message broker (ports 5673, 15673)
+- **RabbitMQ**: Message broker (ports 5672, 15672)
 - **Vault**: Secrets management (port 8200)
 
 Default credentials for development:
@@ -304,7 +314,67 @@ For detailed documentation, see:
 
 - **Issues**: [GitHub Issues](https://github.com/danilomartinelli/usecapsule-api/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/danilomartinelli/usecapsule-api/discussions)
-- **Security**: Report security vulnerabilities to security@usecapsule.com
+- **Security**: Report security vulnerabilities to <security@usecapsule.com>
+
+## Developer Tools & SDKs
+
+Capsule provides comprehensive developer tools to integrate with your workflow:
+
+### Command Line Interface
+
+The Capsule CLI enables deployment management directly from your terminal:
+
+```bash
+# Future CLI capabilities (in development)
+capsule deploy --name my-app --image node:18
+capsule logs my-app --follow
+capsule scale my-app --replicas 3
+capsule env set my-app DATABASE_URL=postgresql://...
+```
+
+### Multi-Language SDKs
+
+Official SDKs are planned for multiple programming languages:
+
+- **Node.js/TypeScript** - Express.js middleware, Next.js integration
+- **Go** - Gin/Echo middleware, gRPC interceptors  
+- **Python** - FastAPI/Django middleware, Jupyter notebook support
+- **PHP** - Laravel service provider, WordPress plugin
+- **Ruby** - Rails generators, Sinatra extensions
+- **Rust** - Axum/Actix middleware, WASM compatibility
+
+Each SDK will provide:
+- Type-safe API clients
+- Framework-specific integrations
+- Streaming log access
+- Real-time deployment status
+- Environment variable management
+
+### Integration Examples
+
+```javascript
+// Node.js SDK (planned)
+import { Capsule } from '@usecapsule/sdk';
+
+const capsule = new Capsule({ apiKey: process.env.CAPSULE_API_KEY });
+const deployment = await capsule.deployments.create({
+  name: 'my-app',
+  image: 'node:18-alpine',
+  port: 3000
+});
+```
+
+```python
+# Python SDK (planned)
+from capsule import Capsule
+
+capsule = Capsule(api_key=os.getenv('CAPSULE_API_KEY'))
+deployment = capsule.deployments.create(
+    name='my-app',
+    image='python:3.11-slim',
+    port=8000
+)
+```
 
 ## Roadmap
 
@@ -323,6 +393,8 @@ For detailed documentation, see:
 - [ ] Advanced deployment strategies
 - [ ] Cost tracking engine
 - [ ] Team collaboration features
+- [ ] CLI tool development
+- [ ] Node.js SDK implementation
 
 ### Phase 3: Production Ready (Q3 2025)
 
@@ -330,6 +402,7 @@ For detailed documentation, see:
 - [ ] Infrastructure export tools
 - [ ] Enterprise security features
 - [ ] Multi-region support
+- [ ] Multi-language SDK rollout
 
 ## License
 

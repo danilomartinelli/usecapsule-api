@@ -1,0 +1,61 @@
+# Capsule CLI Tool
+
+Este diretório conterá o CLI oficial da plataforma Capsule.
+
+## Funcionalidades Planejadas
+
+### Gerenciamento de Projetos
+- `capsule init` - Inicializar novo projeto
+- `capsule deploy` - Fazer deploy do projeto
+- `capsule status` - Verificar status dos deployments
+- `capsule logs` - Visualizar logs em tempo real
+- `capsule rollback` - Fazer rollback de deployment
+
+### Configuração
+- `capsule login` - Autenticar com a plataforma
+- `capsule config` - Gerenciar configurações
+- `capsule env` - Gerenciar variáveis de ambiente
+- `capsule secrets` - Gerenciar secrets
+
+### Monitoramento
+- `capsule ps` - Listar containers/serviços
+- `capsule top` - Monitorar recursos
+- `capsule health` - Verificar saúde dos serviços
+
+## Tecnologia
+
+- **Linguagem**: TypeScript/Node.js
+- **Framework**: Commander.js ou Oclif
+- **Distribuição**: npm global package
+- **Configuração**: ~/.capsule/config.json
+
+## Estrutura Planejada
+
+```
+apps/tools/cli/
+├── src/
+│   ├── commands/
+│   │   ├── deploy/
+│   │   ├── project/
+│   │   ├── env/
+│   │   └── auth/
+│   ├── lib/
+│   └── utils/
+├── package.json
+├── tsconfig.json
+└── bin/capsule
+```
+
+## Integração
+
+O CLI se comunicará com a API Gateway via HTTP/REST, utilizando:
+- JWT tokens para autenticação
+- WebSockets para logs em tempo real
+- API keys para CI/CD integration
+
+## Instalação (Futura)
+
+```bash
+npm install -g @usecapsule/cli
+capsule --version
+```

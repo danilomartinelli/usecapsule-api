@@ -1,0 +1,204 @@
+# Capsule Ruby SDK
+
+SDK oficial da plataforma Capsule para aplicações Ruby.
+
+## Características
+
+### Versões Suportadas
+- Ruby 3.0+
+- Bundler gem management
+- RubyGems distribution
+- Rack compatible
+
+### Framework Integrations
+- Rails generators
+- Sinatra extensions
+- Hanami components
+- Roda plugins
+
+## Funcionalidades Planejadas
+
+### Client Base
+```ruby
+require 'capsule'
+
+capsule = Capsule::Client.new(
+  api_key: ENV['CAPSULE_API_KEY'],
+  base_url: 'https://api.usecapsule.com',
+  timeout: 30
+)
+```
+
+### Deploy Management
+```ruby
+# Deploy simples
+deployment = capsule.deployments.create(
+  name: 'ruby-app',
+  image: 'ruby:3.2-alpine',
+  port: 3000,
+  env: {
+    'RAILS_ENV' => 'production',
+    'BUNDLE_WITHOUT' => 'development:test'
+  }
+)
+
+# Aguardar deploy
+capsule.deployments.wait_for_ready(deployment.id, timeout: 300)
+```
+
+### Streaming Logs
+```ruby
+# Block para logs
+capsule.deployments.logs(deployment_id, follow: true) do |line|
+  puts line
+end
+
+# Enumerator
+logs = capsule.deployments.logs(deployment_id)
+logs.each { |line| puts line }
+```
+
+### Rails Integration
+```ruby
+# config/initializers/capsule.rb
+Capsule.configure do |config|
+  config.api_key = Rails.application.credentials.capsule_api_key
+  config.base_url = ENV.fetch('CAPSULE_BASE_URL', 'https://api.usecapsule.com')
+  config.logger = Rails.logger
+end
+
+# Generator para configuração
+rails generate capsule:install
+
+# Controller usage
+class DeploymentsController < ApplicationController
+  def create
+    deployment = Capsule.client.deployments.create(deployment_params)
+    render json: deployment
+  end
+
+  private
+
+  def deployment_params
+    params.require(:deployment).permit(:name, :image, :port, env: {})
+  end
+end
+```
+
+## Estrutura Planejada
+
+```
+tools/sdk/ruby/
+├── lib/
+│   ├── capsule/
+│   │   ├── client.rb
+│   │   ├── resources/
+│   │   │   ├── deployments.rb
+│   │   │   ├── projects.rb
+│   │   │   └── environments.rb
+│   │   ├── integrations/
+│   │   │   ├── rails/
+│   │   │   ├── sinatra/
+│   │   │   └── hanami/
+│   │   └── errors.rb
+│   └── capsule.rb
+├── spec/
+├── examples/
+│   ├── basic_deploy.rb
+│   ├── rails_app.rb
+│   └── sinatra_app.rb
+├── capsule.gemspec
+└── README.md
+```
+
+### Rails Generators
+```ruby
+# lib/generators/capsule/install_generator.rb
+class Capsule::InstallGenerator < Rails::Generators::Base
+  def create_initializer
+    create_file 'config/initializers/capsule.rb', <<~RUBY
+      Capsule.configure do |config|
+        config.api_key = Rails.application.credentials.capsule_api_key
+        config.base_url = ENV.fetch('CAPSULE_BASE_URL', 'https://api.usecapsule.com')
+      end
+    RUBY
+  end
+
+  def create_credentials
+    say "Add to config/credentials.yml.enc:"
+    say "capsule_api_key: your_api_key_here"
+  end
+end
+```
+
+### Error Handling
+```ruby
+module Capsule
+  class Error < StandardError
+    attr_reader :code, :details
+
+    def initialize(message, code: nil, details: nil)
+      super(message)
+      @code = code
+      @details = details
+    end
+  end
+
+  class AuthenticationError < Error; end
+  class ValidationError < Error; end
+  class NetworkError < Error; end
+end
+```
+
+### Sinatra Extension
+```ruby
+require 'sinatra/base'
+
+module Sinatra
+  module CapsuleHelpers
+    def capsule
+      @capsule ||= Capsule::Client.new(
+        api_key: settings.capsule_api_key
+      )
+    end
+
+    def deploy(options = {})
+      capsule.deployments.create(options)
+    end
+  end
+
+  register CapsuleHelpers
+end
+
+# Usage
+class App < Sinatra::Base
+  register Sinatra::CapsuleHelpers
+
+  set :capsule_api_key, ENV['CAPSULE_API_KEY']
+
+  post '/deploy' do
+    deployment = deploy(JSON.parse(request.body.read))
+    deployment.to_json
+  end
+end
+```
+
+### Concurrent Safe
+```ruby
+# Thread-safe client com connection pooling
+class Capsule::Client
+  def initialize(options = {})
+    @http_client = Net::HTTP::Persistent.new(name: 'capsule')
+    @semaphore = Concurrent::Semaphore.new(10)
+  end
+
+  private
+
+  def with_connection(&block)
+    @semaphore.acquire
+    yield
+  ensure
+    @semaphore.release
+  end
+end
+```

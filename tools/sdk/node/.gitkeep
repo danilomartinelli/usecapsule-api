@@ -1,0 +1,124 @@
+# Capsule Node.js SDK
+
+SDK oficial da plataforma Capsule para JavaScript e TypeScript.
+
+## Características
+
+### Linguagens Suportadas
+- JavaScript (ES6+)
+- TypeScript (tipos completos incluídos)
+- Node.js 18+ e Browser support
+
+### Framework Integrations
+- Express.js middleware
+- NestJS decorators
+- Next.js plugins
+- Nuxt.js modules
+
+## Funcionalidades Planejadas
+
+### Client Base
+```typescript
+import { Capsule } from '@usecapsule/sdk';
+
+const capsule = new Capsule({
+  apiKey: process.env.CAPSULE_API_KEY,
+  baseURL: 'https://api.usecapsule.com',
+  timeout: 30000
+});
+```
+
+### Deploy Management
+```typescript
+// Deploy simples
+const deployment = await capsule.deployments.create({
+  name: 'my-app',
+  image: 'node:18-alpine',
+  port: 3000,
+  env: {
+    NODE_ENV: 'production',
+    DATABASE_URL: 'postgresql://...'
+  }
+});
+
+// Monitorar status
+await capsule.deployments.waitForReady(deployment.id);
+```
+
+### Streaming Logs
+```typescript
+const logStream = capsule.deployments.logs(deploymentId, {
+  follow: true,
+  tail: 100
+});
+
+logStream.on('data', (line) => console.log(line));
+logStream.on('error', (err) => console.error(err));
+```
+
+### Environment Management
+```typescript
+// Gerenciar variáveis de ambiente
+await capsule.environments.set('my-app', {
+  DATABASE_URL: 'postgresql://...',
+  REDIS_URL: 'redis://...'
+});
+
+// Secrets management
+await capsule.secrets.create('my-app', 'API_KEY', 'secret-value');
+```
+
+## Estrutura Planejada
+
+```
+apps/tools/sdk/node/
+├── src/
+│   ├── client.ts
+│   ├── resources/
+│   │   ├── deployments.ts
+│   │   ├── projects.ts
+│   │   ├── environments.ts
+│   │   └── auth.ts
+│   ├── types/
+│   └── utils/
+├── tests/
+├── examples/
+│   ├── basic-deploy.js
+│   ├── express-middleware.js
+│   └── typescript-example.ts
+├── docs/
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+## TypeScript Support
+
+Tipos completos para todas as operações:
+
+```typescript
+interface DeploymentOptions {
+  name: string;
+  image: string;
+  port?: number;
+  env?: Record<string, string>;
+  secrets?: Record<string, string>;
+  replicas?: number;
+  resources?: {
+    cpu?: string;
+    memory?: string;
+  };
+}
+```
+
+## Middleware Express
+
+```javascript
+const capsuleMiddleware = require('@usecapsule/sdk/express');
+
+app.use(capsuleMiddleware({
+  apiKey: process.env.CAPSULE_API_KEY,
+  autoLog: true,
+  metrics: true
+}));
+```

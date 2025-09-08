@@ -89,7 +89,7 @@ touch apps/auth-service/.env
 PORT=3000
 NODE_ENV=development
 REDIS_URL=redis://:usecapsule_dev_password@localhost:6379
-RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5673
+RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5672
 JWT_SECRET=development-secret-key-change-in-production
 ```
 
@@ -102,7 +102,7 @@ AUTH_DB_PORT=5432
 AUTH_DB_USER=usecapsule_auth
 AUTH_DB_PASSWORD=usecapsule_dev_password
 AUTH_DB_NAME=usecapsule_auth
-RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5673
+RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5672
 JWT_SECRET=development-secret-key-change-in-production
 JWT_EXPIRY=1h
 ```
@@ -169,7 +169,7 @@ npm run setup
 curl http://localhost:3000/health
 
 # Test RabbitMQ Management UI
-open http://localhost:15673
+open http://localhost:15672
 # Login: usecapsule / usecapsule_dev_password
 ```
 
@@ -563,7 +563,7 @@ const pool = await createPool(connectionString, {
 
 ```bash
 # Find process using port
-lsof -i :5673
+lsof -i :5672
 
 # Kill process
 kill -9 <PID>
@@ -592,7 +592,7 @@ npm run migrate:auth
 docker logs usecapsule-rabbitmq
 
 # Access RabbitMQ management UI
-open http://localhost:15673
+open http://localhost:15672
 ```
 
 ### Build Issues
