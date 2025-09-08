@@ -3,5 +3,7 @@
     "allow": ["Bash: Allow", "Edit: Allow", "Write: Allow"],
     "deny": [],
     "ask": ["Git: Ask"]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "model": ""
 }
