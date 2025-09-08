@@ -292,42 +292,6 @@ throw new UnauthorizedException('Token invalid');
 throw new NotFoundException('Resource not found');
 ```
 
-## 🧪 Testes
-
-### Estrutura de Testes
-
-```typescript
-describe('AuthService', () => {
-  let service: AuthService;
-
-  beforeEach(async () => {
-    const module = await Test.createTestingModule({
-      providers: [AuthService],
-    }).compile();
-
-    service = module.get<AuthService>(AuthService);
-  });
-
-  describe('validateUser', () => {
-    it('should validate user with correct credentials', async () => {
-      // Test implementation
-    });
-  });
-});
-```
-
-### Comandos de Teste
-
-```bash
-# Testes unitários
-nx test auth-service
-
-# Testes e2e
-nx e2e auth-service-e2e
-
-# Cobertura
-nx test auth-service --coverage
-```
 
 ## 🚀 Deployment
 
@@ -379,10 +343,8 @@ logger.error('Authentication failed', error.stack, { email });
 ### Pipeline Padrão
 
 1. **Lint** - Verificação de código
-2. **Test** - Testes unitários
-3. **Build** - Compilação
-4. **E2E** - Testes end-to-end
-5. **Deploy** - Deployment automático
+2. **Build** - Compilação
+3. **Deploy** - Deployment automático
 
 ### Commits Semânticos
 
@@ -392,7 +354,6 @@ fix: corrige bug específico
 docs: atualiza documentação
 style: formatação de código
 refactor: refatoração sem mudança de funcionalidade
-test: adiciona ou corrige testes
 chore: tarefas de manutenção
 ```
 
@@ -407,7 +368,6 @@ chore: tarefas de manutenção
 - [ ] Implementar health check (incluindo DB)
 - [ ] Adicionar documentação Swagger
 - [ ] Configurar variáveis de ambiente de DB
-- [ ] Criar testes unitários
 - [ ] Adicionar logs estruturados
 - [ ] Configurar Dockerfile
 - [ ] Atualizar docker-compose
@@ -417,7 +377,6 @@ chore: tarefas de manutenção
 
 - [ ] Nomear arquivo: `V{version}__{description}.sql`
 - [ ] Incluir rollback plan nos comentários
-- [ ] Testar migração em ambiente local
 - [ ] Validar com `npm run migrate:{service}:validate`
 - [ ] Documentar mudanças no schema
 
@@ -426,7 +385,6 @@ chore: tarefas de manutenção
 - [ ] Definir DTO com validação
 - [ ] Adicionar documentação Swagger
 - [ ] Implementar guard apropriado
-- [ ] Adicionar testes
 - [ ] Tratar erros adequadamente
 - [ ] Adicionar logs
 - [ ] Verificar performance

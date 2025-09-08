@@ -26,8 +26,7 @@ Capsule cloud-native application deployment platform.
 ### 👨‍💻 [Development](./development/)
 
 - [Getting Started Guide](./development/setup.md) - Complete developer setup
-- Development workflow and best practices
-- Testing strategies and debugging
+- Development workflow and debugging
 - Code style and contribution guidelines
 
 ### 🔌 [API Documentation](./api/)
@@ -151,7 +150,7 @@ Capsule follows a pure microservices pattern:
 - **API Gateway**: Single HTTP entry point for external clients
 - **Service Communication**: RabbitMQ messages only (no service-to-service HTTP)
 - **Data Isolation**: Each service owns its database completely
-- **Independent Deployment**: Services can be developed, tested, and deployed
+- **Independent Deployment**: Services can be developed and deployed
   independently
 
 ### Database per Service Pattern
@@ -237,14 +236,12 @@ We welcome contributions! Here's how to get started:
 3. **Follow our workflow**:
    - Create feature branch from `main`
    - Follow conventional commit messages
-   - Write tests for new features
    - Update documentation as needed
    - Submit PR with clear description
 
 4. **Code standards**:
    - TypeScript with strict type checking
    - ESLint and Prettier for code formatting
-   - Comprehensive test coverage
    - Structured logging and error handling
 
 ## 📞 Support & Resources

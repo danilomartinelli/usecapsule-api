@@ -110,19 +110,6 @@ npm run build:prod
 npm run affected:build
 ```
 
-### Testing
-
-```bash
-# Run all tests
-nx run-many --target=test --all
-
-# Run tests for affected projects
-npm run affected:test
-
-# Run specific service tests
-nx test auth-service
-nx test api-gateway
-```
 
 ### Database Migrations
 
@@ -201,7 +188,7 @@ npm run graph
 | `npm run build:prod` | Build all applications for production |
 | `npm run affected:build` | Build only affected projects |
 | `npm run affected:lint` | Lint only affected projects |
-| `npm run validate` | Run linting and tests for all projects |
+| `npm run validate` | Run linting for all projects |
 | `npm run graph` | View project dependency graph |
 | `npm run clean` | Clear Nx cache |
 
@@ -302,7 +289,6 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `docs:` Documentation changes
 - `style:` Code style changes (formatting, etc.)
 - `refactor:` Code refactoring
-- `test:` Test additions or corrections
 - `chore:` Maintenance tasks
 
 ## Documentation
