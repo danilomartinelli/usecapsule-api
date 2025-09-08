@@ -30,7 +30,7 @@ The current deployment landscape forces developers into an impossible choice: ac
 
 Capsule provides a unique three-layer solution that addresses each pain point systematically:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     Magic Deploy™ Layer                      │
 │  Auto-detection • Zero-config • Framework Intelligence       │
@@ -349,7 +349,7 @@ interface ObservabilityRequirements {
 
 ### 3.1 System Architecture
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────────┐
 │                        Client Layer                              │
 │     Web Dashboard • CLI • SDKs • IDE Extensions • Mobile Apps    │
