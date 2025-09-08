@@ -1,24 +1,24 @@
 name: usecapsule-api
 
 services:
-  # PostgreSQL Database
-  postgres:
+  # PostgreSQL Database for Auth Service
+  auth-postgres:
     image: postgres:15-alpine
-    container_name: usecapsule-postgres
+    container_name: usecapsule-auth-postgres
     environment:
-      POSTGRES_DB: usecapsule_dev
-      POSTGRES_USER: usecapsule
+      POSTGRES_DB: usecapsule_auth
+      POSTGRES_USER: usecapsule_auth
       POSTGRES_PASSWORD: usecapsule_dev_password
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - '5432:5432'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - auth_postgres_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
       - usecapsule-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U usecapsule -d usecapsule_dev']
+      test: ['CMD-SHELL', 'pg_isready -U usecapsule_auth -d usecapsule_auth']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -33,8 +33,8 @@ services:
       RABBITMQ_DEFAULT_PASS: usecapsule_dev_password
       RABBITMQ_DEFAULT_VHOST: /
     ports:
-      - '5672:5672' # AMQP
-      - '15672:15672' # Management UI
+      - '5673:5672' # AMQP
+      - '15673:15672' # Management UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
@@ -88,7 +88,7 @@ services:
       - IPC_LOCK
 
 volumes:
-  postgres_data:
+  auth_postgres_data:
     driver: local
   rabbitmq_data:
     driver: local

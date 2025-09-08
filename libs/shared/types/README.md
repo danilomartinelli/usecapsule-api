@@ -2,7 +2,8 @@
 
 ## TypeScript Type Definitions
 
-Biblioteca de tipos TypeScript compartilhados entre todos os microserviços e a API Gateway.
+Biblioteca de tipos TypeScript compartilhados entre todos os microserviços e a
+API Gateway.
 
 ### Propósito
 

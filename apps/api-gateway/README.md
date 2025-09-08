@@ -2,15 +2,19 @@
 
 ## Backend for Frontend (BFF)
 
-O API Gateway é o ponto único de entrada HTTP para toda a plataforma Capsule, responsável por rotear requisições, autenticação e agregação de dados dos microserviços.
+O API Gateway é o ponto único de entrada HTTP para toda a plataforma Capsule,
+responsável por rotear requisições, autenticação e agregação de dados dos
+microserviços.
 
 ### Responsabilidades
 
-- **Roteamento**: Direciona requisições para os microserviços apropriados via RabbitMQ
+- **Roteamento**: Direciona requisições para os microserviços apropriados via
+  RabbitMQ
 - **Autenticação/Autorização**: Valida tokens JWT e API Keys
 - **Rate Limiting**: Controle de taxa de requisições por cliente
 - **Documentação**: Swagger/OpenAPI automático em `/api/documentation`
-- **Agregação**: Combina respostas de múltiplos microserviços quando necessário
+- **Agregação**: Combina respostas de múltiplos microserviços quando
+  necessário
 - **WebSockets**: Suporte a conexões em tempo real para logs e eventos
 
 ### Arquitetura

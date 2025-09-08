@@ -14,14 +14,19 @@
     "setup": "node -v && docker --version && npx nx --version",
     "validate": "nx run-many --target=lint --all",
     "build:all": "nx run-many --target=build --all",
-    "build:prod": "nx run-many --target=build --all --prod"
+    "build:prod": "nx run-many --target=build --all --prod",
+    "migrate:auth": "docker run --rm --network usecapsule-api_usecapsule-network -v $(pwd)/infrastructure/flyway:/flyway/conf -v $(pwd)/infrastructure/migrations/auth-service:/flyway/sql flyway/flyway:9.22.3-alpine -configFiles=/flyway/conf/auth-service.conf migrate",
+    "migrate:auth:info": "docker run --rm --network usecapsule-api_usecapsule-network -v $(pwd)/infrastructure/flyway:/flyway/conf -v $(pwd)/infrastructure/migrations/auth-service:/flyway/sql flyway/flyway:9.22.3-alpine -configFiles=/flyway/conf/auth-service.conf info",
+    "migrate:auth:validate": "docker run --rm --network usecapsule-api_usecapsule-network -v $(pwd)/infrastructure/flyway:/flyway/conf -v $(pwd)/infrastructure/migrations/auth-service:/flyway/sql flyway/flyway:9.22.3-alpine -configFiles=/flyway/conf/auth-service.conf validate"
   },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
+    "@nestjs/microservices": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "axios": "^1.6.0",
+    "slonik": "^37.4.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0"
   },
@@ -34,6 +39,7 @@
     "@nx/js": "21.4.1",
     "@nx/nest": "^21.4.1",
     "@nx/node": "21.4.1",
+    "@nx/web": "21.4.1",
     "@nx/webpack": "21.4.1",
     "@nx/workspace": "21.4.1",
     "@swc-node/register": "~1.9.1",
@@ -58,6 +64,7 @@
   "workspaces": [
     "apps/*",
     "libs/*",
-    "libs/shared/*"
+    "libs/shared/*",
+    "apps"
   ]
 }
