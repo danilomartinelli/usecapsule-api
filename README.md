@@ -1,413 +1,458 @@
-# Capsule
+# Capsule Platform
 
-Capsule is a cloud-native application deployment platform that simplifies
-infrastructure management for development teams. Built on Kubernetes with a
-developer-first approach, it enables automated deployments with zero vendor
-lock-in.
+> **Cloud-native application deployment platform that eliminates infrastructure complexity for development teams**
 
-## Key Features
+Capsule transforms the way teams deploy and manage applications by providing automated deployment pipelines, comprehensive observability, and zero vendor lock-in through Infrastructure as Code export capabilities. Built on Kubernetes with a developer-first approach, Capsule reduces deployment time from weeks to minutes while maintaining enterprise-grade reliability and security.
 
-- **Smart Deploy** - Automatic framework detection and optimized deployment
-  configuration
-- **Complete Observability** - Built-in metrics, logging, and distributed
-  tracing
-- **Preview Environments** - Automatic environments for every pull request
-- **Managed Services** - Production-ready databases and message brokers with
-  one click
-- **No Lock-in** - Export to Kubernetes/Terraform at any time
-- **Team Collaboration** - Role-based access control and Git-integrated
-  workflows
+## 🎯 Why Capsule?
 
-## Quick Start
+Development teams spend 40-60% of their time wrestling with infrastructure instead of building features. Capsule solves this by abstracting away infrastructure complexity while maintaining the flexibility and control teams need. With Capsule, you can deploy any application with a simple git push, monitor it with built-in observability tools, and export your entire infrastructure as code whenever you need to migrate or go independent.
+
+### Key Features
+
+- **Universal Smart Deploy** - Automatically detects and deploys 50+ frameworks with zero configuration
+- **Complete Observability** - Metrics, logging, and distributed tracing out of the box
+- **Team Collaboration** - Preview environments for every pull request with automatic cleanup
+- **No Lock-in** - Export to Kubernetes, Terraform, or Docker Compose at any time
+- **Managed Services** - Production-ready databases and message brokers with one click
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 20+ and npm
-- Docker and Docker Compose
-- Nx CLI (`npm install -g nx@latest`)
+Before you begin, ensure you have the following installed on your development machine:
 
-### Installation
+- **Node.js** (v20 or higher) - [Download here](https://nodejs.org/)
+- **npm** (v10 or higher) - Comes with Node.js
+- **Docker Desktop** - [Download here](https://www.docker.com/products/docker-desktop)
+- **Git** - [Download here](https://git-scm.com/)
 
-1. Clone the repository:
+Optional but recommended:
+
+- **Nx Console** - VS Code extension for better Nx experience
+- **PostgreSQL client** - For database debugging (psql or pgAdmin)
+- **RabbitMQ Management** - Access at <http://localhost:15672> when running
+
+### Quick Start
+
+Follow these steps to get Capsule running on your local machine in under 5 minutes:
 
 ```bash
-git clone git@github.com:danilomartinelli/usecapsule-api.git
-cd usecapsule-api
-```
+# Clone the repository
+git clone https://github.com/your-org/capsule.git
+cd capsule
 
-2. Install dependencies:
-
-```bash
+# Install dependencies
 npm install
-```
 
-3. Start infrastructure services:
+# Start infrastructure (databases, RabbitMQ)
+npm run infrastructure:up
 
-```bash
-npm run docker:up
-```
+# Run database migrations
+npm run db:migrate:all
 
-4. Run database migrations:
-
-```bash
-# Run migrations for auth service
-npm run migrate:auth
-
-# Check migration status
-npm run migrate:auth:info
-```
-
-5. Verify setup:
-
-```bash
-npm run setup
-```
-
-## Development
-
-### Start Development Servers
-
-```bash
 # Start all services in development mode
-nx run-many --target=serve --all
+npm run dev
 
-# Or start specific services
-
-# API Gateway
-nx serve api-gateway
-
-# Microservices (Coming Soon)
-nx serve auth-service
-nx serve notification-service
-nx serve deployment-service
-# ...
+# In another terminal, run the API Gateway
+npm run serve:gateway
 ```
 
-### Available Services
+Your Capsule platform is now running! Access it at:
 
-- **API Gateway** - <http://localhost:3000> (Main API endpoint)
-- **Auth Service** - RabbitMQ microservice (no direct HTTP access)
-- **Web Applications** - Hosted in separate repository (connects to API
-  Gateway)
+- **API Gateway**: <http://localhost:3000>
+- **API Documentation**: <http://localhost:3000/api/documentation>
+- **RabbitMQ Management**: <http://localhost:15672> (admin/admin)
 
-## Available Tools
+### Verifying Your Setup
 
-- **Auth PostgreSQL** - localhost:5432 (Auth service database)
-- **Redis** - localhost:6379 (Cache)
-- **RabbitMQ** - localhost:5672 (AMQP), localhost:15672 (Management UI)
-- **Vault** - <http://localhost:8200> (Secrets management)
-
-### Build
+Run the health check to ensure everything is working:
 
 ```bash
-# Build all applications
-npm run build:all
+# Check all services are healthy
+curl http://localhost:3000/health
 
-# Build for production
-npm run build:prod
+# Run the test suite
+npm run test
 
-# Build affected projects only
-npm run affected:build
+# Run a specific service's tests
+nx test auth-service
 ```
 
-### Database Migrations
+## 📁 Project Structure
 
-The project uses **Flyway** for database migrations with **Slonik** for
-type-safe queries.
-
-```bash
-# Auth Service Migrations
-npm run migrate:auth              # Run pending migrations
-npm run migrate:auth:info        # Check migration status
-npm run migrate:auth:validate    # Validate migration files
-
-# Future services (when implemented)
-npm run migrate:project          # Project service migrations
-npm run migrate:deploy           # Deploy service migrations
-```
-
-#### Creating New Migrations
-
-1. Create SQL file in `infrastructure/migrations/[service]/`:
-
-```bash
-# Example: infrastructure/migrations/auth-service/V002__add_user_roles.sql
-```
-
-2. Follow naming convention: `V{version}__{description}.sql`
-
-3. Run migration: `npm run migrate:auth`
-
-### Code Quality
-
-```bash
-# Run linting
-npm run affected:lint
-
-# Validate entire codebase
-npm run validate
-
-# View dependency graph
-npm run graph
-```
-
-## Project Structure
+Capsule uses an Nx monorepo structure with Domain-Driven Design principles. Each microservice represents a bounded context with its own database and domain model:
 
 ```text
 @usecapsule/source/
-├── apps/                      # Application projects
-│   ├── api-gateway/          # Main API Backend for Frontend
-│   └── *-service/            # Microservices (auth, notification, deployment, etc.)
-├── libs/                     # Shared libraries
-│   └── shared/              # Shared utilities and types
-│       ├── dto/            # Data transfer objects
-│       └── types/          # TypeScript type definitions
-├── tools/                   # Development tools and SDKs
-│   ├── cli/                # Command Line Interface tool
-│   └── sdk/                # Multi-language SDKs
-│       ├── node/          # Node.js/TypeScript SDK
-│       ├── go/            # Go SDK
-│       ├── python/        # Python SDK
-│       ├── php/           # PHP SDK
-│       ├── ruby/          # Ruby SDK
-│       └── rust/          # Rust SDK
-├── infrastructure/          # Infrastructure configurations
-│   ├── docker/             # Docker configurations
-│   ├── flyway/             # Flyway migration configs
-│   └── migrations/         # Database migration files
-│       └── auth-service/   # Auth service migrations
-├── docs/                   # Documentation
-├── public/                 # Public Assets
-├── compose.yml             # Local development services
-├── nx.json                 # Nx workspace configuration
-└── package.json           # Root package configuration
+├── apps/                     # Microservices and applications
+│   ├── api-gateway/         # HTTP entry point, routes to services
+│   ├── auth-service/        # Authentication bounded context
+│   ├── deploy-service/      # Deployment orchestration
+│   └── monitor-service/     # Metrics and observability
+│
+├── libs/                    # Shared libraries
+│   ├── shared/             # Cross-cutting concerns
+│   │   ├── ddd/           # DDD building blocks
+│   │   ├── messaging/     # Message contracts
+│   │   └── types/         # TypeScript types
+│   └── configs/           # Configuration modules
+│
+├── devtools/              # Development tools
+│   ├── docker/           # Docker configurations
+│   ├── k8s/             # Kubernetes manifests
+│   └── scripts/         # Utility scripts
+│
+└── tools/                # Future SDKs and CLIs
 ```
 
-## Available Scripts
+For detailed architecture documentation, see [CLAUDE.md](./CLAUDE.md) - our comprehensive guide to Domain-Driven Design patterns and best practices used throughout the project.
 
-| Script | Description |
-|--------|-------------|
-| `npm run docker:up` | Start all Docker services |
-| `npm run docker:down` | Stop all Docker services |
-| `npm run docker:reset` | Reset and restart Docker services |
-| `npm run docker:logs` | View Docker service logs |
-| `npm run migrate:auth` | Run auth service database migrations |
-| `npm run migrate:auth:info` | Check auth service migration status |
-| `npm run migrate:auth:validate` | Validate auth service migrations |
-| `npm run build:all` | Build all applications |
-| `npm run build:prod` | Build all applications for production |
-| `npm run affected:build` | Build only affected projects |
-| `npm run affected:lint` | Lint only affected projects |
-| `npm run validate` | Run linting for all projects |
-| `npm run graph` | View project dependency graph |
-| `npm run clean` | Clear Nx cache |
+## 🛠️ Development Workflow
 
-## Technology Stack
+### Working with Nx
 
-- **Monorepo**: Nx 21.4
-- **Backend**: NestJS 11, Node.js 20+
-- **Frontend**: Web applications in separate repository
-- **Language**: TypeScript 5.8
-- **Database**: PostgreSQL 15 with Slonik (type-safe queries)
-- **Migrations**: Flyway (Docker-based)
-- **Cache**: Redis 7
-- **Message Queue**: RabbitMQ 3
-- **Secrets**: HashiCorp Vault
-- **Build Tools**: Webpack, SWC
-
-## Environment Variables
-
-Each service uses environment variables for configuration. Create `.env` files
-in the respective app directories:
+Nx provides powerful tools for monorepo management. Here are the essential commands you'll use daily:
 
 ```bash
-# apps/api-gateway/.env
-PORT=3000
-REDIS_URL=redis://:usecapsule_dev_password@localhost:6379
-RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5672
+# Serve a specific application
+nx serve api-gateway
+nx serve auth-service --watch
 
-# apps/auth-service/.env (Microservice - no PORT needed)
-JWT_SECRET=your-jwt-secret
-AUTH_DB_HOST=localhost
-AUTH_DB_PORT=5432
-AUTH_DB_USER=usecapsule_auth
-AUTH_DB_PASSWORD=usecapsule_dev_password
-AUTH_DB_NAME=usecapsule_auth
-RABBITMQ_URL=amqp://usecapsule:usecapsule_dev_password@localhost:5672
+# Build a specific application
+nx build auth-service
+
+# Run tests for a specific project
+nx test auth-service
+nx test-e2e auth-service-e2e
+
+# Generate new code
+nx g @nx/nest:module user --project=auth-service
+nx g @nx/nest:service user --project=auth-service
+
+# See project dependencies
+nx graph
+
+# Run commands for all affected projects
+nx affected:build
+nx affected:test
+nx affected:lint
 ```
 
-## Docker Services
+### Available Scripts
 
-The `compose.yml` provides the following services for local development:
+We've created convenient npm scripts that orchestrate common development tasks:
 
-- **Auth PostgreSQL**: Auth service database (port 5432)
-- **Redis**: Caching and session storage (port 6379)
-- **RabbitMQ**: Message broker (ports 5672, 15672)
-- **Vault**: Secrets management (port 8200)
+#### Infrastructure Management
 
-Default credentials for development:
+```bash
+npm run infrastructure:up      # Start Docker containers (databases, RabbitMQ)
+npm run infrastructure:down    # Stop all containers
+npm run infrastructure:reset   # Reset all data (careful!)
+```
 
-- Auth Database: `usecapsule_auth` / `usecapsule_dev_password`
-- RabbitMQ: `usecapsule` / `usecapsule_dev_password`
-- Redis: `usecapsule_dev_password`
-- Vault Token: `usecapsule-dev-token`
+#### Database Management
 
-**⚠️ Important**: These credentials are for development only. Never use them
-in production.
+```bash
+npm run db:migrate:all        # Run all service migrations
+npm run db:migrate:auth       # Run auth service migrations only
+npm run db:migrate:deploy     # Run deploy service migrations only
+npm run db:seed:all          # Seed all databases with test data
+npm run db:reset:all         # Drop and recreate all databases
+```
 
-## Contributing
+#### Development
+
+```bash
+npm run dev                  # Start all services in watch mode
+npm run dev:gateway         # Start only API Gateway
+npm run dev:services        # Start all microservices (no gateway)
+npm run build              # Build all projects
+npm run build:affected     # Build only changed projects
+```
+
+#### Testing
+
+```bash
+npm run test               # Run all unit tests
+npm run test:affected      # Test only changed code
+npm run test:e2e          # Run end-to-end tests
+npm run test:integration  # Run integration tests
+npm run test:coverage     # Generate coverage report
+```
+
+#### Code Quality
+
+```bash
+npm run lint              # Lint all projects
+npm run lint:affected     # Lint only changed code
+npm run format           # Format code with Prettier
+npm run analyze          # Analyze bundle sizes
+```
+
+### Creating a New Microservice
+
+When you need to add a new bounded context to the system, follow these steps:
+
+```bash
+# 1. Generate the new service
+nx g @nx/nest:app payment-service
+
+# 2. Create the database configuration
+mkdir apps/payment-service/migrations
+touch apps/payment-service/migrations/flyway.conf
+
+# 3. Add the service to docker-compose.yml
+# (Copy the pattern from auth-service)
+
+# 4. Create the first migration
+echo "CREATE TABLE payments (...);" > \
+  apps/payment-service/migrations/V1__create_payments_table.sql
+
+# 5. Add message handlers (no HTTP controllers!)
+nx g @nx/nest:controller message-handlers/payment \
+  --project=payment-service
+
+# 6. Connect to RabbitMQ in main.ts
+# (Copy pattern from auth-service/src/main.ts)
+```
+
+### Working with Databases
+
+Each microservice has its own database. Here's how to interact with them during development:
+
+```bash
+# Connect to a specific service's database
+docker exec -it capsule-auth-db psql -U auth_user -d auth_service_db
+docker exec -it capsule-deploy-db psql -U deploy_user -d deploy_service_db
+
+# View migration history
+docker run --rm --network=host \
+  -v ./apps/auth-service/migrations:/flyway/sql \
+  flyway/flyway:9 info \
+  -url=jdbc:postgresql://localhost:5432/auth_service_db \
+  -user=auth_user -password=auth_pass
+
+# Create a new migration
+touch apps/auth-service/migrations/V$(date +%Y%m%d%H%M)__description.sql
+```
+
+## 🏗️ Architecture Overview
+
+Capsule follows Domain-Driven Design with Hexagonal Architecture patterns:
+
+- **API Gateway Pattern**: Single HTTP entry point that routes to microservices via RabbitMQ
+- **Database per Service**: Each bounded context owns its data completely
+- **CQRS**: Commands and queries separate write and read operations
+- **Event-Driven**: Services communicate asynchronously through domain events
+- **No Shared State**: Services never share databases or domain models
+
+### Key Architectural Decisions
+
+1. **Message-Only Microservices**: Services only communicate via RabbitMQ, never HTTP
+2. **Flyway Migrations**: Schema versioning with forward-only migrations
+3. **Domain-First Development**: Business logic lives in domain entities, not services
+4. **Eventual Consistency**: Embracing async communication between bounded contexts
+
+For deep dives into our architecture patterns, refer to [CLAUDE.md](./CLAUDE.md).
+
+## 🧪 Testing Strategy
+
+We maintain high code quality through comprehensive testing at multiple levels:
+
+### Running Tests
+
+```bash
+# Unit tests (fast, no dependencies)
+nx test auth-service --watch
+
+# Integration tests (with test databases)
+nx test auth-service --testPathPattern=integration
+
+# E2E tests (full system)
+nx e2e api-gateway-e2e
+
+# Test coverage
+nx test auth-service --coverage
+```
+
+### Writing Tests
+
+Tests are colocated with the code they test:
+
+- `*.spec.ts` - Unit tests next to source files
+- `*.integration.spec.ts` - Integration tests in the same folder
+- `e2e/*.e2e-spec.ts` - End-to-end tests in dedicated e2e projects
+
+## 🔄 CI/CD Pipeline
+
+Our GitHub Actions pipeline ensures code quality and automates deployments:
+
+```yaml
+# On every push
+- Lint affected code
+- Run affected unit tests
+- Build affected projects
+
+# On PR to main
+- Run full test suite
+- Integration tests with real databases
+- E2E tests
+- Security scanning
+
+# On merge to main
+- Run Flyway migrations
+- Deploy to staging
+- Run smoke tests
+- Deploy to production (manual approval)
+```
+
+## 📊 Monitoring and Debugging
+
+### Local Debugging
+
+```bash
+# View logs for a specific service
+docker logs -f capsule-auth-service
+
+# Access RabbitMQ Management UI
+open http://localhost:15672
+
+# Monitor database queries
+docker exec capsule-auth-db psql -U auth_user -c "SELECT * FROM pg_stat_activity;"
+
+# Debug with VS Code
+# 1. Run: nx serve auth-service --inspect
+# 2. Attach debugger to port 9229
+```
+
+### Performance Profiling
+
+```bash
+# Generate CPU profile
+nx serve auth-service --inspect-brk
+# Use Chrome DevTools to profile
+
+# Analyze bundle size
+nx build auth-service --stats-json
+webpack-bundle-analyzer dist/apps/auth-service/stats.json
+```
+
+## 🤝 Contributing
 
 We welcome contributions! Please follow these guidelines:
 
-1. **Fork the repository** and create your branch from `main`
-2. **Update documentation** as needed
-3. **Submit a pull request** with a clear description
+### Development Process
 
-### Development Workflow
+1. **Fork and Clone**: Fork the repository and clone your fork
+2. **Branch**: Create a feature branch from `main`
+3. **Develop**: Make your changes following our architecture patterns
+4. **Test**: Ensure all tests pass and add new ones for your changes
+5. **Document**: Update documentation if you're changing architecture
+6. **PR**: Submit a pull request with a clear description
 
-1. Create a feature branch:
+### Code Style
 
-```bash
-git checkout -b feature/your-feature-name
-```
+- Follow the patterns in [CLAUDE.md](./CLAUDE.md)
+- Use conventional commits: `feat:`, `fix:`, `docs:`, `chore:`
+- Keep commits atomic and focused
+- Write meaningful commit messages
 
-2. Make your changes and commit:
+### Pull Request Guidelines
 
-```bash
-git add .
-git commit -m "feat: add new feature"
-```
+- PRs should be focused and not too large
+- Include tests for new functionality
+- Update documentation as needed
+- Ensure CI passes before requesting review
+- Link to any relevant issues
 
-3. Run validation:
+## 📚 Resources
 
-```bash
-npm run validate
-```
+### Documentation
 
-4. Push and create a pull request:
+- [CLAUDE.md](./CLAUDE.md) - Comprehensive architecture guide
+- [API Documentation](http://localhost:3000/api/documentation) - Swagger/OpenAPI specs
+- [Nx Documentation](https://nx.dev) - Monorepo tooling
+- [NestJS Documentation](https://nestjs.com) - Framework documentation
 
-```bash
-git push origin feature/your-feature-name
-```
+### Learning Resources
 
-### Commit Convention
+- [Domain-Driven Design Distilled](https://www.amazon.com/Domain-Driven-Design-Distilled-Vaughn-Vernon/dp/0134434420) - Essential DDD concepts
+- [Building Microservices](https://www.amazon.com/Building-Microservices-Designing-Fine-Grained-Systems/dp/1492034029) - Microservices patterns
+- [Event-Driven Architecture](https://www.youtube.com/watch?v=STKCRSUsyP0) - Understanding event-driven systems
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
+### Tools
 
-- `feat:` New features
-- `fix:` Bug fixes
-- `docs:` Documentation changes
-- `style:` Code style changes (formatting, etc.)
-- `refactor:` Code refactoring
-- `chore:` Maintenance tasks
+- [Nx Console](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console) - VS Code extension
+- [Thunder Client](https://marketplace.visualstudio.com/items?itemName=rangav.vscode-thunder-client) - API testing
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) - Container management
 
-## Documentation
+## 🐛 Troubleshooting
 
-For detailed documentation, see:
+### Common Issues
 
-- [Product Requirements Document](./docs/PRD.md) - Complete product
-  specification
-- [Knowledge Base](./docs/KNOWLEDGE.md) - API endpoints and usage
-- _Architecture Guide_ - System architecture details (coming soon)
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/danilomartinelli/usecapsule-api/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/danilomartinelli/usecapsule-api/discussions)
-- **Security**: Report security vulnerabilities to <security@usecapsule.com>
-
-## Developer Tools & SDKs
-
-Capsule provides comprehensive developer tools to integrate with your workflow:
-
-### Command Line Interface
-
-The Capsule CLI enables deployment management directly from your terminal:
+- **Services won't start**
 
 ```bash
-# Future CLI capabilities (in development)
-capsule deploy --name my-app --image node:18
-capsule logs my-app --follow
-capsule scale my-app --replicas 3
-capsule env set my-app DATABASE_URL=postgresql://...
+# Check if ports are already in use
+lsof -i :3000  # API Gateway
+lsof -i :5432  # PostgreSQL
+lsof -i :5672  # RabbitMQ
+
+# Reset everything
+npm run infrastructure:reset
+npm run dev
 ```
 
-### Multi-Language SDKs
+- **Database connection errors**
 
-Official SDKs are planned for multiple programming languages:
+```bash
+# Ensure databases are running
+docker ps
 
-- **Node.js/TypeScript** - Express.js middleware, Next.js integration
-- **Go** - Gin/Echo middleware, gRPC interceptors  
-- **Python** - FastAPI/Django middleware, Jupyter notebook support
-- **PHP** - Laravel service provider, WordPress plugin
-- **Ruby** - Rails generators, Sinatra extensions
-- **Rust** - Axum/Actix middleware, WASM compatibility
+# Check migrations
+npm run db:migrate:all
 
-Each SDK will provide:
-- Type-safe API clients
-- Framework-specific integrations
-- Streaming log access
-- Real-time deployment status
-- Environment variable management
-
-### Integration Examples
-
-```javascript
-// Node.js SDK (planned)
-import { Capsule } from '@usecapsule/sdk';
-
-const capsule = new Capsule({ apiKey: process.env.CAPSULE_API_KEY });
-const deployment = await capsule.deployments.create({
-  name: 'my-app',
-  image: 'node:18-alpine',
-  port: 3000
-});
+# View database logs
+docker logs capsule-auth-db
 ```
 
-```python
-# Python SDK (planned)
-from capsule import Capsule
+- **RabbitMQ connection issues**
 
-capsule = Capsule(api_key=os.getenv('CAPSULE_API_KEY'))
-deployment = capsule.deployments.create(
-    name='my-app',
-    image='python:3.11-slim',
-    port=8000
-)
+```bash
+# Check RabbitMQ is healthy
+curl -u admin:admin http://localhost:15672/api/overview
+
+# Reset RabbitMQ
+docker restart capsule-rabbitmq
 ```
 
-## Roadmap
+- **TypeScript/Build errors**
 
-### Phase 1: MVP Foundation (Q1 2025)
+```bash
+# Clear Nx cache
+nx reset
 
-- [ ] Nx monorepo setup
-- [ ] Docker infrastructure
-- [ ] Basic authentication service
-- [ ] Container deployment engine
-- [ ] React portal with dashboard
-- [ ] Real-time log streaming
+# Reinstall dependencies
+rm -rf node_modules package-lock.json
+npm install
+```
 
-### Phase 2: Developer Experience (Q2 2025)
+## 📄 License
 
-- [ ] Preview environments
-- [ ] Advanced deployment strategies
-- [ ] Cost tracking engine
-- [ ] Team collaboration features
-- [ ] CLI tool development
-- [ ] Node.js SDK implementation
+This project is proprietary software. All rights reserved.
 
-### Phase 3: Production Ready (Q3 2025)
+## 🙋 Support
 
-- [ ] Managed database services
-- [ ] Infrastructure export tools
-- [ ] Enterprise security features
-- [ ] Multi-region support
-- [ ] Multi-language SDK rollout
+For questions and support:
 
-## License
-
-This project is licensed under the MIT License.
+- Create an issue in GitHub
+- Check existing issues for solutions
+- Reach out to the architecture team on Slack
+- Review [CLAUDE.md](./CLAUDE.md) for architecture questions
 
 ---
 
-**Capsule** - Deploy with confidence, scale without limits.
+**Ready to revolutionize how you deploy applications?** Follow the quick start guide above and you'll have Capsule running locally in minutes. For production deployments, contact the platform team for access to our cloud environments.
+
+Built with ❤️ by the Capsule Team

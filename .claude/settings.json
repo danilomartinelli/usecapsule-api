@@ -2,6 +2,6 @@
   "permissions": {
     "allow": ["Bash: Allow", "Edit: Allow", "Write: Allow"],
     "deny": [],
-    "ask": []
+    "ask": ["Git: Ask"]
   }
 }

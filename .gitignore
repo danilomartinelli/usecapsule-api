@@ -1,38 +1,30 @@
-# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
-
 # compiled output
-dist
-tmp
-out-tsc
+dist/
+tmp/
+out-tsc/
 
 # dependencies
-node_modules
+node_modules/
 
-# IDEs and editors
-/.
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
+# VSCode (Supported IDE)
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
+# JetBrains (Not Supported IDE)
+.idea/
+
+# Others editors (Not Supported IDEs)
+.project
+.classpath
+.c9
+*.sublime-workspace
+
+# LOG files
+logs/
+*.log
 
 # System Files
 .DS_Store
@@ -41,41 +33,15 @@ Thumbs.db
 # Nx
 .nx/cache
 .nx/workspace-data
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
-vite.config.*.timestamp*
-test-output
-
-# Local mcp servers
-.cursor/mcp.json
-.mcp.json
 
 # Environment Files
 .env
 .env.local
 .env.*.local
 
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-dev-debug.log
+# NX specific ignores
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
 
-# Dependency directories
-node_modules/
-
-# Editor directories and files
-.idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# AI
-.mcp.*
-.github/instructions
-.taskmaster
+# AI tools
+.claude/
