@@ -1,8 +1,6 @@
 import { Type } from '@nestjs/common';
 import { ModuleMetadata } from '@nestjs/common/interfaces';
 
-import { Environment } from '@usecapsule/types';
-
 export interface DatabaseModuleOptions {
   host: string;
   port: number;
@@ -15,7 +13,7 @@ export interface DatabaseModuleOptions {
   connectionTimeout?: number;
   idleTimeout?: number;
   statementTimeout?: number;
-  environment?: Environment;
+  environment?: 'test' | 'development' | 'production';
 }
 
 export interface DatabaseModuleAsyncOptions {

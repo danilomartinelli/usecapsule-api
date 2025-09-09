@@ -1,8 +1,5 @@
-import { Interceptor, QueryContext } from 'slonik';
 import { Logger } from '@nestjs/common';
-
-import { Environment } from '@usecapsule/types';
-
+import { Interceptor, QueryContext } from 'slonik';
 
 /**
  * Connection context information for logging
@@ -53,7 +50,9 @@ interface QueryErrorContext {
  * });
  * ```
  */
-export function loggingInterceptor(environment: Environment): Interceptor {
+export function loggingInterceptor(
+  environment: 'development' | 'production' | 'test',
+): Interceptor {
   const logger = new Logger('DatabaseInterceptor');
 
   /**
@@ -66,20 +65,19 @@ export function loggingInterceptor(environment: Environment): Interceptor {
    */
   const logConnectionEvent = (
     event: string,
-    context: ConnectionLogContext
+    context: ConnectionLogContext,
   ): void => {
     if (isDevelopment()) {
-      logger.debug(`${event} - Pool: ${context.poolId}, Connection: ${context.connectionId}`);
+      logger.debug(
+        `${event} - Pool: ${context.poolId}, Connection: ${context.connectionId}`,
+      );
     }
   };
 
   /**
    * Logs pool-related events with consistent formatting (before connection is established)
    */
-  const logPoolEvent = (
-    event: string,
-    context: PoolLogContext
-  ): void => {
+  const logPoolEvent = (event: string, context: PoolLogContext): void => {
     if (isDevelopment()) {
       logger.debug(`${event} - Pool: ${context.poolId}`);
     }

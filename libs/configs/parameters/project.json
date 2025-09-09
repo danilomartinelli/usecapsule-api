@@ -1,0 +1,20 @@
+{
+  "name": "@usecapsule/parameters",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/configs/parameters/src",
+  "projectType": "library",
+  "tags": ["scope:config", "type:lib", "layer:infrastructure"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/configs/parameters",
+        "tsConfig": "libs/configs/parameters/tsconfig.lib.json",
+        "packageJson": "libs/configs/parameters/package.json",
+        "main": "libs/configs/parameters/src/index.ts",
+        "assets": ["libs/configs/parameters/*.md"]
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "name": "@usecapsule/database",
+  "name": "@usecapsule/parameters",
   "version": "0.0.1",
   "private": true,
   "main": "./dist/index.js",
@@ -15,13 +15,8 @@
     }
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.6",
-    "slonik": "^48.6.0",
+    "@nestjs/config": "^4.0.2",
     "tslib": "^2.3.0",
-    "zod": "^4.1.5",
-    "@usecapsule/types": "0.0.1"
-  },
-  "devDependencies": {
-    "@types/pg": "^8.15.5"
+    "zod": "^3.25.76"
   }
 }
