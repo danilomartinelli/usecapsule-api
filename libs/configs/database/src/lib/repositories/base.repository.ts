@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common';
-import { DatabasePool, sql, QuerySqlToken } from 'slonik';
+import { DatabasePool, QuerySqlToken, sql } from 'slonik';
 import { z } from 'zod';
 import { DATABASE_POOL } from '../database.constants';
 
@@ -31,20 +31,30 @@ export interface WhereCondition {
 /**
  * Type representing data to be inserted/updated (excluding computed fields)
  */
-type EntityData<T> = Partial<z.infer<T>>;
+type EntityData<T extends z.ZodType> = Partial<z.infer<T>>;
+
+/**
+ * Type guard to check if a value is a valid ValueExpression
+ */
+type SafeValueExpression = string | number | boolean | null | bigint | Buffer;
+
+/**
+ * Helper type to ensure database query results are properly typed
+ */
+type DatabaseQueryResult<T extends z.ZodType> = z.infer<T>;
 
 /**
  * Abstract base repository providing common CRUD operations with type safety.
- * 
+ *
  * This repository provides:
  * - Type-safe database operations using Zod schemas
  * - Common CRUD patterns with consistent error handling
  * - Flexible querying with pagination and filtering
  * - Optimized SQL generation with proper escaping
  * - Transaction support through the database pool
- * 
+ *
  * @template T - Zod schema type for the entity
- * 
+ *
  * @example
  * ```typescript
  * const UserSchema = z.object({
@@ -54,7 +64,7 @@ type EntityData<T> = Partial<z.infer<T>>;
  *   created_at: z.date(),
  *   updated_at: z.date(),
  * });
- * 
+ *
  * @Injectable()
  * class UserRepository extends BaseRepository<typeof UserSchema> {
  *   protected tableName = 'users';
@@ -70,30 +80,31 @@ export abstract class BaseRepository<T extends z.ZodType> {
 
   /**
    * Finds a single entity by its ID.
-   * 
+   *
    * @param id - The entity ID to search for
    * @returns Promise resolving to the entity or null if not found
-   * 
+   *
    * @example
    * ```typescript
    * const user = await userRepository.findById('123e4567-e89b-12d3-a456-426614174000');
    * ```
    */
-  async findById(id: string): Promise<z.infer<T> | null> {
+  async findById(id: string): Promise<DatabaseQueryResult<T> | null> {
     const query = sql.type(this.schema)`
       SELECT * FROM ${sql.identifier([this.tableName])}
       WHERE id = ${id}
     `;
-    
-    return this.pool.maybeOne(query);
+
+    const result = await this.pool.maybeOne(query);
+    return result ? this.validateAndTransform(result) : null;
   }
 
   /**
    * Finds all entities with optional pagination and ordering.
-   * 
+   *
    * @param options - Query options including pagination and ordering
    * @returns Promise resolving to array of entities
-   * 
+   *
    * @example
    * ```typescript
    * const users = await userRepository.findAll({
@@ -104,18 +115,18 @@ export abstract class BaseRepository<T extends z.ZodType> {
    * });
    * ```
    */
-  async findAll(options: QueryOptions = {}): Promise<z.infer<T>[]> {
+  async findAll(options: QueryOptions = {}): Promise<DatabaseQueryResult<T>[]> {
     const query = this.buildSelectQuery(options);
     const results = await this.pool.any(query);
-    return results as z.infer<T>[];
+    return results.map((result) => this.validateAndTransform(result));
   }
 
   /**
    * Creates a new entity in the database.
-   * 
+   *
    * @param data - Partial entity data to insert
    * @returns Promise resolving to the created entity
-   * 
+   *
    * @example
    * ```typescript
    * const newUser = await userRepository.create({
@@ -124,20 +135,21 @@ export abstract class BaseRepository<T extends z.ZodType> {
    * });
    * ```
    */
-  async create(data: EntityData<T>): Promise<z.infer<T>> {
+  async create(data: EntityData<T>): Promise<DatabaseQueryResult<T>> {
     const cleanData = this.filterUndefinedValues(data);
     const query = this.buildInsertQuery(cleanData);
-    
-    return this.pool.one(query);
+
+    const result = await this.pool.one(query);
+    return this.validateAndTransform(result);
   }
 
   /**
    * Updates an existing entity by ID.
-   * 
+   *
    * @param id - The entity ID to update
    * @param data - Partial entity data to update
    * @returns Promise resolving to updated entity or null if not found
-   * 
+   *
    * @example
    * ```typescript
    * const updatedUser = await userRepository.update('123', {
@@ -145,23 +157,27 @@ export abstract class BaseRepository<T extends z.ZodType> {
    * });
    * ```
    */
-  async update(id: string, data: EntityData<T>): Promise<z.infer<T> | null> {
+  async update(
+    id: string,
+    data: EntityData<T>,
+  ): Promise<DatabaseQueryResult<T> | null> {
     const cleanData = this.filterUndefinedValues(data);
-    
+
     if (Object.keys(cleanData).length === 0) {
       return this.findById(id);
     }
 
     const query = this.buildUpdateQuery(id, cleanData);
-    return this.pool.maybeOne(query);
+    const result = await this.pool.maybeOne(query);
+    return result ? this.validateAndTransform(result) : null;
   }
 
   /**
    * Deletes an entity by ID.
-   * 
+   *
    * @param id - The entity ID to delete
    * @returns Promise resolving to true if deleted, false if not found
-   * 
+   *
    * @example
    * ```typescript
    * const wasDeleted = await userRepository.delete('123');
@@ -179,10 +195,10 @@ export abstract class BaseRepository<T extends z.ZodType> {
 
   /**
    * Checks if an entity exists by ID.
-   * 
+   *
    * @param id - The entity ID to check
    * @returns Promise resolving to true if exists, false otherwise
-   * 
+   *
    * @example
    * ```typescript
    * const userExists = await userRepository.exists('123');
@@ -193,16 +209,16 @@ export abstract class BaseRepository<T extends z.ZodType> {
       SELECT 1 FROM ${sql.identifier([this.tableName])}
       WHERE id = ${id}
     `;
-    
+
     return this.pool.exists(query);
   }
 
   /**
    * Counts entities matching optional where conditions.
-   * 
+   *
    * @param where - Optional conditions to filter count
    * @returns Promise resolving to the count of matching entities
-   * 
+   *
    * @example
    * ```typescript
    * const activeUsers = await userRepository.count({ status: 'active' });
@@ -217,11 +233,11 @@ export abstract class BaseRepository<T extends z.ZodType> {
 
   /**
    * Finds entities matching the provided where conditions.
-   * 
+   *
    * @param where - Conditions to filter entities
    * @param options - Additional query options
    * @returns Promise resolving to array of matching entities
-   * 
+   *
    * @example
    * ```typescript
    * const activeUsers = await userRepository.findWhere(
@@ -233,10 +249,10 @@ export abstract class BaseRepository<T extends z.ZodType> {
   async findWhere(
     where: WhereCondition,
     options: QueryOptions = {},
-  ): Promise<z.infer<T>[]> {
+  ): Promise<DatabaseQueryResult<T>[]> {
     const query = this.buildSelectQuery(options, where);
     const results = await this.pool.any(query);
-    return results as z.infer<T>[];
+    return results.map((result) => this.validateAndTransform(result));
   }
 
   // Private helper methods for query building
@@ -266,7 +282,7 @@ export abstract class BaseRepository<T extends z.ZodType> {
 
     if (options.limit) {
       query = sql.type(this.schema)`${query} LIMIT ${options.limit}`;
-      
+
       if (options.offset) {
         query = sql.type(this.schema)`${query} OFFSET ${options.offset}`;
       }
@@ -336,7 +352,7 @@ export abstract class BaseRepository<T extends z.ZodType> {
     const conditions = Object.entries(where).map(([key, value]) =>
       value === null
         ? sql.fragment`${sql.identifier([key])} IS NULL`
-        : sql.fragment`${sql.identifier([key])} = ${this.sanitizeValue(value)}`,
+        : sql.fragment`${sql.identifier([key])} = ${this.convertToValueExpression(value)}`,
     );
 
     return sql.join(conditions, sql.fragment` AND `);
@@ -349,7 +365,7 @@ export abstract class BaseRepository<T extends z.ZodType> {
     const assignments = Object.entries(data).map(([key, value]) =>
       value === null
         ? sql.fragment`${sql.identifier([key])} = NULL`
-        : sql.fragment`${sql.identifier([key])} = ${this.sanitizeValue(value)}`,
+        : sql.fragment`${sql.identifier([key])} = ${this.convertToValueExpression(value)}`,
     );
 
     return sql.join(assignments, sql.fragment`, `);
@@ -359,40 +375,78 @@ export abstract class BaseRepository<T extends z.ZodType> {
    * Formats a value for SQL insertion, handling NULL values properly.
    */
   private formatValue(value: unknown) {
-    return value === null ? sql.fragment`NULL` : sql.fragment`${this.sanitizeValue(value)}`;
+    return value === null
+      ? sql.fragment`NULL`
+      : this.convertToValueExpression(value);
   }
 
   /**
-   * Sanitizes a value for safe SQL usage by ensuring it's a valid type.
+   * Converts a value to a valid ValueExpression for Slonik.
+   * Handles type conversion and ensures compatibility with SQL parameters.
    */
-  private sanitizeValue(value: unknown): string | number | boolean | Date | bigint {
+  private convertToValueExpression(value: unknown): SafeValueExpression {
+    if (value === null || value === undefined) {
+      return null;
+    }
+
     if (
       typeof value === 'string' ||
       typeof value === 'number' ||
       typeof value === 'boolean' ||
-      typeof value === 'bigint' ||
-      value instanceof Date
+      typeof value === 'bigint'
     ) {
       return value;
     }
-    
+
+    // Convert Date objects to ISO strings for database storage
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    // Handle Buffer objects
+    if (Buffer.isBuffer(value)) {
+      return value;
+    }
+
     // For complex objects, convert to JSON string
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === 'object') {
       return JSON.stringify(value);
     }
-    
+
     // Fallback to string representation
     return String(value);
   }
 
   /**
-   * Filters out undefined values from data object.
+   * Validates and transforms database result using the schema.
+   * Provides runtime type safety by validating against the Zod schema.
    */
-  private filterUndefinedValues(
-    data: EntityData<T>,
-  ): Record<string, unknown> {
-    return Object.entries(data)
-      .filter(([, value]) => value !== undefined)
-      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+  private validateAndTransform(result: unknown): DatabaseQueryResult<T> {
+    try {
+      return this.schema.parse(result) as DatabaseQueryResult<T>;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errorMessages = error.issues
+          .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+          .join(', ');
+        throw new Error(`Database result validation failed: ${errorMessages}`);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Filters out undefined values from data object and ensures type safety.
+   */
+  private filterUndefinedValues(data: EntityData<T>): Record<string, unknown> {
+    const filtered: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined) {
+        filtered[key] = value;
+      }
+    }
+
+    return filtered;
   }
 }
