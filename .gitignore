@@ -1,45 +1,38 @@
-# compiled output
-dist/
-tmp/
-out-tsc/
-
-# dependencies
+# Node modules
 node_modules/
+**/node_modules/
 
-# VSCode (Supported IDE)
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+# Environment files
+.env
+.env.*
+!.env.example
 
-# JetBrains (Not Supported IDE)
-.idea/
+# Database
+*.sql
+*.sqlite
 
-# Others editors (Not Supported IDEs)
-.project
-.classpath
-.c9
-*.sublime-workspace
-
-# LOG files
+# Logs
 logs/
 *.log
 
-# System Files
+# OS files
 .DS_Store
 Thumbs.db
 
-# Nx
-**/.nx/cache
-**/.nx/workspace-data
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
+# Distribution
+dist/
+build/
+out/
+coverage/
 
-# Environment Files
-.env
-.env.local
-.env.*.local
-
-# NX specific ignores
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
+# Temporary files
+tmp/
+temp/
+.cache/
+.nx/

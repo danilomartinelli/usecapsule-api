@@ -1,0 +1,56 @@
+name: usecapsule-services
+
+services:
+  rabbitmq:
+    container_name: rabbitmq_dev
+    image: rabbitmq:3.13-management
+    ports:
+      - '7010:5672'
+      - '7020:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  auth-db:
+    container_name: auth_db_dev
+    image: postgres:15
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+      POSTGRES_DB: auth_service_db
+    ports:
+      - '7110:5432'
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+
+  deploy-db:
+    container_name: deploy_db_dev
+    image: postgres:15
+    environment:
+      POSTGRES_USER: deploy_user
+      POSTGRES_PASSWORD: deploy_pass
+      POSTGRES_DB: deploy_service_db
+    ports:
+      - '7111:5432'
+    volumes:
+      - deploy_db_data:/var/lib/postgresql/data
+
+  monitor-db:
+    container_name: monitor_db_dev
+    image: timescale/timescaledb:latest-pg15
+    environment:
+      POSTGRES_USER: monitor_user
+      POSTGRES_PASSWORD: monitor_pass
+      POSTGRES_DB: monitor_service_db
+    ports:
+      - '7112:5432'
+    volumes:
+      - monitor_db_data:/var/lib/postgresql/data
+
+volumes:
+  rabbitmq_data:
+  auth_db_data:
+  deploy_db_data:
+  monitor_db_data:
