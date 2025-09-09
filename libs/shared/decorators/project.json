@@ -1,0 +1,28 @@
+{
+  "name": "@usecapsule/decorators",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/decorators/src",
+  "projectType": "library",
+  "tags": [
+    "scope:shared",
+    "type:lib",
+    "layer:application"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/libs/shared/decorators",
+        "tsConfig": "libs/shared/decorators/tsconfig.lib.json",
+        "packageJson": "libs/shared/decorators/package.json",
+        "main": "libs/shared/decorators/src/index.ts",
+        "assets": [
+          "libs/shared/decorators/*.md"
+        ]
+      }
+    }
+  }
+}

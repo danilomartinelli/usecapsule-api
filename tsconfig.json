@@ -26,6 +26,9 @@
     },
     {
       "path": "./libs/shared/exceptions"
+    },
+    {
+      "path": "./libs/shared/decorators"
     }
   ]
 }
