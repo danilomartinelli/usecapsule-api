@@ -5,5 +5,5 @@
     "ask": ["Git: Ask"]
   },
   "enableAllProjectMcpServers": true,
-  "model": ""
+  "model": "opusplan"
 }
