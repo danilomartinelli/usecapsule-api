@@ -1,0 +1,28 @@
+{
+  "name": "@usecapsule/observability",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/configs/observability/src",
+  "projectType": "library",
+  "tags": [
+    "scope:config",
+    "type:lib",
+    "layer:infrastructure"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/libs/configs/observability",
+        "tsConfig": "libs/configs/observability/tsconfig.lib.json",
+        "packageJson": "libs/configs/observability/package.json",
+        "main": "libs/configs/observability/src/index.ts",
+        "assets": [
+          "libs/configs/observability/*.md"
+        ]
+      }
+    }
+  }
+}

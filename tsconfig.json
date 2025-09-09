@@ -35,6 +35,15 @@
     },
     {
       "path": "./libs/shared/utils"
+    },
+    {
+      "path": "./libs/configs/database"
+    },
+    {
+      "path": "./libs/configs/rabbitmq"
+    },
+    {
+      "path": "./libs/configs/observability"
     }
   ]
 }

@@ -1,0 +1,28 @@
+{
+  "name": "@usecapsule/rabbitmq",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/configs/rabbitmq/src",
+  "projectType": "library",
+  "tags": [
+    "scope:config",
+    "type:lib",
+    "layer:infrastructure"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/libs/configs/rabbitmq",
+        "tsConfig": "libs/configs/rabbitmq/tsconfig.lib.json",
+        "packageJson": "libs/configs/rabbitmq/package.json",
+        "main": "libs/configs/rabbitmq/src/index.ts",
+        "assets": [
+          "libs/configs/rabbitmq/*.md"
+        ]
+      }
+    }
+  }
+}
