@@ -1,3 +1,1 @@
-export function types(): string {
-  return 'types';
-}
+export type Environment = 'development' | 'production' | 'test';
