@@ -1,0 +1,13 @@
+{
+  "name": "@usecapsule/types",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/types/src",
+  "projectType": "library",
+  "tags": [
+    "scope:shared",
+    "type:lib",
+    "layer:domain"
+  ],
+  "// targets": "to see all targets run: nx show project @usecapsule/types --web",
+  "targets": {}
+}

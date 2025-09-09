@@ -29,6 +29,12 @@
     },
     {
       "path": "./libs/shared/decorators"
+    },
+    {
+      "path": "./libs/shared/types"
+    },
+    {
+      "path": "./libs/shared/utils"
     }
   ]
 }
