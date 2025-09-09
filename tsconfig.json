@@ -17,6 +17,15 @@
     },
     {
       "path": "./apps/billing-service"
+    },
+    {
+      "path": "./libs/shared/ddd"
+    },
+    {
+      "path": "./libs/shared/messaging"
+    },
+    {
+      "path": "./libs/shared/exceptions"
     }
   ]
 }
