@@ -2,5 +2,14 @@
   "name": "@usecapsule/api-gateway",
   "version": "1.0.0",
   "private": true,
-  "dependencies": {}
+  "dependencies": {
+    "@nestjs/microservices": "^11.1.6",
+    "@nestjs/swagger": "^11.2.0",
+    "@nestjs/throttler": "^6.4.0",
+    "amqp-connection-manager": "^4.1.14",
+    "amqplib": "^0.10.9"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.7"
+  }
 }

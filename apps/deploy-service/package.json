@@ -2,5 +2,12 @@
   "name": "@usecapsule/deploy-service",
   "version": "1.0.0",
   "private": true,
-  "dependencies": {}
+  "dependencies": {
+    "@nestjs/microservices": "^11.1.6",
+    "amqp-connection-manager": "^4.1.14",
+    "amqplib": "^0.10.9"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.7"
+  }
 }
