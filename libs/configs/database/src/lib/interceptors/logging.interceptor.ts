@@ -1,41 +1,157 @@
-import { Interceptor } from 'slonik';
+import { Interceptor, QueryContext } from 'slonik';
+import { Logger } from '@nestjs/common';
 
 import { Environment } from '@usecapsule/types';
 
-export const loggingInterceptor = (environment: Environment): Interceptor => ({
-  name: 'LoggingInterceptor',
-  beforePoolConnection: (connectionContext) => {
-    if (environment === 'development') {
-      console.log(
-        `[Database] Acquiring connection from pool ${connectionContext.poolId}`,
-      );
-    }
 
-    return null;
-  },
-  afterPoolConnection: (connectionContext) => {
-    if (environment === 'development') {
-      console.log(
-        `[Database] Connection acquired ${connectionContext.connectionId}`,
-      );
-    }
+/**
+ * Connection context information for logging
+ */
+interface ConnectionLogContext {
+  readonly poolId: string;
+  readonly connectionId: string;
+}
 
-    return null;
-  },
-  beforePoolConnectionRelease: async (connectionContext) => {
-    if (environment === 'development') {
-      console.log(
-        `[Database] Releasing connection ${connectionContext.connectionId}`,
-      );
-    }
+/**
+ * Pool context information for logging (before connection is established)
+ */
+interface PoolLogContext {
+  readonly poolId: string;
+}
 
-    return null;
-  },
-  queryExecutionError: (_queryContext, query, error) => {
-    console.error('[Database] Query execution error:', {
-      query: query.sql,
+/**
+ * Query error context information for enhanced error logging
+ */
+interface QueryErrorContext {
+  readonly sql: string;
+  readonly values?: readonly unknown[];
+  readonly error: string;
+  readonly stack?: string;
+}
+
+/**
+ * Creates a database logging interceptor with environment-aware logging levels.
+ *
+ * The interceptor provides comprehensive logging for database operations:
+ * - Connection lifecycle events (acquire, release) in development mode
+ * - Query execution errors with detailed context in all environments
+ * - Structured logging using NestJS Logger for consistency
+ * - Performance-aware logging that respects environment settings
+ *
+ * @param environment - Current application environment
+ * @returns Configured Slonik interceptor for database logging
+ *
+ * @example
+ * ```typescript
+ * import { createPool } from 'slonik';
+ * import { loggingInterceptor } from './logging.interceptor';
+ *
+ * const pool = createPool(connectionString, {
+ *   interceptors: [
+ *     loggingInterceptor('development'), // Enables verbose connection logging
+ *   ],
+ * });
+ * ```
+ */
+export function loggingInterceptor(environment: Environment): Interceptor {
+  const logger = new Logger('DatabaseInterceptor');
+
+  /**
+   * Checks if development-level logging is enabled
+   */
+  const isDevelopment = (): boolean => environment === 'development';
+
+  /**
+   * Logs connection-related events with consistent formatting
+   */
+  const logConnectionEvent = (
+    event: string,
+    context: ConnectionLogContext
+  ): void => {
+    if (isDevelopment()) {
+      logger.debug(`${event} - Pool: ${context.poolId}, Connection: ${context.connectionId}`);
+    }
+  };
+
+  /**
+   * Logs pool-related events with consistent formatting (before connection is established)
+   */
+  const logPoolEvent = (
+    event: string,
+    context: PoolLogContext
+  ): void => {
+    if (isDevelopment()) {
+      logger.debug(`${event} - Pool: ${context.poolId}`);
+    }
+  };
+
+  /**
+   * Logs query execution errors with enhanced context
+   */
+  const logQueryError = (
+    queryContext: QueryContext,
+    query: { sql: string; values?: readonly unknown[] },
+    error: Error,
+  ): void => {
+    const errorContext: QueryErrorContext = {
+      sql: query.sql,
+      values: query.values,
       error: error.message,
+      stack: error.stack,
+    };
+
+    // Always log query errors regardless of environment
+    logger.error('Query execution failed', {
+      context: errorContext,
+      queryId: queryContext.queryId,
+      connectionId: queryContext.connectionId,
     });
-    throw error;
-  },
-});
+  };
+
+  return {
+    name: 'DatabaseLoggingInterceptor',
+
+    /**
+     * Logs when a connection is being acquired from the pool
+     */
+    beforePoolConnection: (poolContext) => {
+      logPoolEvent('Acquiring connection', {
+        poolId: poolContext.poolId,
+      });
+      return null;
+    },
+
+    /**
+     * Logs when a connection has been successfully acquired
+     */
+    afterPoolConnection: (connectionContext) => {
+      logConnectionEvent('Connection acquired', {
+        poolId: connectionContext.poolId,
+        connectionId: connectionContext.connectionId,
+      });
+      return null;
+    },
+
+    /**
+     * Logs when a connection is being released back to the pool
+     */
+    beforePoolConnectionRelease: async (connectionContext) => {
+      logConnectionEvent('Releasing connection', {
+        poolId: connectionContext.poolId,
+        connectionId: connectionContext.connectionId,
+      });
+      return null;
+    },
+
+    /**
+     * Handles and logs query execution errors with detailed context
+     * Always re-throws the error to maintain normal error flow
+     */
+    queryExecutionError: (queryContext, query, error) => {
+      logQueryError(queryContext, query, error);
+
+      // Re-throw the original error to maintain error flow
+      throw error;
+    },
+  };
+}
