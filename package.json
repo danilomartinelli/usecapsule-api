@@ -1,7 +1,10 @@
 {
   "name": "@usecapsule/source",
-  "version": "1.0.0",
+  "description": "Capsule Platform - Zero-configuration cloud-native deployment platform with Magic Deploy™ and complete infrastructure portability.",
+  "author": "Witek Team",
   "private": true,
+  "version": "1.0.0",
+  "license": "ISC",
   "workspaces": [
     "apps/*",
     "libs/*",
@@ -14,5 +17,12 @@
     "@nx/workspace": "^21.5.1",
     "nx": "21.5.1"
   },
-  "dependencies": {}
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danilomartinelli/usecapsule-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/danilomartinelli/usecapsule-api/issues"
+  },
+  "homepage": "https://github.com/danilomartinelli/usecapsule-api#readme"
 }
