@@ -23,17 +23,18 @@
  */
 
 import { INestMicroservice, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 
-import { BootstrapConfig } from '@usecapsule/parameters'
+import type { AuthServiceSchema } from '@usecapsule/parameters';
 import { AppModule } from './app/app.module'
 
 /**
  * Bootstrap function for the Auth Service microservice.
  *
  * This function:
- * 1. Creates the NestJS application context
+ * 1. Creates the NestJS application context (which loads and validates configuration)
  * 2. Retrieves validated configuration from ConfigService
  * 3. Configures RabbitMQ transport with proper connection settings
  * 4. Sets up error handling and graceful shutdown
@@ -52,10 +53,36 @@ async function bootstrap(): Promise<void> {
   try {
     logger.log('Starting Auth Service microservice...');
 
-    // Create the parameters context first to access environment variables
-    const parameters = BootstrapConfig.getInstance('auth-service');
+    // First create the application context to initialize the ParametersModule
+    // This will load and validate the configuration
+    logger.log('Creating application context and loading configuration...');
+    const appContext = await NestFactory.createApplicationContext(AppModule);
 
-    const rabbitConfig = parameters.getRabbitMQConfig();
+    // Get the validated configuration from ConfigService
+    const configService = appContext.get(ConfigService<AuthServiceSchema>);
+
+    // Build RabbitMQ configuration from validated config
+    const rabbitUrl = configService.get('RABBITMQ_URL', { infer: true });
+    const rabbitQueue = configService.get('RABBITMQ_QUEUE', { infer: true });
+
+    if (!rabbitUrl) {
+      throw new Error('RABBITMQ_URL is required but not configured');
+    }
+
+    const rabbitConfig = {
+      urls: [rabbitUrl],
+      queue: rabbitQueue,
+      queueOptions: {
+        durable: true,
+      },
+    };
+
+    logger.log(
+      `RabbitMQ config: ${rabbitConfig.urls[0]} -> ${rabbitConfig.queue}`,
+    );
+
+    // Close the application context as we only needed it for configuration
+    await appContext.close();
 
     logger.log('Creating microservice with RabbitMQ transport...');
     const app = await NestFactory.createMicroservice<MicroserviceOptions>(
