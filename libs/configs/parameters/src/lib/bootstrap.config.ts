@@ -138,16 +138,16 @@ export class BootstrapConfig {
    *
    * @returns RabbitMQ connection configuration
    */
-  getRabbitMQConfig(): Readonly<{
-    urls: readonly string[];
+  getRabbitMQConfig(): {
+    urls: string[];
     queue: string;
     prefetchCount: number;
-  }> {
+  } {
     return {
       urls: [this.get('RABBITMQ_URL', 'amqp://localhost:5672')],
       queue: this.get('QUEUE', `${this.serviceName}_queue`),
       prefetchCount: Number.parseInt(this.get('PREFETCH_COUNT', '10'), 10),
-    } as const;
+    };
   }
 
   /**

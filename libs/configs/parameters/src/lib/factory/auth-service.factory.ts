@@ -1,3 +1,5 @@
+import type { AuthServiceSchema } from '../schemas/auth-service.schema';
+
 /**
  * Configuration factory for the Auth Service.
  *
@@ -5,7 +7,7 @@
  * by reading from environment variables. It provides type-safe configuration
  * that will be validated against the authServiceSchema.
  *
- * @returns Auth Service configuration object
+ * @returns Auth Service configuration object matching the schema
  *
  * @example
  * ```typescript
@@ -15,58 +17,26 @@
  * const validatedConfig = authServiceSchema.parse(config);
  * ```
  */
-export const authServiceFactory = (): AuthServiceConfig => ({
-  database: {
-    host: process.env.DB_HOST,
-    name: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    port: Number.parseInt(process.env.DB_PORT || '5432', 10),
-    ssl: process.env.DB_SSL === 'true',
-  },
-  jwt: {
-    secret: process.env.JWT_SECRET,
-    expiresIn: process.env.JWT_EXPIRATION || '15m',
-    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRATION || '7d',
-  },
-  bcrypt: {
-    rounds: Number.parseInt(process.env.BCRYPT_ROUNDS || '10', 10),
-  },
-  oauth: {
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    },
-  },
-} as const);
-
-/**
- * Type representing the Auth Service configuration structure.
- */
-export interface AuthServiceConfig {
-  readonly database: {
-    readonly host: string | undefined;
-    readonly name: string | undefined;
-    readonly user: string | undefined;
-    readonly password: string | undefined;
-    readonly port: number;
-    readonly ssl: boolean;
-  };
-  readonly jwt: {
-    readonly secret: string | undefined;
-    readonly expiresIn: string;
-    readonly refreshExpiresIn: string;
-  };
-  readonly bcrypt: {
-    readonly rounds: number;
-  };
-  readonly oauth: {
-    readonly github: {
-      readonly clientId: string | undefined;
-      readonly clientSecret: string | undefined;
-    };
-  };
-}
+export const authServiceFactory = (): AuthServiceSchema => ({
+  NODE_ENV: (process.env.NODE_ENV as 'test' | 'development' | 'production') || 'development',
+  APP_ENV: (process.env.APP_ENV as 'test' | 'local' | 'development' | 'staging' | 'production' | 'canary') || 'local',
+  SERVICE_NAME: 'auth-service' as const,
+  RABBITMQ_URL: process.env.RABBITMQ_URL || '',
+  RABBITMQ_QUEUE: process.env.RABBITMQ_QUEUE || 'auth_queue',
+  DB_HOST: process.env.DB_HOST || '',
+  DB_PORT: Number.parseInt(process.env.DB_PORT || '5432', 10),
+  DB_NAME: process.env.DB_NAME || '',
+  DB_USER: process.env.DB_USER || '',
+  DB_PASSWORD: process.env.DB_PASSWORD || '',
+  DB_SSL: process.env.DB_SSL === 'true',
+  JWT_SECRET: process.env.JWT_SECRET || '',
+  JWT_EXPIRATION: process.env.JWT_EXPIRATION || '15m',
+  JWT_REFRESH_EXPIRATION: process.env.JWT_REFRESH_EXPIRATION || '7d',
+  BCRYPT_ROUNDS: Number.parseInt(process.env.BCRYPT_ROUNDS || '10', 10),
+  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+  LOG_LEVEL: (process.env.LOG_LEVEL as 'error' | 'warn' | 'info' | 'debug') || 'info',
+});
 
 /**
  * Type alias for the auth service factory function.
