@@ -20,6 +20,7 @@ apps/
 ## Common Development Commands
 
 ### Nx Workspace Commands
+
 ```bash
 # View workspace structure and dependencies
 nx graph
@@ -46,6 +47,7 @@ nx typecheck auth-service
 ```
 
 ### Development Workflow
+
 ```bash
 # Install dependencies
 npm install
@@ -67,6 +69,7 @@ npm run format              # Format with Prettier
 ```
 
 ### Infrastructure Commands
+
 ```bash
 # Docker infrastructure
 npm run infrastructure:up    # Start databases, RabbitMQ
@@ -83,16 +86,19 @@ npm run db:reset:all        # Drop and recreate databases
 ## Architecture Principles
 
 ### 1. Microservices with Message Queues
+
 - Services communicate only via RabbitMQ, never direct HTTP
 - API Gateway is the single HTTP entry point
 - Each service has its own database
 
 ### 2. Domain-Driven Design
+
 - Each app represents a bounded context
 - Business logic stays in domain entities
 - CQRS for command/query separation
 
 ### 3. Development Guidelines
+
 - Use Nx generators for consistent code structure
 - Follow NestJS conventions and decorators
 - Write tests at unit, integration, and e2e levels
@@ -101,6 +107,7 @@ npm run db:reset:all        # Drop and recreate databases
 ## Nx Development Guidelines
 
 ### Working with Nx MCP Server
+
 When using Claude Code with this Nx workspace:
 
 1. **Understanding the workspace**: Use `nx_workspace` tool to gain understanding of workspace architecture
@@ -109,7 +116,9 @@ When using Claude Code with this Nx workspace:
 4. **Visualizing dependencies**: Use `nx_visualize_graph` tool to demonstrate task dependencies
 
 ### Generation Workflow
+
 When generating new code:
+
 1. Learn about workspace using `nx_workspace` and `nx_project_details` tools
 2. Get available generators with `nx_generators` tool
 3. Check `nx_available_plugins` for additional plugins if needed
@@ -119,14 +128,18 @@ When generating new code:
 7. Read results with generator log tools
 
 ### Task Management
+
 For running tests, builds, lint, and other tasks:
+
 1. Check current tasks with `nx_current_running_tasks_details`
 2. Get task output with `nx_current_running_task_output`
 3. Use `nx run <taskId>` to rerun tasks in proper Nx context
 4. Don't rerun continuous tasks that are already running
 
 ### CI Pipeline Debugging
+
 For CI pipeline errors:
+
 1. Get CIPE details with `nx_cloud_cipe_details`
 2. Get specific task logs with `nx_cloud_fix_cipe_failure`
 3. Fix identified problems and rerun the failing task
@@ -137,28 +150,30 @@ For CI pipeline errors:
 External Clients → API Gateway (HTTP) → RabbitMQ → Microservices
                       ↓
               - auth-service
-              - billing-service  
+              - billing-service
               - deploy-service
               - monitor-service
 ```
 
 ### Key Architecture Points
-- **API Gateway**: Single HTTP entry point (port 3000) 
+
+- **API Gateway**: Single HTTP entry point (port 3000)
 - **Microservices**: Communicate only via RabbitMQ, no direct HTTP
 - **Database per Service**: Each service owns its data completely
 - **Message Patterns**: Request/Response (RPC) and Event-driven (Pub/Sub)
 - **Domain Focus**: Each service represents a business capability
 
 ### Service Structure Pattern
+
 ```
 apps/[service-name]/
 ├── src/
-│   ├── main.ts              # RabbitMQ microservice bootstrap  
+│   ├── main.ts              # RabbitMQ microservice bootstrap
 │   ├── app.module.ts        # Service configuration
 │   └── modules/             # Domain modules (aggregates)
 │       └── [aggregate]/
 │           ├── commands/    # Write operations
-│           ├── queries/     # Read operations  
+│           ├── queries/     # Read operations
 │           ├── domain/      # Business entities
 │           ├── database/    # Infrastructure adapters
 │           └── message-handlers/ # RabbitMQ handlers
@@ -167,13 +182,16 @@ apps/[service-name]/
 ## Important Development Notes
 
 ### URLs and Endpoints
-- **API Gateway**: http://localhost:3000
-- **API Documentation**: http://localhost:3000/api/documentation  
-- **RabbitMQ Management**: http://localhost:15672 (admin/admin)
-- **Health Check**: http://localhost:3000/health
+
+- **API Gateway**: <http://localhost:3000>
+- **API Documentation**: <http://localhost:3000/api/documentation>
+- **RabbitMQ Management**: <http://localhost:15672> (admin/admin)
+- **Health Check**: <http://localhost:3000/health>
 
 ### Creating New Services
+
 When adding a new bounded context:
+
 1. Generate service: `nx g @nx/nest:app [service-name]`
 2. Configure RabbitMQ transport in main.ts (no HTTP server)
 3. Create message handlers (use @MessagePattern/@EventPattern)
@@ -181,6 +199,7 @@ When adding a new bounded context:
 5. Update docker-compose.yml for infrastructure
 
 ### Testing Guidelines
+
 - Unit tests: `*.spec.ts` files next to source code
 - Integration tests: `*.integration.spec.ts` with test databases
 - E2E tests: In dedicated e2e projects

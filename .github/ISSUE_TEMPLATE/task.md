@@ -63,8 +63,8 @@ assignees: ''
 
 ## 📊 Estimativa
 
-- **Story Points**: 
-- **Tempo estimado**: 
+- **Story Points**:
+- **Tempo estimado**:
 
 ## 📝 Notas Técnicas
 

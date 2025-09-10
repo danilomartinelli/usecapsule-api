@@ -41,7 +41,7 @@ export const apiGatewaySchema = z
      * @default 'local'
      */
     APP_ENV: z
-      .enum(['local', 'staging', 'production'])
+      .enum(['test', 'local', 'development', 'staging', 'production', 'canary'])
       .default('local')
       .describe('Application deployment environment'),
 

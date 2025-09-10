@@ -58,8 +58,8 @@ assignees: ''
 
 <!-- Estimativa de esforço em story points ou dias -->
 
-- **Story Points**: 
-- **Tempo estimado**: 
+- **Story Points**:
+- **Tempo estimado**:
 
 ## 📝 Notas Adicionais
 
