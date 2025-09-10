@@ -49,8 +49,21 @@ services:
     volumes:
       - monitor_db_data:/var/lib/postgresql/data
 
+  billing-db:
+    container_name: billing_db_dev
+    image: postgres:15
+    environment:
+      POSTGRES_USER: billing_user
+      POSTGRES_PASSWORD: billing_pass
+      POSTGRES_DB: billing_service_db
+    ports:
+      - '7113:5432'
+    volumes:
+      - billing_db_data:/var/lib/postgresql/data
+
 volumes:
   rabbitmq_data:
   auth_db_data:
   deploy_db_data:
   monitor_db_data:
+  billing_db_data:

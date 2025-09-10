@@ -8,20 +8,38 @@
  * Available factories:
  * - `authServiceFactory` - Auth Service configuration factory
  * - `apiGatewayFactory` - API Gateway configuration factory
+ * - `billingServiceFactory` - Billing Service configuration factory
  * - `deployServiceFactory` - Deploy Service configuration factory
+ * - `monitorServiceFactory` - Monitor Service configuration factory
  *
  * @example
  * ```typescript
- * import { authServiceFactory, apiGatewayFactory, deployServiceFactory } from '@usecapsule/parameters';
- * import { authServiceSchema, apiGatewaySchema, deployServiceSchema } from '@usecapsule/parameters';
+ * import { 
+ *   authServiceFactory, 
+ *   apiGatewayFactory, 
+ *   billingServiceFactory,
+ *   deployServiceFactory,
+ *   monitorServiceFactory 
+ * } from '@usecapsule/parameters';
+ * import { 
+ *   authServiceSchema, 
+ *   apiGatewaySchema, 
+ *   billingServiceSchema,
+ *   deployServiceSchema,
+ *   monitorServiceSchema 
+ * } from '@usecapsule/parameters';
  *
  * // Create and validate configurations
  * const authConfig = authServiceSchema.parse(authServiceFactory());
  * const gatewayConfig = apiGatewaySchema.parse(apiGatewayFactory());
+ * const billingConfig = billingServiceSchema.parse(billingServiceFactory());
  * const deployConfig = deployServiceSchema.parse(deployServiceFactory());
+ * const monitorConfig = monitorServiceSchema.parse(monitorServiceFactory());
  * ```
  */
 
-export * from './auth-service.factory';
 export * from './api-gateway.factory';
+export * from './auth-service.factory';
+export * from './billing-service.factory';
 export * from './deploy-service.factory';
+export * from './monitor-service.factory';

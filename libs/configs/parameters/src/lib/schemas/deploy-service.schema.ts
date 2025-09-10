@@ -130,6 +130,17 @@ export const deployServiceSchema = z
       .describe('Database password for Deploy Service'),
 
     /**
+     * Enable SSL for database connections.
+     * Controls whether database connections use SSL encryption.
+     *
+     * @default false
+     */
+    DEPLOY_DB_SSL: z
+      .boolean()
+      .default(false)
+      .describe('Enable SSL for database connections'),
+
+    /**
      * Kubernetes API server URL.
      * The endpoint for the Kubernetes cluster where applications will be deployed.
      * Must be a valid HTTPS URL for security.
