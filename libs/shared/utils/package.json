@@ -16,8 +16,6 @@
     }
   },
   "dependencies": {
-    "date-fns": "^4.1.0",
-    "tslib": "^2.3.0",
-    "underscore": "^1.13.7"
+    "tslib": "^2.3.0"
   }
 }

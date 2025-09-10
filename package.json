@@ -19,6 +19,7 @@
     "dev:all": "nx run-many --target=serve --all --parallel",
     "build:all": "nx run-many --target=build --all",
     "test:all": "nx run-many --target=test --all",
+    "lint:all": "nx run-many --target=lint --all",
     "dep-graph": "nx graph"
   },
   "devDependencies": {

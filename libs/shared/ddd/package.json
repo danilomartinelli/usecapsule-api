@@ -15,10 +15,8 @@
     }
   },
   "dependencies": {
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.2",
     "tslib": "^2.3.0",
-    "uuid": "^13.0.0"
+    "@nestjs/common": "^11.1.6"
   },
   "devDependencies": {
     "@types/uuid": "^10.0.0"
