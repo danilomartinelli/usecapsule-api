@@ -2,16 +2,42 @@ import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * Bootstrap configuration loader using the Singleton pattern.
+ *
+ * This class provides centralized configuration management for microservices
+ * during the bootstrap phase. It handles environment variable loading,
+ * service-specific filtering, and provides typed access to configuration values.
+ *
+ * @deprecated This class is being deprecated in favor of the new EnvLoader class.
+ * Use EnvLoader for new implementations.
+ *
+ * @example
+ * ```typescript
+ * const config = BootstrapConfig.getInstance('auth-service');
+ * const dbConfig = config.getDatabaseConfig();
+ * const rabbitConfig = config.getRabbitMQConfig();
+ * ```
+ */
 export class BootstrapConfig {
-  private static instance: BootstrapConfig;
-  private config: Record<string, unknown> = {};
+  private static instance: BootstrapConfig | undefined;
+  private readonly config: Record<string, unknown> = {};
   private readonly serviceName: string;
 
   private constructor(serviceName: string) {
-    this.serviceName = serviceName;
+    if (!serviceName?.trim()) {
+      throw new Error('Service name cannot be empty');
+    }
+    this.serviceName = serviceName.trim();
     this.loadConfiguration();
   }
 
+  /**
+   * Gets the singleton instance of BootstrapConfig.
+   *
+   * @param serviceName - The name of the service
+   * @returns The singleton BootstrapConfig instance
+   */
   static getInstance(serviceName: string): BootstrapConfig {
     if (!BootstrapConfig.instance) {
       BootstrapConfig.instance = new BootstrapConfig(serviceName);
@@ -19,75 +45,129 @@ export class BootstrapConfig {
     return BootstrapConfig.instance;
   }
 
-  private loadConfiguration() {
-    // 1. Carrega .env global
+  /**
+   * Loads configuration from multiple sources in priority order.
+   * This method loads environment variables from various sources:
+   * 1. Global .env file
+   * 2. Environment-specific .env file
+   * 3. Service-specific .env file
+   * 4. Applies service-specific filtering
+   */
+  private loadConfiguration(): void {
+    // Load global .env file
     this.loadEnvFile('.env');
 
-    // 2. Carrega .env do ambiente
+    // Load environment-specific .env file
     if (process.env.NODE_ENV) {
       this.loadEnvFile(`.env.${process.env.NODE_ENV}`);
     }
 
-    // 3. Carrega .env específico do serviço
+    // Load service-specific .env file
     this.loadEnvFile(`.env.${this.serviceName}`);
 
-    // 4. Aplica filtros por prefixo
+    // Apply service-specific filtering
     this.applyServiceFilter();
   }
 
-  private loadEnvFile(filename: string) {
-    const envPath = path.resolve(process.cwd(), filename);
-    if (fs.existsSync(envPath)) {
-      const result = dotenv.config({ path: envPath });
-      if (result.parsed) {
-        Object.assign(this.config, result.parsed);
+  /**
+   * Loads environment variables from a specific file.
+   *
+   * @param filename - The environment file name
+   */
+  private loadEnvFile(filename: string): void {
+    try {
+      const envPath = path.resolve(process.cwd(), filename);
+      if (fs.existsSync(envPath)) {
+        const result = dotenv.config({ path: envPath });
+        if (result.parsed) {
+          Object.assign(this.config, result.parsed);
+        }
       }
+    } catch (error) {
+      // Silently skip files that cannot be loaded
+      console.warn(`Failed to load environment file '${filename}':`, error);
     }
   }
 
-  private applyServiceFilter() {
-    const servicePrefix = this.serviceName.toUpperCase().replace('-', '_');
-    const globalVars = ['NODE_ENV', 'APP_ENV', 'LOG_LEVEL', 'RABBITMQ_URL'];
+  /**
+   * Applies service-specific filtering to environment variables.
+   * Filters variables to include only global and service-specific ones.
+   */
+  private applyServiceFilter(): void {
+    const servicePrefix = this.serviceName.toUpperCase().replace(/-/g, '_');
+    const globalVars: readonly string[] = [
+      'NODE_ENV',
+      'APP_ENV', 
+      'LOG_LEVEL',
+      'RABBITMQ_URL'
+    ] as const;
 
-    // Cria novo objeto com apenas as vars permitidas
+    // Create new object with only allowed variables
     const filtered: Record<string, string> = {};
 
-    Object.entries(this.config).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(this.config)) {
       if (globalVars.includes(key)) {
         filtered[key] = value as string;
       } else if (key.startsWith(`${servicePrefix}_`)) {
-        // Remove prefixo para uso mais limpo
+        // Remove prefix for cleaner usage
         const cleanKey = key.replace(`${servicePrefix}_`, '');
         filtered[cleanKey] = value as string;
       }
-    });
+    }
 
-    // Atualiza process.env com valores filtrados
+    // Update process.env with filtered values
     Object.assign(process.env, filtered);
-    this.config = filtered;
+    Object.assign(this.config, filtered);
   }
 
+  /**
+   * Gets a configuration value with optional default.
+   *
+   * @param key - The configuration key
+   * @param defaultValue - Optional default value
+   * @returns The configuration value or default
+   */
   get<T = string>(key: string): T | undefined;
   get<T = string>(key: string, defaultValue: T): T;
   get<T = string>(key: string, defaultValue?: T): T | undefined {
     return (this.config[key] as T) ?? defaultValue;
   }
 
-  getRabbitMQConfig() {
+  /**
+   * Gets RabbitMQ configuration with sensible defaults.
+   *
+   * @returns RabbitMQ connection configuration
+   */
+  getRabbitMQConfig(): Readonly<{
+    urls: readonly string[];
+    queue: string;
+    prefetchCount: number;
+  }> {
     return {
       urls: [this.get('RABBITMQ_URL', 'amqp://localhost:5672')],
       queue: this.get('QUEUE', `${this.serviceName}_queue`),
-      prefetchCount: parseInt(this.get('PREFETCH_COUNT', '10'), 10),
-    };
+      prefetchCount: Number.parseInt(this.get('PREFETCH_COUNT', '10'), 10),
+    } as const;
   }
 
-  getDatabaseConfig() {
+  /**
+   * Gets database configuration for the service.
+   *
+   * @returns Database connection configuration
+   */
+  getDatabaseConfig(): Readonly<{
+    host: string | undefined;
+    port: number;
+    database: string | undefined;
+    username: string | undefined;
+    password: string | undefined;
+  }> {
     return {
       host: this.get('DB_HOST'),
-      port: parseInt(this.get('DB_PORT', '5432'), 10),
+      port: Number.parseInt(this.get('DB_PORT', '5432'), 10),
       database: this.get('DB_NAME'),
       username: this.get('DB_USER'),
       password: this.get('DB_PASSWORD'),
-    };
+    } as const;
   }
 }

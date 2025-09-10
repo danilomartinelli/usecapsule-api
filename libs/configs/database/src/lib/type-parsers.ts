@@ -34,11 +34,14 @@ interface TypeParserConfig<T = unknown> {
  * @param value - JSON string to parse
  * @returns Parsed JSON object or the original string if parsing fails
  */
-const safeJsonParser: ParserFunction<unknown> = (value: string) => {
+const safeJsonParser: ParserFunction<unknown> = (value: string): unknown => {
   try {
     return JSON.parse(value);
   } catch (error) {
-    console.warn(`Failed to parse JSON value: ${value}`, error);
+    // Use console.warn in development, consider using a proper logger in production
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`Failed to parse JSON value: ${value}`, error);
+    }
     return value; // Return original string as fallback
   }
 };
@@ -71,11 +74,14 @@ const safeNumericParser: ParserFunction<number> = (value: string) => {
  * @param value - BigInt string to parse
  * @returns Parsed BigInt or 0n if parsing fails
  */
-const safeBigIntParser: ParserFunction<bigint> = (value: string) => {
+const safeBigIntParser: ParserFunction<bigint> = (value: string): bigint => {
   try {
     return BigInt(value);
   } catch (error) {
-    console.warn(`Failed to parse BigInt value: ${value}`, error);
+    // Use console.warn in development, consider using a proper logger in production
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`Failed to parse BigInt value: ${value}`, error);
+    }
     return 0n; // Return 0 as fallback
   }
 };
