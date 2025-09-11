@@ -8,7 +8,7 @@ This is a Capsule Platform monorepo built with Nx 21.5.1 and npm. It implements 
 
 ## Project Structure
 
-```
+```text
 apps/
 ├── api-gateway/          # HTTP entry point (port 3000)
 ├── auth-service/         # Authentication bounded context
@@ -165,7 +165,7 @@ External Clients → API Gateway (HTTP) → RabbitMQ → Microservices
 
 ### Service Structure Pattern
 
-```
+```text
 apps/[service-name]/
 ├── src/
 │   ├── main.ts              # RabbitMQ microservice bootstrap
