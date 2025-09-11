@@ -33,6 +33,10 @@ export const apiGatewayFactory = (): ApiGatewayConfig => ({
   CORS_ENABLED: process.env.API_GATEWAY_CORS_ENABLED === 'false' ? false : true,
   CORS_ORIGINS: process.env.API_GATEWAY_CORS_ORIGINS || '*',
   LOG_LEVEL: (process.env.LOG_LEVEL as 'error' | 'warn' | 'info' | 'debug') || 'info',
+  REDIS_HOST: process.env.REDIS_HOST || 'localhost',
+  REDIS_PORT: Number.parseInt(process.env.REDIS_PORT || '6379', 10),
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  REDIS_DB: Number.parseInt(process.env.REDIS_DB || '0', 10),
 });
 
 /**

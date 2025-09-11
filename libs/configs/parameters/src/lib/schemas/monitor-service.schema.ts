@@ -293,6 +293,56 @@ export const monitorServiceSchema = z
       .enum(['error', 'warn', 'info', 'debug'])
       .default('info')
       .describe('Application logging level'),
+
+    /**
+     * Redis server hostname or IP address.
+     * Used for caching and session storage.
+     *
+     * @default 'localhost'
+     */
+    REDIS_HOST: z
+      .string()
+      .min(1)
+      .default('localhost')
+      .describe('Redis server hostname or IP address'),
+
+    /**
+     * Redis server port number.
+     * The port on which Redis server is listening.
+     *
+     * @default 6379
+     */
+    REDIS_PORT: z
+      .number()
+      .int()
+      .positive()
+      .max(65535)
+      .default(6379)
+      .describe('Redis server port number'),
+
+    /**
+     * Redis password for authentication.
+     * Required if Redis server has authentication enabled.
+     */
+    REDIS_PASSWORD: z
+      .string()
+      .min(1)
+      .optional()
+      .describe('Redis password for authentication'),
+
+    /**
+     * Redis database number to use.
+     * Redis supports multiple databases (0-15 by default).
+     *
+     * @default 0
+     */
+    REDIS_DB: z
+      .number()
+      .int()
+      .min(0)
+      .max(15)
+      .default(0)
+      .describe('Redis database number to use'),
   })
   .strict(); // Reject undefined environment variables
 

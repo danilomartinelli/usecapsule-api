@@ -43,6 +43,10 @@ export const monitorServiceFactory = (): MonitorServiceConfig => ({
   ALERT_MEMORY_THRESHOLD_PERCENT: Number.parseInt(process.env.MONITOR_SERVICE_ALERT_MEMORY_THRESHOLD_PERCENT || '85', 10),
   ALERT_DISK_THRESHOLD_PERCENT: Number.parseInt(process.env.MONITOR_SERVICE_ALERT_DISK_THRESHOLD_PERCENT || '90', 10),
   LOG_LEVEL: (process.env.LOG_LEVEL as 'error' | 'warn' | 'info' | 'debug') || 'info',
+  REDIS_HOST: process.env.REDIS_HOST || 'localhost',
+  REDIS_PORT: Number.parseInt(process.env.REDIS_PORT || '6379', 10),
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  REDIS_DB: Number.parseInt(process.env.REDIS_DB || '0', 10),
 });
 
 /**

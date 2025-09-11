@@ -41,6 +41,10 @@ export const deployServiceFactory = (): DeployServiceConfig => ({
   MAX_CONCURRENT_BUILDS: Number.parseInt(process.env.MAX_CONCURRENT_BUILDS || '5', 10),
   BUILD_TIMEOUT_SECONDS: Number.parseInt(process.env.BUILD_TIMEOUT_SECONDS || '600', 10),
   LOG_LEVEL: (process.env.LOG_LEVEL as 'error' | 'warn' | 'info' | 'debug') || 'info',
+  REDIS_HOST: process.env.REDIS_HOST || 'localhost',
+  REDIS_PORT: Number.parseInt(process.env.REDIS_PORT || '6379', 10),
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  REDIS_DB: Number.parseInt(process.env.REDIS_DB || '0', 10),
 });
 
 /**
