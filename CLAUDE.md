@@ -179,98 +179,278 @@ apps/[service-name]/
 │           └── message-handlers/ # RabbitMQ handlers
 ```
 
-## RabbitMQ Message Patterns
+## RabbitMQ Architecture
 
-### Message Queue Architecture
+### Message Queue Architecture Overview
 
-The platform uses RabbitMQ for all inter-service communication following event-driven patterns:
+The platform uses RabbitMQ as the central nervous system for all inter-service communication. This exchange-first architecture ensures decoupled, reliable messaging between microservices:
 
 ```text
-API Gateway → Commands → capsule.commands → Service Queues
-Services → Events → capsule.events → Event Subscribers
-Failed Messages → Dead Letter Exchange → Manual Recovery
+API Gateway → capsule.commands → [auth.*|billing.*|deploy.*|monitor.*] → Service Queues
+Services → capsule.events → [*.created|*.updated|*.deleted] → Event Subscribers
+Health Checks → capsule.commands → [service.health] → Service Health Responses
+Failed Messages → dlx (Dead Letter Exchange) → dlq → Manual Recovery
 ```
 
-### Exchanges and Queues
+### Exchange-Based Routing Architecture
+
+The system uses a sophisticated exchange-based routing system defined in `/devtools/infra/rabbitmq/definitions.json`:
 
 #### Core Exchanges
-- **`capsule.commands`** (direct) - Service commands (RPC pattern)
-- **`capsule.events`** (topic) - Domain events (Pub/Sub pattern)  
-- **`dlx`** (fanout) - Dead letter exchange for failed messages
 
-#### Service Queues
+1. **`capsule.commands`** (Direct Exchange)
+   - **Purpose**: RPC-style service commands with routing keys
+   - **Type**: Direct (exact routing key matching)
+   - **Routing**: `{service}.{action}` patterns
+   - **Examples**: `auth.register`, `billing.charge`, `deploy.create`
+
+2. **`capsule.events`** (Topic Exchange)
+   - **Purpose**: Domain events for pub/sub patterns
+   - **Type**: Topic (wildcard routing key matching)
+   - **Routing**: `{context}.{event}` patterns
+   - **Examples**: `user.created`, `payment.processed`, `deployment.completed`
+
+3. **`dlx`** (Dead Letter Exchange)
+   - **Purpose**: Failed message collection and manual recovery
+   - **Type**: Fanout (broadcasts to all bound queues)
+   - **Auto-configured**: All queues have DLQ policy applied
+
+#### Service Queues with TTL
+
+All service queues are configured with 6-hour message TTL (21,600,000ms):
+
 - **`auth_queue`** - Authentication service messages
-- **`billing_queue`** - Billing service messages
-- **`deploy_queue`** - Deployment service messages
-- **`monitor_queue`** - Monitoring service messages
+- **`billing_queue`** - Billing and subscription management
+- **`deploy_queue`** - Deployment orchestration messages
+- **`monitor_queue`** - Metrics and observability data
 - **`dlq`** - Dead letter queue for failed messages
 
-### Message Patterns Usage
+#### Exchange Bindings and Routing
 
-#### 1. Commands (Request/Response)
-```typescript
-// In service handler
-@RabbitMQMessagePattern('auth.register')
-async registerUser(@Payload() dto: RegisterUserDto): Promise<User> {
-  return this.authService.register(dto);
-}
+```text
+capsule.commands Exchange Bindings:
+├── auth.*     → auth_queue     (auth.register, auth.login, auth.health)
+├── billing.*  → billing_queue  (billing.charge, billing.cancel, billing.health)
+├── deploy.*   → deploy_queue   (deploy.create, deploy.status, deploy.health)
+└── monitor.*  → monitor_queue  (monitor.metrics, monitor.alert, monitor.health)
 
-// From API Gateway
-const user = await this.rabbitMQService.send('auth.register', userData);
+dlx Exchange Bindings:
+└── "" (empty) → dlq           (all failed messages)
 ```
 
-#### 2. Events (Publish/Subscribe)
+### Message Patterns and Usage
+
+#### 1. RPC Commands (Request/Response)
+
+Used for operations requiring immediate responses:
+
 ```typescript
-// Publishing domain events
-@EventPattern('user.created')
-async onUserCreated(@Payload() user: User): Promise<void> {
-  await this.emailService.sendWelcomeEmail(user);
+// Service Handler (e.g., auth-service)
+@Controller()
+export class AuthController {
+  @MessagePattern('auth.register')
+  async registerUser(@Payload() dto: RegisterUserDto): Promise<User> {
+    return this.authService.register(dto);
+  }
+
+  @MessagePattern('health.check')
+  healthCheck(): HealthCheckResponse {
+    return this.appService.getHealthStatus();
+  }
 }
 
-// Emitting events
-this.rabbitMQService.emit('user.created', user);
+// API Gateway Client
+export class AuthGatewayService {
+  async registerUser(userData: RegisterUserDto): Promise<User> {
+    return this.rabbitMQService.send('auth.register', userData);
+  }
+
+  async checkAuthHealth(): Promise<HealthCheckResponse> {
+    return this.rabbitMQService.sendHealthCheck('auth.health');
+  }
+}
 ```
 
-#### 3. Retry Policies
+#### 2. Event Publishing (Fire-and-Forget)
+
+Used for domain events that multiple services may consume:
+
 ```typescript
-// Automatic retry with exponential backoff
-@DatabaseRetry(3, 1500)
+// Event Publisher
+@Injectable()
+export class UserEventPublisher {
+  async publishUserCreated(user: User): Promise<void> {
+    this.rabbitMQService.emit('user.created', {
+      userId: user.id,
+      email: user.email,
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
+
+// Event Subscriber (in billing-service)
+@Controller()
+export class UserEventHandler {
+  @EventPattern('user.created')
+  async onUserCreated(@Payload() event: UserCreatedEvent): Promise<void> {
+    await this.billingService.createCustomerProfile(event.userId);
+  }
+}
+```
+
+#### 3. Health Check Pattern
+
+Specialized health checking with routing key targeting:
+
+```typescript
+// Health Check Implementation
+export class RabbitMQService {
+  async sendHealthCheck(routingKey: string): Promise<HealthCheckResponse> {
+    // Routes to specific service queue via exchange binding
+    return this.client.send('health.check', { routingKey }).pipe(
+      timeout(5000),
+      retry(1),
+      catchError(() => of({
+        status: HealthStatus.UNHEALTHY,
+        service: routingKey.split('.')[0],
+        timestamp: new Date().toISOString(),
+      }))
+    ).toPromise();
+  }
+}
+```
+
+### Message Routing and Delivery
+
+#### Routing Key Conventions
+
+1. **Service Commands**: `{service}.{action}`
+   - `auth.register`, `auth.login`, `auth.logout`
+   - `billing.charge`, `billing.refund`, `billing.subscribe`
+   - `deploy.create`, `deploy.scale`, `deploy.delete`
+   - `monitor.track`, `monitor.alert`, `monitor.report`
+
+2. **Domain Events**: `{entity}.{event}`
+   - `user.created`, `user.updated`, `user.deleted`
+   - `payment.processed`, `payment.failed`, `payment.refunded`
+   - `deployment.started`, `deployment.completed`, `deployment.failed`
+
+3. **Health Checks**: `{service}.health`
+   - `auth.health`, `billing.health`, `deploy.health`, `monitor.health`
+
+#### Message Processing Flow
+
+```text
+1. API Gateway receives HTTP request
+2. Gateway validates and transforms request
+3. Gateway publishes to capsule.commands with routing key
+4. Exchange routes to appropriate service queue
+5. Service processes message and responds
+6. Service may emit domain events to capsule.events
+7. Other services consume relevant events
+```
+
+### Advanced Configuration
+
+#### Custom Message Patterns
+
+The platform provides enhanced decorators for complex messaging:
+
+```typescript
+// Priority Messages
+@PriorityMessagePattern('auth.urgent-verification', 255)
+async handleUrgentVerification(@Payload() data: VerificationDto): Promise<void> {
+  // High-priority message processing
+}
+
+// Temporary Messages with Expiration
+@TemporaryMessagePattern('auth.temp-session', 300000) // 5 minutes
+async handleTempSession(@Payload() data: SessionDto): Promise<void> {
+  // Temporary session handling
+}
+
+// Retry Policies
+@DatabaseRetry(3, 1500) // 3 retries with 1.5s base delay
 @RabbitMQMessagePattern('billing.process-payment')
 async processPayment(@Payload() dto: PaymentDto): Promise<PaymentResult> {
   return this.billingService.processPayment(dto);
 }
 ```
 
-### Using RabbitMQ Module
+#### Service Module Configuration
 
-#### Service Configuration
 ```typescript
-// In service app.module.ts
-RabbitMQModule.forMicroservice({
-  queue: 'auth_queue',
-  connection: {
-    urls: [process.env.RABBITMQ_URL],
-  },
-  globalRetryPolicy: {
-    maxRetries: 3,
-    exponentialBackoff: true,
-  },
-});
+// Complete service configuration example
+@Module({
+  imports: [
+    RabbitMQModule.forMicroservice({
+      queue: 'auth_queue',
+      connection: {
+        urls: [process.env.RABBITMQ_URL],
+      },
+      globalRetryPolicy: {
+        maxRetries: 3,
+        retryDelay: 1000,
+        exponentialBackoff: true,
+        maxRetryDelay: 30000,
+      },
+      exchanges: [
+        {
+          name: 'capsule.commands',
+          type: 'direct',
+          options: { durable: true },
+        },
+        {
+          name: 'capsule.events',
+          type: 'topic',
+          options: { durable: true },
+        },
+      ],
+    }),
+  ],
+})
+export class AppModule {}
 ```
 
-#### Routing Key Patterns
-- **Commands**: `{service}.{action}` → `auth.register`, `billing.charge`
-- **Events**: `{context}.{event}` → `user.created`, `payment.processed`
-- **Queries**: `{service}.query.{entity}` → `auth.query.user`
+### Dead Letter Queue (DLQ) Handling
 
-### Dead Letter Queue Handling
+Automatic failure recovery system:
 
-Failed messages automatically go to DLQ after retry exhaustion:
-1. Message fails processing
-2. Retried up to 3 times with exponential backoff  
-3. Sent to Dead Letter Exchange (`dlx`)
-4. Routed to Dead Letter Queue (`dlq`)
-5. Manual investigation and reprocessing via Management UI
+#### DLQ Policy Configuration
+
+```json
+{
+  "name": "dlq-policy",
+  "pattern": "^(?!.*\.dlq$).*",
+  "definition": {
+    "dead-letter-exchange": "dlx",
+    "dead-letter-routing-key": "dlq"
+  }
+}
+```
+
+#### Failure Flow Process
+
+1. **Message Processing Fails**: Service handler throws unhandled exception
+2. **Retry Logic**: Automatic retry up to 3 times with exponential backoff
+3. **DLQ Routing**: After retry exhaustion, message sent to `dlx` exchange
+4. **Dead Letter Storage**: Message stored in `dlq` with failure metadata
+5. **Manual Recovery**: Operations team investigates via Management UI
+6. **Reprocessing**: Messages can be manually requeued or fixed and resubmitted
+
+#### DLQ Monitoring
+
+```bash
+# Access RabbitMQ Management UI
+open http://localhost:7020
+# Login: usecapsule / usecapsule_dev_password
+
+# Check DLQ messages via CLI
+docker exec rabbitmq_dev rabbitmqctl list_queues name messages
+
+# Inspect specific DLQ message
+# Use Management UI -> Queues -> dlq -> Get Messages
+```
 
 ## Important Development Notes
 
@@ -278,18 +458,200 @@ Failed messages automatically go to DLQ after retry exhaustion:
 
 - **API Gateway**: <http://localhost:3000>
 - **API Documentation**: <http://localhost:3000/api/documentation>
-- **RabbitMQ Management**: <http://localhost:7020> (usecapsule/usecapsule_dev_password)
 - **Health Check**: <http://localhost:3000/health>
+- **RabbitMQ Management UI**: <http://localhost:7020> (usecapsule/usecapsule_dev_password)
+- **RabbitMQ AMQP**: `amqp://usecapsule:usecapsule_dev_password@localhost:7010/`
+
+### RabbitMQ Management and Debugging
+
+#### RabbitMQ Management UI Features
+
+Access the management interface at <http://localhost:7020> for:
+
+1. **Queue Monitoring**
+   - Message counts and rates
+   - Consumer information
+   - Queue bindings and routing
+
+2. **Exchange Visualization**
+   - Exchange types and bindings
+   - Message routing topology
+   - Publisher and consumer connections
+
+3. **Dead Letter Queue Inspection**
+   - Failed message details
+   - Error stack traces
+   - Message requeue capabilities
+
+4. **Performance Metrics**
+   - Message throughput
+   - Connection statistics
+   - Node health and memory usage
+
+#### Debugging Message Routing Issues
+
+```bash
+# Check queue status
+docker exec rabbitmq_dev rabbitmqctl list_queues name messages consumers
+
+# Inspect exchange bindings
+docker exec rabbitmq_dev rabbitmqctl list_bindings
+
+# Monitor real-time message flow
+docker exec rabbitmq_dev rabbitmqctl list_exchanges name type
+
+# Check connection status
+docker exec rabbitmq_dev rabbitmqctl list_connections
+
+# View detailed queue information
+docker exec rabbitmq_dev rabbitmqctl list_queues name messages_ready messages_unacknowledged
+```
+
+#### Common RabbitMQ Troubleshooting
+
+1. **Messages Not Being Consumed**
+   ```bash
+   # Check if service is connected to queue
+   docker logs auth_service_container
+   
+   # Verify queue bindings
+   # Management UI -> Exchanges -> capsule.commands -> Bindings
+   ```
+
+2. **Health Checks Failing**
+   ```bash
+   # Test health check routing
+   curl -X GET http://localhost:3000/health
+   
+   # Check specific service health
+   # Management UI -> Queues -> auth_queue -> Publish Message
+   # Pattern: health.check, Payload: {"routingKey": "auth.health"}
+   ```
+
+3. **Dead Letter Queue Messages**
+   ```bash
+   # Inspect failed messages
+   # Management UI -> Queues -> dlq -> Get Messages
+   
+   # Check DLQ policy application
+   docker exec rabbitmq_dev rabbitmqctl list_policies
+   ```
+
+4. **Message TTL Expiration**
+   ```bash
+   # Check message TTL settings (6 hours = 21,600,000ms)
+   # Management UI -> Queues -> [queue_name] -> Features -> TTL
+   ```
+
+#### Testing Message Patterns
+
+```bash
+# Test direct command routing
+# Management UI -> Exchanges -> capsule.commands -> Publish Message
+# Routing Key: auth.register
+# Payload: {"email": "test@example.com", "password": "password"}
+
+# Test event publishing
+# Management UI -> Exchanges -> capsule.events -> Publish Message  
+# Routing Key: user.created
+# Payload: {"userId": "123", "email": "test@example.com"}
+
+# Test health check routing
+# Management UI -> Exchanges -> capsule.commands -> Publish Message
+# Routing Key: auth.health
+# Payload: {"routingKey": "auth.health"}
+```
 
 ### Creating New Services
 
 When adding a new bounded context:
 
-1. Generate service: `nx g @nx/nest:app [service-name]`
-2. Configure RabbitMQ transport in main.ts (no HTTP server)
-3. Create message handlers (use @MessagePattern/@EventPattern)
-4. Add service-specific database configuration
-5. Update docker-compose.yml for infrastructure
+1. **Generate Service Structure**
+   ```bash
+   nx g @nx/nest:app [service-name]
+   ```
+
+2. **Configure RabbitMQ Microservice Bootstrap**
+   ```typescript
+   // apps/[service-name]/src/main.ts
+   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+     AppModule,
+     {
+       transport: Transport.RMQ,
+       options: {
+         urls: [rabbitUrl],
+         queue: `${serviceName}_queue`,
+         queueOptions: { durable: true },
+       },
+     },
+   );
+   ```
+
+3. **Add Message Handlers**
+   ```typescript
+   // Service controller
+   @Controller()
+   export class ServiceController {
+     @MessagePattern(`${serviceName}.action`)
+     async handleAction(@Payload() dto: ActionDto): Promise<ActionResult> {
+       return this.service.performAction(dto);
+     }
+
+     @MessagePattern('health.check')
+     healthCheck(): HealthCheckResponse {
+       return this.appService.getHealthStatus();
+     }
+   }
+   ```
+
+4. **Update RabbitMQ Infrastructure**
+   ```json
+   // devtools/infra/rabbitmq/definitions.json
+   {
+     "queues": [
+       {
+         "name": "[service-name]_queue",
+         "vhost": "/",
+         "durable": true,
+         "auto_delete": false,
+         "arguments": { "x-message-ttl": 21600000 }
+       }
+     ],
+     "bindings": [
+       {
+         "source": "capsule.commands",
+         "destination": "[service-name]_queue",
+         "destination_type": "queue",
+         "routing_key": "[service-name].*"
+       }
+     ]
+   }
+   ```
+
+5. **Add Database Configuration**
+   ```yaml
+   # compose.yml
+   [service-name]-db:
+     container_name: [service-name]_db_dev
+     image: postgres:15
+     environment:
+       POSTGRES_USER: [service-name]_user
+       POSTGRES_PASSWORD: [service-name]_pass
+       POSTGRES_DB: [service-name]_service_db
+     ports:
+       - '711X:5432'  # Use next available port
+   ```
+
+6. **Register with API Gateway**
+   ```typescript
+   // apps/api-gateway/src/modules/[domain]/[domain].service.ts
+   @Injectable()
+   export class DomainService {
+     async performAction(dto: ActionDto): Promise<ActionResult> {
+       return this.rabbitMQService.send(`${serviceName}.action`, dto);
+     }
+   }
+   ```
 
 ### Testing Guidelines
 
