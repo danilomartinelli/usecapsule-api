@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
 import { RABBITMQ_CLIENT, RABBITMQ_OPTIONS } from '../rabbitmq.constants';
-import {
+import type {
   RabbitMQModuleOptions,
   ExchangeConfig,
   QueueConfig,

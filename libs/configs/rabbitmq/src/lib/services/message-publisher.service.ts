@@ -3,7 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Observable, firstValueFrom, timeout, retry, catchError, throwError } from 'rxjs';
 
 import { RABBITMQ_CLIENT, RABBITMQ_OPTIONS, DEFAULT_RETRY_CONFIG } from '../rabbitmq.constants';
-import { RabbitMQModuleOptions, PublishOptions, RetryPolicy } from '../interfaces';
+import type { RabbitMQModuleOptions, PublishOptions, RetryPolicy } from '../interfaces';
 
 /**
  * Message publisher service for advanced publishing operations.
@@ -128,15 +128,16 @@ export class MessagePublisherService {
   /**
    * Publishes multiple messages in a batch.
    * 
+   * @template T - Type of the message data
    * @param messages - Array of messages to publish
    * @param options - Global options for all messages
    * @returns Promise resolving when all messages are published
    */
   async publishBatch<T = unknown>(
-    messages: Array<{
-      pattern: string;
-      data: T;
-      options?: PublishOptions;
+    messages: ReadonlyArray<{
+      readonly pattern: string;
+      readonly data: T;
+      readonly options?: PublishOptions;
     }>,
     options?: Partial<PublishOptions>,
   ): Promise<void> {
@@ -161,6 +162,7 @@ export class MessagePublisherService {
   /**
    * Publishes a priority message.
    * 
+   * @template T - Type of the message payload
    * @param pattern - Message pattern or routing key
    * @param data - Message payload
    * @param priority - Message priority (0-255, higher is more priority)
@@ -179,6 +181,7 @@ export class MessagePublisherService {
   /**
    * Publishes a message with expiration.
    * 
+   * @template T - Type of the message payload
    * @param pattern - Message pattern or routing key
    * @param data - Message payload
    * @param expiration - Message expiration in milliseconds

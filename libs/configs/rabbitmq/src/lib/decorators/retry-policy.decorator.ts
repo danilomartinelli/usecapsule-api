@@ -55,7 +55,7 @@ export function RetryPolicy(policy: RetryPolicyInterface): MethodDecorator {
  * }
  * ```
  */
-export function Retry(maxRetries: number, retryDelay: number = 1000): MethodDecorator {
+export function Retry(maxRetries: number, retryDelay = 1000): MethodDecorator {
   return SetMetadata(RETRY_POLICY_METADATA, {
     maxRetries,
     retryDelay,
@@ -83,8 +83,8 @@ export function Retry(maxRetries: number, retryDelay: number = 1000): MethodDeco
  */
 export function ExponentialBackoffRetry(
   maxRetries: number,
-  initialDelay: number = 1000,
-  maxDelay: number = 30000,
+  initialDelay = 1000,
+  maxDelay = 30000,
 ): MethodDecorator {
   return SetMetadata(RETRY_POLICY_METADATA, {
     maxRetries,
@@ -118,7 +118,7 @@ export function ExponentialBackoffRetry(
 export function ConditionalRetry(
   maxRetries: number,
   retryCondition: (error: Error) => boolean,
-  retryDelay: number = 1000,
+  retryDelay = 1000,
 ): MethodDecorator {
   return SetMetadata(RETRY_POLICY_METADATA, {
     maxRetries,
@@ -164,7 +164,7 @@ export function NoRetry(): MethodDecorator {
  * }
  * ```
  */
-export function DatabaseRetry(maxRetries: number = 3, retryDelay: number = 1500): MethodDecorator {
+export function DatabaseRetry(maxRetries = 3, retryDelay = 1500): MethodDecorator {
   return SetMetadata(RETRY_POLICY_METADATA, {
     maxRetries,
     retryDelay,
@@ -206,7 +206,7 @@ export function DatabaseRetry(maxRetries: number = 3, retryDelay: number = 1500)
  * }
  * ```
  */
-export function NetworkRetry(maxRetries: number = 5, retryDelay: number = 2000): MethodDecorator {
+export function NetworkRetry(maxRetries = 5, retryDelay = 2000): MethodDecorator {
   return SetMetadata(RETRY_POLICY_METADATA, {
     maxRetries,
     retryDelay,

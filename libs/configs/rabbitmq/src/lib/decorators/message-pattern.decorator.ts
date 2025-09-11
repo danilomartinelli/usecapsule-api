@@ -1,7 +1,8 @@
 import { SetMetadata } from '@nestjs/common';
 import { MessagePattern as NestMessagePattern } from '@nestjs/microservices';
 
-import { MessagePatternConfig } from '../interfaces';
+import type { MessagePatternConfig } from '../interfaces';
+import type { MessagePriority } from '../types';
 
 /**
  * Metadata key for storing message pattern configuration.
@@ -109,7 +110,7 @@ export function MessagePattern(
  */
 export function PriorityMessagePattern(
   pattern: string,
-  priority: number,
+  priority: MessagePriority | number,
   options?: Partial<Omit<MessagePatternConfig, 'pattern' | 'priority'>>,
 ): MethodDecorator {
   return RabbitMQMessagePattern({

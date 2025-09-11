@@ -4,8 +4,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
   RABBITMQ_CLIENT,
   RABBITMQ_OPTIONS,
-  // RABBITMQ_PUBLISHER,
-  // RABBITMQ_EXCHANGE_MANAGER,
+  RABBITMQ_PUBLISHER,
+  RABBITMQ_EXCHANGE_MANAGER,
   DEFAULT_QUEUE_CONFIG,
 } from './rabbitmq.constants';
 import {
@@ -15,18 +15,19 @@ import {
 } from './interfaces';
 import {
   RabbitMQSimpleService,
-  // RabbitMQService,
-  // MessagePublisherService,
-  // ExchangeManagerService,
+  RabbitMQService,
+  MessagePublisherService,
+  ExchangeManagerService,
 } from './services';
 
 /**
  * Module export configuration interface
  */
 interface ModuleExports {
-  readonly service: typeof RabbitMQSimpleService;
-  // readonly publisher: typeof MessagePublisherService;
-  // readonly exchangeManager: typeof ExchangeManagerService;
+  readonly simpleService: typeof RabbitMQSimpleService;
+  readonly service: typeof RabbitMQService;
+  readonly publisher: typeof MessagePublisherService;
+  readonly exchangeManager: typeof ExchangeManagerService;
   readonly client: typeof RABBITMQ_CLIENT;
 }
 
@@ -83,9 +84,10 @@ export class RabbitMQModule {
    * Module exports that are available to importing modules
    */
   private static readonly EXPORTS: ModuleExports = {
-    service: RabbitMQSimpleService,
-    // publisher: MessagePublisherService,
-    // exchangeManager: ExchangeManagerService,
+    simpleService: RabbitMQSimpleService,
+    service: RabbitMQService,
+    publisher: MessagePublisherService,
+    exchangeManager: ExchangeManagerService,
     client: RABBITMQ_CLIENT,
   } as const;
 
@@ -173,9 +175,10 @@ export class RabbitMQModule {
       imports: config.imports,
       providers: config.providers,
       exports: [
+        this.EXPORTS.simpleService,
         this.EXPORTS.service,
-        // this.EXPORTS.publisher,
-        // this.EXPORTS.exchangeManager,
+        this.EXPORTS.publisher,
+        this.EXPORTS.exchangeManager,
         this.EXPORTS.client,
       ],
     };
@@ -195,14 +198,15 @@ export class RabbitMQModule {
       config.optionsProvider,
       config.clientProvider,
       RabbitMQSimpleService,
-      // {
-      //   provide: RABBITMQ_PUBLISHER,
-      //   useClass: MessagePublisherService,
-      // },
-      // {
-      //   provide: RABBITMQ_EXCHANGE_MANAGER,
-      //   useClass: ExchangeManagerService,
-      // },
+      RabbitMQService,
+      {
+        provide: RABBITMQ_PUBLISHER,
+        useClass: MessagePublisherService,
+      },
+      {
+        provide: RABBITMQ_EXCHANGE_MANAGER,
+        useClass: ExchangeManagerService,
+      },
     ];
   }
 
@@ -243,7 +247,7 @@ export class RabbitMQModule {
   private static createClientProvider(): Provider {
     return {
       provide: RABBITMQ_CLIENT,
-      useFactory: (clientsModule: any) => clientsModule.get('RABBITMQ_CLIENT'),
+      useFactory: (clientsModule: { get: (token: string) => unknown }) => clientsModule.get('RABBITMQ_CLIENT'),
       inject: ['RABBITMQ_CLIENT'],
     };
   }
@@ -256,7 +260,7 @@ export class RabbitMQModule {
   private static createAsyncClientProvider(): Provider {
     return {
       provide: RABBITMQ_CLIENT,
-      useFactory: (clientsModule: any) => clientsModule.get('RABBITMQ_CLIENT'),
+      useFactory: (clientsModule: { get: (token: string) => unknown }) => clientsModule.get('RABBITMQ_CLIENT'),
       inject: ['RABBITMQ_CLIENT'],
     };
   }

@@ -3,7 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Observable, firstValueFrom, timeout, retry, catchError, throwError } from 'rxjs';
 
 import { RABBITMQ_CLIENT, RABBITMQ_OPTIONS } from '../rabbitmq.constants';
-import { RabbitMQModuleOptions, PublishOptions } from '../interfaces';
+import type { RabbitMQModuleOptions, PublishOptions } from '../interfaces';
 
 /**
  * Main RabbitMQ service providing core messaging operations.
@@ -43,6 +43,8 @@ export class RabbitMQService implements OnModuleDestroy {
   /**
    * Sends a message using request/response pattern (RPC).
    * 
+   * @template TResult - Type of the expected response
+   * @template TInput - Type of the input data
    * @param pattern - Message pattern identifier
    * @param data - Data to send
    * @param options - Publishing options
@@ -86,13 +88,14 @@ export class RabbitMQService implements OnModuleDestroy {
   /**
    * Emits an event without expecting a response (pub/sub).
    * 
+   * @template T - Type of the data being emitted
    * @param event - Event name
    * @param data - Data to emit
    * @param options - Publishing options
    */
   emit<T = unknown>(event: string, data: T, options?: PublishOptions): void {
     try {
-      this.logger.debug(`Emitting event: ${event}`);
+      this.logger.debug(`Emitting event: ${event}`, { options });
       this.client.emit<T>(event, data);
     } catch (error) {
       this.logger.error(
@@ -106,6 +109,8 @@ export class RabbitMQService implements OnModuleDestroy {
   /**
    * Sends a message and returns an Observable for streaming responses.
    * 
+   * @template TResult - Type of the expected stream responses
+   * @template TInput - Type of the input data
    * @param pattern - Message pattern identifier
    * @param data - Data to send
    * @param options - Publishing options

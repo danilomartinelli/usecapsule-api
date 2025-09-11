@@ -2,13 +2,23 @@ import { Type } from '@nestjs/common';
 import { ModuleMetadata } from '@nestjs/common/interfaces';
 
 /**
+ * Utility type for ensuring strict exchange types
+ */
+export type ExchangeType = 'direct' | 'topic' | 'fanout' | 'headers';
+
+/**
+ * Utility type for environment configuration
+ */
+export type Environment = 'test' | 'development' | 'production';
+
+/**
  * Exchange configuration options for RabbitMQ.
  */
 export interface ExchangeConfig {
   /** Name of the exchange */
   name: string;
   /** Type of exchange (direct, topic, fanout, headers) */
-  type: 'direct' | 'topic' | 'fanout' | 'headers';
+  type: ExchangeType;
   /** Whether the exchange should survive server restarts */
   durable?: boolean;
   /** Whether to delete the exchange when no longer in use */
@@ -95,7 +105,7 @@ export interface RabbitMQModuleOptions {
     noAck?: boolean;
   };
   /** Environment for logging and debugging */
-  environment?: 'test' | 'development' | 'production';
+  environment?: Environment;
 }
 
 /**
@@ -127,5 +137,5 @@ export interface RabbitMQMicroserviceOptions {
   /** Global retry policy */
   globalRetryPolicy?: RetryPolicy;
   /** Environment for logging and debugging */
-  environment?: 'test' | 'development' | 'production';
+  environment?: Environment;
 }

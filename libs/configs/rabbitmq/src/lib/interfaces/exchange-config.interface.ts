@@ -1,3 +1,5 @@
+import type { ExchangeType } from './rabbitmq-options.interface';
+
 /**
  * Exchange binding configuration.
  */
@@ -46,7 +48,7 @@ export interface DeadLetterConfig {
 export interface AdvancedExchangeConfig {
   /** Basic exchange configuration */
   name: string;
-  type: 'direct' | 'topic' | 'fanout' | 'headers';
+  type: ExchangeType;
   durable?: boolean;
   autoDelete?: boolean;
   arguments?: Record<string, unknown>;

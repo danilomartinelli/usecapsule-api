@@ -10,6 +10,9 @@ export * from './lib/interfaces';
 // Services
 export * from './lib/services';
 
+// Types and utilities
+export * from './lib/types';
+
 // Decorators
 export {
   RabbitMQMessagePattern,
