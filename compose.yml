@@ -61,9 +61,28 @@ services:
     volumes:
       - billing_db_data:/var/lib/postgresql/data
 
+  redis:
+    container_name: redis_dev
+    image: redis:7-alpine
+    ports:
+      - '7120:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  flyway:
+    container_name: flyway_dev
+    image: flyway/flyway:10
+    command: -url=jdbc:postgresql://auth-db:5432/auth_service_db -user=auth_user -password=auth_pass -connectRetries=60 migrate
+    volumes:
+      - ./apps/auth-service/src/database/migrations:/flyway/sql
+    depends_on:
+      - auth-db
+
 volumes:
   rabbitmq_data:
   auth_db_data:
   deploy_db_data:
   monitor_db_data:
   billing_db_data:
+  redis_data:
