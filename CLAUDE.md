@@ -179,13 +179,106 @@ apps/[service-name]/
 │           └── message-handlers/ # RabbitMQ handlers
 ```
 
+## RabbitMQ Message Patterns
+
+### Message Queue Architecture
+
+The platform uses RabbitMQ for all inter-service communication following event-driven patterns:
+
+```text
+API Gateway → Commands → capsule.commands → Service Queues
+Services → Events → capsule.events → Event Subscribers
+Failed Messages → Dead Letter Exchange → Manual Recovery
+```
+
+### Exchanges and Queues
+
+#### Core Exchanges
+- **`capsule.commands`** (direct) - Service commands (RPC pattern)
+- **`capsule.events`** (topic) - Domain events (Pub/Sub pattern)  
+- **`dlx`** (fanout) - Dead letter exchange for failed messages
+
+#### Service Queues
+- **`auth_queue`** - Authentication service messages
+- **`billing_queue`** - Billing service messages
+- **`deploy_queue`** - Deployment service messages
+- **`monitor_queue`** - Monitoring service messages
+- **`dlq`** - Dead letter queue for failed messages
+
+### Message Patterns Usage
+
+#### 1. Commands (Request/Response)
+```typescript
+// In service handler
+@RabbitMQMessagePattern('auth.register')
+async registerUser(@Payload() dto: RegisterUserDto): Promise<User> {
+  return this.authService.register(dto);
+}
+
+// From API Gateway
+const user = await this.rabbitMQService.send('auth.register', userData);
+```
+
+#### 2. Events (Publish/Subscribe)
+```typescript
+// Publishing domain events
+@EventPattern('user.created')
+async onUserCreated(@Payload() user: User): Promise<void> {
+  await this.emailService.sendWelcomeEmail(user);
+}
+
+// Emitting events
+this.rabbitMQService.emit('user.created', user);
+```
+
+#### 3. Retry Policies
+```typescript
+// Automatic retry with exponential backoff
+@DatabaseRetry(3, 1500)
+@RabbitMQMessagePattern('billing.process-payment')
+async processPayment(@Payload() dto: PaymentDto): Promise<PaymentResult> {
+  return this.billingService.processPayment(dto);
+}
+```
+
+### Using RabbitMQ Module
+
+#### Service Configuration
+```typescript
+// In service app.module.ts
+RabbitMQModule.forMicroservice({
+  queue: 'auth_queue',
+  connection: {
+    urls: [process.env.RABBITMQ_URL],
+  },
+  globalRetryPolicy: {
+    maxRetries: 3,
+    exponentialBackoff: true,
+  },
+});
+```
+
+#### Routing Key Patterns
+- **Commands**: `{service}.{action}` → `auth.register`, `billing.charge`
+- **Events**: `{context}.{event}` → `user.created`, `payment.processed`
+- **Queries**: `{service}.query.{entity}` → `auth.query.user`
+
+### Dead Letter Queue Handling
+
+Failed messages automatically go to DLQ after retry exhaustion:
+1. Message fails processing
+2. Retried up to 3 times with exponential backoff  
+3. Sent to Dead Letter Exchange (`dlx`)
+4. Routed to Dead Letter Queue (`dlq`)
+5. Manual investigation and reprocessing via Management UI
+
 ## Important Development Notes
 
 ### URLs and Endpoints
 
 - **API Gateway**: <http://localhost:3000>
 - **API Documentation**: <http://localhost:3000/api/documentation>
-- **RabbitMQ Management**: <http://localhost:15672> (admin/admin)
+- **RabbitMQ Management**: <http://localhost:7020> (usecapsule/usecapsule_dev_password)
 - **Health Check**: <http://localhost:3000/health>
 
 ### Creating New Services

@@ -74,8 +74,7 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {
-        "x-message-ttl": 86400000,
-        "x-max-retries": 3
+        "x-message-ttl": 86400000
       }
     },
     {
@@ -84,8 +83,7 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {
-        "x-message-ttl": 86400000,
-        "x-max-retries": 3
+        "x-message-ttl": 86400000
       }
     },
     {
@@ -94,8 +92,7 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {
-        "x-message-ttl": 86400000,
-        "x-max-retries": 3
+        "x-message-ttl": 86400000
       }
     },
     {
@@ -104,8 +101,7 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {
-        "x-message-ttl": 86400000,
-        "x-max-retries": 3
+        "x-message-ttl": 86400000
       }
     },
     {
