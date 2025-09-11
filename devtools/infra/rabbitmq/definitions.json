@@ -3,6 +3,14 @@
   "rabbitmq_version": "3.13",
   "product_name": "RabbitMQ",
   "product_version": "3.13",
+  "users": [
+    {
+      "name": "usecapsule",
+      "password_hash": "dvZ/os3RwDjc5HxgmR16QVER7C7IhX1bUfjo4RUNbPsV6JHP",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": ["administrator"]
+    }
+  ],
   "vhosts": [
     {
       "name": "/"
