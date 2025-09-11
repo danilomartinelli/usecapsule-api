@@ -23,13 +23,13 @@
  * ```
  */
 
-import { INestMicroservice, Logger } from '@nestjs/common'
+import { INestMicroservice, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core'
-import { MicroserviceOptions, Transport } from '@nestjs/microservices'
+import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
-import type { DeployServiceConfig } from '@usecapsule/parameters';
-import { AppModule } from './app/app.module'
+import type { DeployServiceSchema } from '@usecapsule/parameters';
+import { AppModule } from './app/app.module';
 
 /**
  * Bootstrap function for the Deploy Service microservice.
@@ -60,7 +60,7 @@ async function bootstrap(): Promise<void> {
     const appContext = await NestFactory.createApplicationContext(AppModule);
 
     // Get the validated configuration from ConfigService
-    const configService = appContext.get(ConfigService<DeployServiceConfig>);
+    const configService = appContext.get(ConfigService<DeployServiceSchema>);
 
     // Build RabbitMQ configuration from validated config
     const rabbitUrl = configService.get('RABBITMQ_URL', { infer: true });

@@ -8,10 +8,10 @@ import { z } from 'zod';
  *
  * @example
  * ```typescript
- * import { apiGatewaySchema, type ApiGatewayConfig } from './api-gateway.schema';
+ * import { apiGatewaySchema, type ApiGatewaySchema } from './api-gateway.schema';
  *
  * // Parse and validate environment variables
- * const config: ApiGatewayConfig = apiGatewaySchema.parse(process.env);
+ * const config: ApiGatewaySchema = apiGatewaySchema.parse(process.env);
  *
  * // Safe parsing with error handling
  * const result = apiGatewaySchema.safeParse(process.env);
@@ -76,6 +76,30 @@ export const apiGatewaySchema = z
       .url()
       .startsWith('amqp')
       .describe('RabbitMQ connection URL for inter-service communication'),
+
+
+    /**
+     * Number of retry attempts for failed RabbitMQ messages.
+     */
+    RABBITMQ_RETRY_ATTEMPTS: z
+      .number()
+      .int()
+      .min(0)
+      .default(3)
+      .describe('Number of retry attempts for failed RabbitMQ messages'),
+
+    /**
+     * Delay between retry attempts for failed RabbitMQ messages (in milliseconds).
+     */
+    RABBITMQ_RETRY_DELAY: z
+      .number()
+      .int()
+      .min(0)
+      .default(1000)
+      .describe(
+        'Delay between retry attempts for failed RabbitMQ messages (in milliseconds)',
+      ),
+
 
     /**
      * JWT secret key for token validation.
@@ -218,7 +242,7 @@ export const apiGatewaySchema = z
  *
  * @example
  * ```typescript
- * function createServer(config: ApiGatewayConfig) {
+ * function createServer(config: ApiGatewaySchema) {
  *   const app = express();
  *   app.listen(config.SERVICE_PORT, () => {
  *     console.log(`API Gateway listening on port ${config.SERVICE_PORT}`);
@@ -226,7 +250,7 @@ export const apiGatewaySchema = z
  * }
  * ```
  */
-export type ApiGatewayConfig = z.infer<typeof apiGatewaySchema>;
+export type ApiGatewaySchema = z.infer<typeof apiGatewaySchema>;
 
 /**
  * Input type for the API Gateway schema before validation.

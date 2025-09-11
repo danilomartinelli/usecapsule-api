@@ -29,7 +29,7 @@ import { AppService } from './app.service';
  * @example
  * ```typescript
  * // In other services/controllers
- * constructor(private configService: ConfigService<BillingServiceConfig>) {
+ * constructor(private configService: ConfigService<BillingServiceSchema>) {
  *   const dbHost = this.configService.get('BILLING_DB_HOST', { infer: true });
  *   const stripeKey = this.configService.get('STRIPE_SECRET_KEY', { infer: true });
  *   const currency = this.configService.get('BILLING_CURRENCY', { infer: true });

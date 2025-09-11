@@ -31,7 +31,7 @@ import { AppService } from './app.service';
  * @example
  * ```typescript
  * // In other services/controllers
- * constructor(private configService: ConfigService<MonitorServiceConfig>) {
+ * constructor(private configService: ConfigService<MonitorServiceSchema>) {
  *   const dbHost = this.configService.get('MONITOR_DB_HOST', { infer: true });
  *   const prometheusUrl = this.configService.get('PROMETHEUS_URL', { infer: true });
  *   const alertThreshold = this.configService.get('ALERT_CPU_THRESHOLD_PERCENT', { infer: true });

@@ -29,7 +29,7 @@ export class EnvLoader {
 
   private readonly serviceName: string;
   private readonly normalizedServiceName: string;
-  private readonly parameters: Record<string, string | undefined> = {};
+  private readonly parameters: Record<string, string | undefined>;
   private readonly loadedFiles: string[] = [];
 
   /**
@@ -45,6 +45,11 @@ export class EnvLoader {
 
     this.serviceName = serviceName.trim();
     this.normalizedServiceName = this.normalizeServiceName(serviceName);
+
+    // Always include service name in parameters
+    this.parameters = {
+      SERVICE_NAME: this.serviceName,
+    };
 
     try {
       this.loadConfiguration();
@@ -158,6 +163,15 @@ export class EnvLoader {
       'APP_ENV',
       'LOG_LEVEL',
       'RABBITMQ_URL',
+      'RABBITMQ_EXCHANGE_EVENTS',
+      'RABBITMQ_EXCHANGE_COMMANDS',
+      'RABBITMQ_DLQ_ENABLED',
+      'RABBITMQ_RETRY_ATTEMPTS',
+      'RABBITMQ_RETRY_DELAY',
+      'REDIS_HOST',
+      'REDIS_PORT',
+      'REDIS_PASSWORD',
+      'REDIS_DB',
     ] as const;
 
     // Process all environment variables
@@ -177,11 +191,6 @@ export class EnvLoader {
         const cleanKey = key.replace(`${this.normalizedServiceName}_`, '');
         filteredEnv[cleanKey] = value;
         continue;
-      }
-
-      // Include SERVICE_NAME if it matches this service
-      if (key === 'SERVICE_NAME' && value === this.serviceName) {
-        filteredEnv[key] = value;
       }
     }
 

@@ -1,30 +1,39 @@
 import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { Observable, firstValueFrom, timeout, retry, catchError, throwError } from 'rxjs';
+import type { HealthCheckResponse } from '@usecapsule/types';
+import { HealthStatus } from '@usecapsule/types';
+import {
+  Observable,
+  catchError,
+  firstValueFrom,
+  retry,
+  throwError,
+  timeout,
+} from 'rxjs';
 
+import type { PublishOptions, RabbitMQModuleOptions } from '../interfaces';
 import { RABBITMQ_CLIENT, RABBITMQ_OPTIONS } from '../rabbitmq.constants';
-import type { RabbitMQModuleOptions, PublishOptions } from '../interfaces';
 
 /**
  * Main RabbitMQ service providing core messaging operations.
- * 
+ *
  * This service handles:
  * - Direct message sending via RabbitMQ client
  * - RPC-style request/response patterns
  * - Connection management and health checks
  * - Error handling and retry logic
- * 
+ *
  * @example
  * ```typescript
  * // Inject the service
  * constructor(private readonly rabbitMQService: RabbitMQService) {}
- * 
+ *
  * // Send a message
  * await this.rabbitMQService.send('user.create', { name: 'John' });
- * 
+ *
  * // Emit an event
  * this.rabbitMQService.emit('user.created', { id: 1, name: 'John' });
- * 
+ *
  * // Check connection health
  * const isHealthy = await this.rabbitMQService.isHealthy();
  * ```
@@ -42,7 +51,7 @@ export class RabbitMQService implements OnModuleDestroy {
 
   /**
    * Sends a message using request/response pattern (RPC).
-   * 
+   *
    * @template TResult - Type of the expected response
    * @template TInput - Type of the input data
    * @param pattern - Message pattern identifier
@@ -87,7 +96,7 @@ export class RabbitMQService implements OnModuleDestroy {
 
   /**
    * Emits an event without expecting a response (pub/sub).
-   * 
+   *
    * @template T - Type of the data being emitted
    * @param event - Event name
    * @param data - Data to emit
@@ -108,7 +117,7 @@ export class RabbitMQService implements OnModuleDestroy {
 
   /**
    * Sends a message and returns an Observable for streaming responses.
-   * 
+   *
    * @template TResult - Type of the expected stream responses
    * @template TInput - Type of the input data
    * @param pattern - Message pattern identifier
@@ -123,7 +132,7 @@ export class RabbitMQService implements OnModuleDestroy {
   ): Observable<TResult> {
     try {
       const timeoutMs = options?.timeout || 30000;
-      
+
       this.logger.debug(`Sending streaming message to pattern: ${pattern}`);
 
       return this.client.send<TResult, TInput>(pattern, data).pipe(
@@ -146,29 +155,66 @@ export class RabbitMQService implements OnModuleDestroy {
   }
 
   /**
-   * Checks if the RabbitMQ connection is healthy.
-   * 
-   * @returns Promise resolving to health status
+   * Sends a health check message to a specific service using routing keys.
+   *
+   * @param routingKey - Routing key to target specific service (e.g., 'auth.health')
+   * @returns Promise resolving to health status response
    */
-  async isHealthy(): Promise<boolean> {
+  async sendHealthCheck(routingKey: string): Promise<HealthCheckResponse> {
     try {
-      // Try to send a simple health check message
-      const healthCheck$ = this.client.send('health.check', {}).pipe(
-        timeout(5000),
-        catchError(() => throwError(() => new Error('Health check failed'))),
-      );
+      this.logger.debug(`Sending health check with routing key: ${routingKey}`);
 
-      await firstValueFrom(healthCheck$);
-      return true;
+      // For API Gateway clients, we need to use the message pattern that services listen for
+      // Since services listen for 'health.check' pattern, but we route with 'auth.health' etc.
+      // The RabbitMQ exchange routing will handle delivering to the correct queue
+      const messagePattern = 'health.check';
+
+      // Send health check via exchange with routing key
+      const healthCheck$ = this.client
+        .send<HealthCheckResponse>(messagePattern, { routingKey })
+        .pipe(
+          timeout(5000),
+          retry(1), // Single retry
+          catchError((error) => {
+            this.logger.warn(`Health check failed for ${routingKey}:`, error.message);
+            return throwError(() => error);
+          }),
+        );
+
+      const response = await firstValueFrom(healthCheck$);
+      this.logger.debug(`Health check successful for ${routingKey}`);
+      return response;
     } catch (error) {
-      this.logger.warn('RabbitMQ health check failed:', error);
-      return false;
+      this.logger.warn(`Health check failed for ${routingKey}:`, error);
+      
+      // Return unhealthy status instead of throwing
+      return {
+        status: HealthStatus.UNHEALTHY,
+        service: routingKey.split('.')[0], // Extract service name from routing key
+        timestamp: new Date().toISOString(),
+        metadata: {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          queue: {
+            name: routingKey,
+            connected: false,
+          },
+        },
+      } satisfies HealthCheckResponse;
     }
   }
 
   /**
+   * Legacy method - kept for backward compatibility.
+   * @deprecated Use sendHealthCheck with routing key instead
+   */
+  async isHealthy(queue?: string): Promise<HealthCheckResponse> {
+    const routingKey = queue ? `${queue.replace('_queue', '')}.health` : 'health.check';
+    return this.sendHealthCheck(routingKey);
+  }
+
+  /**
    * Gets connection information and statistics.
-   * 
+   *
    * @returns Connection information
    */
   getConnectionInfo(): {

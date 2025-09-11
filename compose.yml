@@ -15,6 +15,13 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./devtools/infra/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
       - ./devtools/infra/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
   auth-db:
     container_name: auth_db_dev
@@ -27,6 +34,12 @@ services:
       - '7110:5432'
     volumes:
       - auth_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_service_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   deploy-db:
     container_name: deploy_db_dev
@@ -80,7 +93,8 @@ services:
     volumes:
       - ./apps/auth-service/src/database/migrations:/flyway/sql
     depends_on:
-      - auth-db
+      auth-db:
+        condition: service_healthy
 
 volumes:
   rabbitmq_data:

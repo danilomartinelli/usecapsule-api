@@ -28,7 +28,7 @@ import { AppService } from './app.service';
  * @example
  * ```typescript
  * // In other services/controllers
- * constructor(private configService: ConfigService<DeployServiceConfig>) {
+ * constructor(private configService: ConfigService<DeployServiceSchema>) {
  *   const dbHost = this.configService.get('DEPLOY_DB_HOST', { infer: true });
  *   const k8sUrl = this.configService.get('KUBERNETES_API_URL', { infer: true });
  *   const registryUrl = this.configService.get('REGISTRY_URL', { infer: true });

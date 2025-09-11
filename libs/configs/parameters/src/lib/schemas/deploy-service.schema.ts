@@ -9,10 +9,10 @@ import { z } from 'zod';
  *
  * @example
  * ```typescript
- * import { deployServiceSchema, type DeployServiceConfig } from './deploy-service.schema';
+ * import { deployServiceSchema, type DeployServiceSchema } from './deploy-service.schema';
  *
  * // Parse and validate environment variables
- * const config: DeployServiceConfig = deployServiceSchema.parse(process.env);
+ * const config: DeployServiceSchema = deployServiceSchema.parse(process.env);
  *
  * // Safe parsing with error handling
  * const result = deployServiceSchema.safeParse(process.env);
@@ -317,7 +317,7 @@ export const deployServiceSchema = z
  *
  * @example
  * ```typescript
- * function createDeployService(config: DeployServiceConfig) {
+ * function createDeployService(config: DeployServiceSchema) {
  *   const k8sClient = new KubernetesClient({
  *     url: config.KUBERNETES_API_URL,
  *     token: config.KUBERNETES_TOKEN,
@@ -337,7 +337,7 @@ export const deployServiceSchema = z
  * }
  * ```
  */
-export type DeployServiceConfig = z.infer<typeof deployServiceSchema>;
+export type DeployServiceSchema = z.infer<typeof deployServiceSchema>;
 
 /**
  * Input type for the Deploy Service schema before validation.

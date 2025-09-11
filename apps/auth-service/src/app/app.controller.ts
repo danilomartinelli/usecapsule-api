@@ -1,4 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
+import { MESSAGE_PATTERNS } from '@usecapsule/messaging';
+import type { HealthCheckResponse } from '@usecapsule/types';
 
 import { AppService } from './app.service';
 
@@ -14,12 +17,16 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   /**
-   * Health check endpoint returning service identification.
+   * Health check message pattern for RabbitMQ monitoring.
    *
-   * @returns Service status information
+   * This handler responds to 'health.check' messages sent via RabbitMQ,
+   * allowing the system to verify that the auth-service is running
+   * and responding to messages properly.
+   *
+   * @returns Service health status
    */
-  @Get()
-  getData(): Readonly<{ message: string }> {
-    return this.appService.getData();
+  @MessagePattern(MESSAGE_PATTERNS.HEALTH_CHECK)
+  healthCheck(): HealthCheckResponse {
+    return this.appService.getHealthStatus();
   }
 }

@@ -25,13 +25,13 @@
  * ```
  */
 
-import { INestMicroservice, Logger } from '@nestjs/common'
+import { INestMicroservice, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core'
-import { MicroserviceOptions, Transport } from '@nestjs/microservices'
+import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
-import type { MonitorServiceConfig } from '@usecapsule/parameters';
-import { AppModule } from './app/app.module'
+import type { MonitorServiceSchema } from '@usecapsule/parameters';
+import { AppModule } from './app/app.module';
 
 /**
  * Bootstrap function for the Monitor Service microservice.
@@ -62,7 +62,7 @@ async function bootstrap(): Promise<void> {
     const appContext = await NestFactory.createApplicationContext(AppModule);
 
     // Get the validated configuration from ConfigService
-    const configService = appContext.get(ConfigService<MonitorServiceConfig>);
+    const configService = appContext.get(ConfigService<MonitorServiceSchema>);
 
     // Build RabbitMQ configuration from validated config
     const rabbitUrl = configService.get('RABBITMQ_URL', { infer: true });

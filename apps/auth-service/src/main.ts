@@ -59,15 +59,13 @@ async function bootstrap(): Promise<void> {
     const appContext = await NestFactory.createApplicationContext(AppModule);
 
     // Get the validated configuration from ConfigService
-    const configService = appContext.get(ConfigService<AuthServiceSchema>);
+    const configService = appContext.get(
+      ConfigService<AuthServiceSchema, true>,
+    );
 
     // Build RabbitMQ configuration from validated config
     const rabbitUrl = configService.get('RABBITMQ_URL', { infer: true });
     const rabbitQueue = configService.get('RABBITMQ_QUEUE', { infer: true });
-
-    if (!rabbitUrl) {
-      throw new Error('RABBITMQ_URL is required but not configured');
-    }
 
     const rabbitConfig = {
       urls: [rabbitUrl],

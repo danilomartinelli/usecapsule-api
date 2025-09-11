@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import type { HealthCheckResponse } from '@usecapsule/types';
+import { HealthStatus } from '@usecapsule/types';
 
 /**
  * Application service providing core business logic for the Auth Service.
@@ -10,11 +12,23 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AppService {
   /**
-   * Retrieves application data for health checks and service identification.
+   * Provides detailed health status for RabbitMQ health checks.
    *
-   * @returns Service identification message with proper typing
+   * @returns Comprehensive health status information
    */
-  getData(): Readonly<{ message: string }> {
-    return { message: 'Auth Service - Ready' } as const;
+  getHealthStatus(): HealthCheckResponse {
+    return {
+      status: HealthStatus.HEALTHY,
+      service: 'auth-service',
+      timestamp: new Date().toISOString(),
+      metadata: {
+        version: '1.0.0',
+        memory: {
+          used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+          total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+          unit: 'MB',
+        },
+      },
+    };
   }
 }

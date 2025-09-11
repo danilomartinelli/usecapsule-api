@@ -9,10 +9,10 @@ import { z } from 'zod';
  *
  * @example
  * ```typescript
- * import { billingServiceSchema, type BillingServiceConfig } from './billing-service.schema';
+ * import { billingServiceSchema, type BillingServiceSchema } from './billing-service.schema';
  *
  * // Parse and validate environment variables
- * const config: BillingServiceConfig = billingServiceSchema.parse(process.env);
+ * const config: BillingServiceSchema = billingServiceSchema.parse(process.env);
  *
  * // Safe parsing with error handling
  * const result = billingServiceSchema.safeParse(process.env);
@@ -164,7 +164,10 @@ export const billingServiceSchema = z
     STRIPE_PUBLISHABLE_KEY: z
       .string()
       .min(1)
-      .regex(/^pk_(test|live)_/, 'Must be a valid Stripe publishable key format')
+      .regex(
+        /^pk_(test|live)_/,
+        'Must be a valid Stripe publishable key format',
+      )
       .describe('Stripe publishable key for client-side integrations'),
 
     /**
@@ -297,7 +300,7 @@ export const billingServiceSchema = z
  *
  * @example
  * ```typescript
- * function createBillingService(config: BillingServiceConfig) {
+ * function createBillingService(config: BillingServiceSchema) {
  *   const stripeClient = new Stripe(config.STRIPE_SECRET_KEY, {
  *     apiVersion: '2023-10-16',
  *   });
@@ -319,7 +322,7 @@ export const billingServiceSchema = z
  * }
  * ```
  */
-export type BillingServiceConfig = z.infer<typeof billingServiceSchema>;
+export type BillingServiceSchema = z.infer<typeof billingServiceSchema>;
 
 /**
  * Input type for the Billing Service schema before validation.

@@ -75,6 +75,10 @@ export interface ConnectionConfig {
   reconnectAttempts?: number;
   /** Delay between reconnection attempts in milliseconds */
   reconnectDelay?: number;
+  /** Connection pool size */
+  poolSize?: number;
+  /** Channel pool size per connection */
+  channelPoolSize?: number;
 }
 
 /**
@@ -111,10 +115,12 @@ export interface RabbitMQModuleOptions {
 /**
  * Async configuration options for RabbitMQ module.
  */
-export interface RabbitMQModuleAsyncOptions {
+export interface RabbitMQModuleAsyncOptions<
+  Args extends unknown[] = unknown[],
+> {
   /** Factory function to create module options */
   useFactory: (
-    ...args: unknown[]
+    ...args: Args
   ) => Promise<RabbitMQModuleOptions> | RabbitMQModuleOptions;
   /** Dependencies to inject into the factory function */
   inject?: Array<Type<unknown> | string | symbol>;

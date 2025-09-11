@@ -9,10 +9,10 @@ import { z } from 'zod';
  *
  * @example
  * ```typescript
- * import { monitorServiceSchema, type MonitorServiceConfig } from './monitor-service.schema';
+ * import { monitorServiceSchema, type MonitorServiceSchema } from './monitor-service.schema';
  *
  * // Parse and validate environment variables
- * const config: MonitorServiceConfig = monitorServiceSchema.parse(process.env);
+ * const config: MonitorServiceSchema = monitorServiceSchema.parse(process.env);
  *
  * // Safe parsing with error handling
  * const result = monitorServiceSchema.safeParse(process.env);
@@ -352,7 +352,7 @@ export const monitorServiceSchema = z
  *
  * @example
  * ```typescript
- * function createMonitorService(config: MonitorServiceConfig) {
+ * function createMonitorService(config: MonitorServiceSchema) {
  *   const prometheusConfig = {
  *     url: config.PROMETHEUS_URL,
  *     pushgatewayUrl: config.PROMETHEUS_PUSHGATEWAY_URL,
@@ -379,7 +379,7 @@ export const monitorServiceSchema = z
  * }
  * ```
  */
-export type MonitorServiceConfig = z.infer<typeof monitorServiceSchema>;
+export type MonitorServiceSchema = z.infer<typeof monitorServiceSchema>;
 
 /**
  * Input type for the Monitor Service schema before validation.

@@ -7,6 +7,12 @@
       "path": "../../libs/configs/parameters"
     },
     {
+      "path": "../../libs/shared/types"
+    },
+    {
+      "path": "../../libs/shared/messaging"
+    },
+    {
       "path": "./tsconfig.app.json"
     }
   ]

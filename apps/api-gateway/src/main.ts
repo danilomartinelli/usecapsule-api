@@ -28,7 +28,7 @@ import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 
-import type { ApiGatewayConfig } from '@usecapsule/parameters';
+import type { ApiGatewaySchema } from '@usecapsule/parameters';
 import { AppModule } from './app/app.module';
 
 /**
@@ -59,7 +59,7 @@ async function bootstrap(): Promise<void> {
     const app = await NestFactory.create(AppModule);
 
     // Get the validated configuration from ConfigService
-    const configService = app.get(ConfigService<ApiGatewayConfig>);
+    const configService = app.get(ConfigService<ApiGatewaySchema>);
 
     // Configure server settings from validated config
     const port = configService.get('SERVICE_PORT', { infer: true });
@@ -73,7 +73,7 @@ async function bootstrap(): Promise<void> {
     // Configure CORS if enabled
     if (corsEnabled) {
       app.enableCors({
-        origin: corsOrigins === '*' ? true : corsOrigins?.split(',').map(origin => origin.trim()) || '*',
+        origin: corsOrigins === '*' ? true : corsOrigins?.split(',').map((origin: string) => origin.trim()) || '*',
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
         credentials: true,

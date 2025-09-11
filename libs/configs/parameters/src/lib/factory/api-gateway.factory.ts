@@ -1,4 +1,4 @@
-import type { ApiGatewayConfig } from '../schemas/api-gateway.schema';
+import type { ApiGatewaySchema } from '../schemas/api-gateway.schema';
 
 /**
  * Configuration factory for the API Gateway.
@@ -20,19 +20,37 @@ import type { ApiGatewayConfig } from '../schemas/api-gateway.schema';
  * const validatedConfig = apiGatewaySchema.parse(config);
  * ```
  */
-export const apiGatewayFactory = (): ApiGatewayConfig => ({
-  NODE_ENV: (process.env.NODE_ENV as 'test' | 'development' | 'production') || 'development',
-  APP_ENV: (process.env.APP_ENV as 'test' | 'local' | 'development' | 'staging' | 'production' | 'canary') || 'local',
+export const apiGatewayFactory = (): ApiGatewaySchema => ({
+  NODE_ENV:
+    (process.env.NODE_ENV as 'test' | 'development' | 'production') ||
+    'development',
+  APP_ENV:
+    (process.env.APP_ENV as
+      | 'test'
+      | 'local'
+      | 'development'
+      | 'staging'
+      | 'production'
+      | 'canary') || 'local',
   SERVICE_NAME: 'api-gateway' as const,
-  SERVICE_PORT: Number.parseInt(process.env.API_GATEWAY_PORT || '3000', 10),
+  SERVICE_PORT: Number.parseInt(process.env.PORT || '3000', 10),
   RABBITMQ_URL: process.env.RABBITMQ_URL || '',
-  JWT_SECRET: process.env.API_GATEWAY_JWT_SECRET || '',
-  JWT_EXPIRATION: process.env.API_GATEWAY_JWT_EXPIRATION || '15m',
-  RATE_LIMIT_TTL: Number.parseInt(process.env.API_GATEWAY_RATE_LIMIT_TTL || '60', 10),
-  RATE_LIMIT_MAX: Number.parseInt(process.env.API_GATEWAY_RATE_LIMIT_MAX || '100', 10),
-  CORS_ENABLED: process.env.API_GATEWAY_CORS_ENABLED === 'false' ? false : true,
-  CORS_ORIGINS: process.env.API_GATEWAY_CORS_ORIGINS || '*',
-  LOG_LEVEL: (process.env.LOG_LEVEL as 'error' | 'warn' | 'info' | 'debug') || 'info',
+  RABBITMQ_RETRY_ATTEMPTS: Number.parseInt(
+    process.env.RABBITMQ_RETRY_ATTEMPTS || '3',
+    10,
+  ),
+  RABBITMQ_RETRY_DELAY: Number.parseInt(
+    process.env.RABBITMQ_RETRY_DELAY || '1000',
+    10,
+  ),
+  JWT_SECRET: process.env.JWT_SECRET || '',
+  JWT_EXPIRATION: process.env.JWT_EXPIRATION || '15m',
+  RATE_LIMIT_TTL: Number.parseInt(process.env.RATE_LIMIT_TTL || '60', 10),
+  RATE_LIMIT_MAX: Number.parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
+  CORS_ENABLED: process.env.CORS_ENABLED === 'false' ? false : true,
+  CORS_ORIGINS: process.env.CORS_ORIGINS || '*',
+  LOG_LEVEL:
+    (process.env.LOG_LEVEL as 'error' | 'warn' | 'info' | 'debug') || 'info',
   REDIS_HOST: process.env.REDIS_HOST || 'localhost',
   REDIS_PORT: Number.parseInt(process.env.REDIS_PORT || '6379', 10),
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,

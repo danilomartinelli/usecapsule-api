@@ -11,15 +11,29 @@
     "libs/configs/*"
   ],
   "scripts": {
-    "dev:infra": "docker-compose up -d",
+    "dev": "npm run infrastructure:up && npm run serve:gateway",
     "dev:gateway": "nx serve api-gateway --watch",
     "dev:auth": "nx serve auth-service --watch",
     "dev:deploy": "nx serve deploy-service --watch",
     "dev:monitor": "nx serve monitor-service --watch",
+    "dev:billing": "nx serve billing-service --watch",
     "dev:all": "nx run-many --target=serve --all --parallel",
+    "serve:gateway": "nx serve api-gateway --watch",
     "build:all": "nx run-many --target=build --all",
-    "test:all": "nx run-many --target=test --all",
-    "lint:all": "nx run-many --target=lint --all",
+    "test": "nx run-many --target=test --all",
+    "test:affected": "nx affected --target=test",
+    "test:e2e": "nx run-many --target=e2e --all",
+    "test:coverage": "nx run-many --target=test --all --coverage",
+    "lint": "nx run-many --target=lint --all",
+    "lint:affected": "nx affected --target=lint",
+    "format": "nx format:write",
+    "infrastructure:up": "docker compose up -d",
+    "infrastructure:down": "docker compose down",
+    "infrastructure:reset": "docker compose down -v && docker compose up -d",
+    "db:migrate:all": "echo 'Run migrations for all services' && npm run db:migrate:auth && npm run db:migrate:billing && npm run db:migrate:deploy && npm run db:migrate:monitor",
+    "db:migrate:auth": "docker compose run --rm flyway -url=jdbc:postgresql://auth-db:5432/auth_service_db -user=auth_user -password=auth_pass -connectRetries=60 migrate",
+    "db:seed:all": "echo 'Add seeding scripts here when ready'",
+    "db:reset:all": "npm run infrastructure:down && docker volume prune -f && npm run infrastructure:up",
     "dep-graph": "nx graph"
   },
   "devDependencies": {
@@ -60,6 +74,8 @@
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",
     "@nestjs/platform-express": "^11.1.6",
+    "@types/amqplib": "^0.10.7",
+    "amqplib": "^0.10.9",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0"
   }

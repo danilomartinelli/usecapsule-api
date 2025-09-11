@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   apiGatewayFactory,
   apiGatewaySchema,
   ParametersModule,
 } from '@usecapsule/parameters';
+import type { ApiGatewaySchema } from '@usecapsule/parameters';
+import { RabbitMQModule } from '@usecapsule/rabbitmq';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -30,7 +33,7 @@ import { AppService } from './app.service';
  * @example
  * ```typescript
  * // In other services/controllers
- * constructor(private configService: ConfigService<ApiGatewayConfig>) {
+ * constructor(private configService: ConfigService<ApiGatewaySchema>) {
  *   const port = this.configService.get('SERVICE_PORT', { infer: true });
  *   const jwtSecret = this.configService.get('JWT_SECRET', { infer: true });
  *   const corsOrigins = this.configService.get('CORS_ORIGINS', { infer: true });
@@ -48,6 +51,30 @@ import { AppService } from './app.service';
         allowUnknown: false,
         abortEarly: false,
         stripUnknown: true,
+      },
+    }),
+    // Configure RabbitMQ client for sending messages to microservices
+    RabbitMQModule.forRootAsync({
+      imports: [ParametersModule],
+      inject: [ConfigService],
+      useFactory: async (...args: unknown[]) => {
+        const configService = args[0] as ConfigService<ApiGatewaySchema, true>;
+
+        return {
+          connection: {
+            urls: [configService.get('RABBITMQ_URL', { infer: true })],
+          },
+          // API Gateway: no defaultQueue specified for exchange-based publishing
+          // This enables the client to publish to exchanges with routing keys
+          globalRetryPolicy: {
+            maxRetries: configService.get('RABBITMQ_RETRY_ATTEMPTS', {
+              infer: true,
+            }),
+            retryDelay: configService.get('RABBITMQ_RETRY_DELAY', {
+              infer: true,
+            }),
+          },
+        };
       },
     }),
   ],
