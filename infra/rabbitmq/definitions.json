@@ -1,0 +1,163 @@
+{
+  "rabbit_version": "3.13",
+  "rabbitmq_version": "3.13",
+  "product_name": "RabbitMQ",
+  "product_version": "3.13",
+  "users": [
+    {
+      "name": "usecapsule",
+      "password": "usecapsule_dev_password",
+      "tags": ["administrator"]
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "usecapsule",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "parameters": [],
+  "policies": [
+    {
+      "vhost": "/",
+      "name": "dlq-policy",
+      "pattern": "^(?!.*\\.dlq$).*",
+      "apply-to": "queues",
+      "definition": {
+        "dead-letter-exchange": "dlx",
+        "dead-letter-routing-key": "dlq"
+      },
+      "priority": 0
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "capsule.events",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "capsule.commands",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "dlx",
+      "vhost": "/",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "auth_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-retries": 3
+      }
+    },
+    {
+      "name": "billing_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-retries": 3
+      }
+    },
+    {
+      "name": "deploy_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-retries": 3
+      }
+    },
+    {
+      "name": "monitor_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000,
+        "x-max-retries": 3
+      }
+    },
+    {
+      "name": "dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 86400000
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "source": "capsule.commands",
+      "vhost": "/",
+      "destination": "auth_queue",
+      "destination_type": "queue",
+      "routing_key": "auth.*",
+      "arguments": {}
+    },
+    {
+      "source": "capsule.commands",
+      "vhost": "/",
+      "destination": "billing_queue",
+      "destination_type": "queue",
+      "routing_key": "billing.*",
+      "arguments": {}
+    },
+    {
+      "source": "capsule.commands",
+      "vhost": "/",
+      "destination": "deploy_queue",
+      "destination_type": "queue",
+      "routing_key": "deploy.*",
+      "arguments": {}
+    },
+    {
+      "source": "capsule.commands",
+      "vhost": "/",
+      "destination": "monitor_queue",
+      "destination_type": "queue",
+      "routing_key": "monitor.*",
+      "arguments": {}
+    },
+    {
+      "source": "dlx",
+      "vhost": "/",
+      "destination": "dlq",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    }
+  ]
+}
