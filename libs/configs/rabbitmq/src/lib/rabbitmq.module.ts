@@ -326,7 +326,7 @@ export class RabbitMQModule {
         imports: options.imports,
         useFactory: async (...args: Args) => {
           const config = await options.useFactory(...args);
-          
+
           // For API Gateway (no defaultQueue) - configure for exchange-based publishing
           const clientOptions = config.defaultQueue
             ? {

@@ -73,7 +73,11 @@ async function bootstrap(): Promise<void> {
     // Configure CORS if enabled
     if (corsEnabled) {
       app.enableCors({
-        origin: corsOrigins === '*' ? true : corsOrigins?.split(',').map((origin: string) => origin.trim()) || '*',
+        origin:
+          corsOrigins === '*'
+            ? true
+            : corsOrigins?.split(',').map((origin: string) => origin.trim()) ||
+              '*',
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
         credentials: true,

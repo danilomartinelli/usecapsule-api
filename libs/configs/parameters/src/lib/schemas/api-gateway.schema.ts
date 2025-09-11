@@ -77,7 +77,6 @@ export const apiGatewaySchema = z
       .startsWith('amqp')
       .describe('RabbitMQ connection URL for inter-service communication'),
 
-
     /**
      * Number of retry attempts for failed RabbitMQ messages.
      */
@@ -99,7 +98,6 @@ export const apiGatewaySchema = z
       .describe(
         'Delay between retry attempts for failed RabbitMQ messages (in milliseconds)',
       ),
-
 
     /**
      * JWT secret key for token validation.

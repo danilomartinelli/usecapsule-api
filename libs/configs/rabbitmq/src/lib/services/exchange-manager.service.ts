@@ -15,26 +15,26 @@ import type {
 
 /**
  * Exchange manager service for managing RabbitMQ topology.
- * 
+ *
  * This service handles:
  * - Exchange creation and management
  * - Queue creation and management
  * - Binding management between exchanges and queues
  * - Topology setup and teardown
  * - Dead letter queue configuration
- * 
+ *
  * @example
  * ```typescript
  * // Inject the service
  * constructor(private readonly exchangeManager: ExchangeManagerService) {}
- * 
+ *
  * // Create an exchange
  * await this.exchangeManager.createExchange({
  *   name: 'user.events',
  *   type: 'topic',
  *   durable: true,
  * });
- * 
+ *
  * // Create a queue with bindings
  * await this.exchangeManager.createQueue({
  *   name: 'user.notifications',
@@ -77,7 +77,7 @@ export class ExchangeManagerService implements OnModuleInit {
 
   /**
    * Creates an exchange with the specified configuration.
-   * 
+   *
    * @param config - Exchange configuration
    * @returns Promise resolving when exchange is created
    */
@@ -101,7 +101,7 @@ export class ExchangeManagerService implements OnModuleInit {
 
   /**
    * Creates a queue with the specified configuration.
-   * 
+   *
    * @param config - Queue configuration
    * @returns Promise resolving when queue is created
    */
@@ -124,7 +124,7 @@ export class ExchangeManagerService implements OnModuleInit {
 
   /**
    * Creates an advanced exchange with topology setup.
-   * 
+   *
    * @param config - Advanced exchange configuration
    * @returns Promise resolving when exchange and topology are created
    */
@@ -169,7 +169,7 @@ export class ExchangeManagerService implements OnModuleInit {
 
   /**
    * Creates an advanced queue with topology setup.
-   * 
+   *
    * @param config - Advanced queue configuration
    * @returns Promise resolving when queue and topology are created
    */
@@ -245,7 +245,7 @@ export class ExchangeManagerService implements OnModuleInit {
 
   /**
    * Binds a queue to an exchange.
-   * 
+   *
    * @param binding - Queue binding configuration
    * @returns Promise resolving when binding is created
    */
@@ -271,7 +271,7 @@ export class ExchangeManagerService implements OnModuleInit {
 
   /**
    * Binds an exchange to another exchange.
-   * 
+   *
    * @param binding - Exchange binding configuration
    * @returns Promise resolving when binding is created
    */
@@ -297,7 +297,7 @@ export class ExchangeManagerService implements OnModuleInit {
 
   /**
    * Sets up complete topology from configuration.
-   * 
+   *
    * @param topology - Topology configuration
    * @returns Promise resolving when topology is setup
    */
@@ -374,12 +374,15 @@ export class ExchangeManagerService implements OnModuleInit {
 
   /**
    * Emits a management command through the RabbitMQ client.
-   * 
+   *
    * @param command - Management command
    * @param data - Command data
    * @returns Promise resolving when command is processed
    */
-  private async emitManagementCommand(command: string, data: unknown): Promise<void> {
+  private async emitManagementCommand(
+    command: string,
+    data: unknown,
+  ): Promise<void> {
     try {
       // In a real implementation, this would use RabbitMQ management API
       // or direct AMQP channel operations
@@ -395,7 +398,7 @@ export class ExchangeManagerService implements OnModuleInit {
 
   /**
    * Gets topology setup status.
-   * 
+   *
    * @returns Whether topology has been setup
    */
   isTopologySetup(): boolean {
@@ -404,7 +407,7 @@ export class ExchangeManagerService implements OnModuleInit {
 
   /**
    * Gets manager information.
-   * 
+   *
    * @returns Manager information
    */
   getManagerInfo(): {

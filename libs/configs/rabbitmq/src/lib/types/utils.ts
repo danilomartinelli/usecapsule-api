@@ -1,13 +1,13 @@
 /**
  * Advanced TypeScript utility types for RabbitMQ module.
- * 
+ *
  * These types provide better type safety, inference, and developer experience
  * when working with RabbitMQ configurations and message handling.
  */
 
 /**
  * Utility type to make specific properties required while keeping others optional.
- * 
+ *
  * @template T - Base type
  * @template K - Keys to make required
  */
@@ -15,15 +15,16 @@ export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
 /**
  * Utility type to make specific properties optional while keeping others as-is.
- * 
+ *
  * @template T - Base type
  * @template K - Keys to make optional
  */
-export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type OptionalFields<T, K extends keyof T> = Omit<T, K> &
+  Partial<Pick<T, K>>;
 
 /**
  * Utility type for creating readonly versions of complex objects.
- * 
+ *
  * @template T - Type to make deeply readonly
  */
 export type DeepReadonly<T> = {
@@ -32,7 +33,7 @@ export type DeepReadonly<T> = {
 
 /**
  * Utility type for non-empty arrays.
- * 
+ *
  * @template T - Array element type
  */
 export type NonEmptyArray<T> = [T, ...T[]];
@@ -44,7 +45,7 @@ export type NonEmptyString<T extends string> = T extends '' ? never : T;
 
 /**
  * Utility type for branded types to prevent primitive obsession.
- * 
+ *
  * @template T - Base type
  * @template B - Brand name
  */
@@ -74,7 +75,7 @@ export type MessagePriority = Brand<number, 'MessagePriority'> & {
 
 /**
  * Helper to create a message priority value.
- * 
+ *
  * @param value - Priority value (0-255)
  * @returns Branded priority type
  */
@@ -87,7 +88,7 @@ export const createMessagePriority = (value: number): MessagePriority => {
 
 /**
  * Helper to create branded queue name.
- * 
+ *
  * @param name - Queue name
  * @returns Branded queue name
  */
@@ -100,7 +101,7 @@ export const createQueueName = (name: string): QueueName => {
 
 /**
  * Helper to create branded exchange name.
- * 
+ *
  * @param name - Exchange name
  * @returns Branded exchange name
  */
@@ -113,7 +114,7 @@ export const createExchangeName = (name: string): ExchangeName => {
 
 /**
  * Helper to create branded routing key.
- * 
+ *
  * @param key - Routing key
  * @returns Branded routing key
  */
@@ -123,7 +124,7 @@ export const createRoutingKey = (key: string): RoutingKey => {
 
 /**
  * Helper to create branded message pattern.
- * 
+ *
  * @param pattern - Message pattern
  * @returns Branded message pattern
  */
@@ -136,7 +137,7 @@ export const createMessagePattern = (pattern: string): MessagePattern => {
 
 /**
  * Type guard to check if a value is a valid queue name.
- * 
+ *
  * @param value - Value to check
  * @returns Type predicate
  */
@@ -146,7 +147,7 @@ export const isQueueName = (value: unknown): value is QueueName => {
 
 /**
  * Type guard to check if a value is a valid exchange name.
- * 
+ *
  * @param value - Value to check
  * @returns Type predicate
  */
@@ -156,7 +157,7 @@ export const isExchangeName = (value: unknown): value is ExchangeName => {
 
 /**
  * Type guard to check if a value is a valid message priority.
- * 
+ *
  * @param value - Value to check
  * @returns Type predicate
  */

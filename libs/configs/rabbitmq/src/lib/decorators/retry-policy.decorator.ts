@@ -9,13 +9,13 @@ export const RETRY_POLICY_METADATA = 'rabbitmq:retry-policy';
 
 /**
  * Retry policy decorator for configuring message retry behavior.
- * 
+ *
  * This decorator allows you to specify retry logic for message handlers,
  * including retry count, delays, and custom retry conditions.
- * 
+ *
  * @param policy - Retry policy configuration
  * @returns Method decorator
- * 
+ *
  * @example
  * ```typescript
  * @Controller()
@@ -41,11 +41,11 @@ export function RetryPolicy(policy: RetryPolicyInterface): MethodDecorator {
 
 /**
  * Simple retry decorator with basic configuration.
- * 
+ *
  * @param maxRetries - Maximum number of retry attempts
  * @param retryDelay - Delay between retries in milliseconds
  * @returns Method decorator
- * 
+ *
  * @example
  * ```typescript
  * @MessagePattern('user.backup')
@@ -65,12 +65,12 @@ export function Retry(maxRetries: number, retryDelay = 1000): MethodDecorator {
 
 /**
  * Exponential backoff retry decorator.
- * 
+ *
  * @param maxRetries - Maximum number of retry attempts
  * @param initialDelay - Initial delay in milliseconds
  * @param maxDelay - Maximum delay in milliseconds
  * @returns Method decorator
- * 
+ *
  * @example
  * ```typescript
  * @MessagePattern('user.sync')
@@ -96,12 +96,12 @@ export function ExponentialBackoffRetry(
 
 /**
  * Conditional retry decorator with custom retry condition.
- * 
+ *
  * @param maxRetries - Maximum number of retry attempts
  * @param retryCondition - Function to determine if retry should happen
  * @param retryDelay - Delay between retries in milliseconds
  * @returns Method decorator
- * 
+ *
  * @example
  * ```typescript
  * @MessagePattern('user.validate')
@@ -130,9 +130,9 @@ export function ConditionalRetry(
 
 /**
  * No retry decorator to explicitly disable retries.
- * 
+ *
  * @returns Method decorator
- * 
+ *
  * @example
  * ```typescript
  * @MessagePattern('user.critical')
@@ -150,11 +150,11 @@ export function NoRetry(): MethodDecorator {
 
 /**
  * Database error retry decorator for database-related operations.
- * 
+ *
  * @param maxRetries - Maximum number of retry attempts
  * @param retryDelay - Delay between retries in milliseconds
  * @returns Method decorator
- * 
+ *
  * @example
  * ```typescript
  * @MessagePattern('user.save')
@@ -164,7 +164,10 @@ export function NoRetry(): MethodDecorator {
  * }
  * ```
  */
-export function DatabaseRetry(maxRetries = 3, retryDelay = 1500): MethodDecorator {
+export function DatabaseRetry(
+  maxRetries = 3,
+  retryDelay = 1500,
+): MethodDecorator {
   return SetMetadata(RETRY_POLICY_METADATA, {
     maxRetries,
     retryDelay,
@@ -182,9 +185,10 @@ export function DatabaseRetry(maxRetries = 3, retryDelay = 1500): MethodDecorato
         'MongoNetworkError',
         'MongoTimeoutError',
       ];
-      
-      return retryableErrors.some(errorType => 
-        error.name.includes(errorType) || error.message.includes(errorType)
+
+      return retryableErrors.some(
+        (errorType) =>
+          error.name.includes(errorType) || error.message.includes(errorType),
       );
     },
   });
@@ -192,11 +196,11 @@ export function DatabaseRetry(maxRetries = 3, retryDelay = 1500): MethodDecorato
 
 /**
  * Network error retry decorator for network-related operations.
- * 
+ *
  * @param maxRetries - Maximum number of retry attempts
  * @param retryDelay - Delay between retries in milliseconds
  * @returns Method decorator
- * 
+ *
  * @example
  * ```typescript
  * @MessagePattern('user.fetch-external')
@@ -206,7 +210,10 @@ export function DatabaseRetry(maxRetries = 3, retryDelay = 1500): MethodDecorato
  * }
  * ```
  */
-export function NetworkRetry(maxRetries = 5, retryDelay = 2000): MethodDecorator {
+export function NetworkRetry(
+  maxRetries = 5,
+  retryDelay = 2000,
+): MethodDecorator {
   return SetMetadata(RETRY_POLICY_METADATA, {
     maxRetries,
     retryDelay,
@@ -222,9 +229,10 @@ export function NetworkRetry(maxRetries = 5, retryDelay = 2000): MethodDecorator
         'FetchError',
         'AxiosError',
       ];
-      
-      return networkErrors.some(errorType => 
-        error.name.includes(errorType) || error.message.includes(errorType)
+
+      return networkErrors.some(
+        (errorType) =>
+          error.name.includes(errorType) || error.message.includes(errorType),
       );
     },
   });

@@ -52,16 +52,16 @@ export interface AdvancedExchangeConfig {
   durable?: boolean;
   autoDelete?: boolean;
   arguments?: Record<string, unknown>;
-  
+
   /** Exchange bindings to other exchanges */
   bindings?: ExchangeBinding[];
-  
+
   /** Queues to bind to this exchange */
   queueBindings?: QueueBinding[];
-  
+
   /** Dead letter configuration */
   deadLetter?: DeadLetterConfig;
-  
+
   /** Whether to create the exchange if it doesn't exist */
   assertExchange?: boolean;
 }
@@ -76,32 +76,32 @@ export interface AdvancedQueueConfig {
   exclusive?: boolean;
   autoDelete?: boolean;
   arguments?: Record<string, unknown>;
-  
+
   /** Bindings to exchanges */
   bindings?: Array<{
     exchange: string;
     routingKey?: string;
     arguments?: Record<string, unknown>;
   }>;
-  
+
   /** Dead letter configuration */
   deadLetter?: DeadLetterConfig;
-  
+
   /** Maximum number of messages in the queue */
   maxLength?: number;
-  
+
   /** Maximum size of the queue in bytes */
   maxLengthBytes?: number;
-  
+
   /** Message TTL in milliseconds */
   messageTtl?: number;
-  
+
   /** Queue TTL in milliseconds */
   queueTtl?: number;
-  
+
   /** Maximum priority for messages */
   maxPriority?: number;
-  
+
   /** Whether to create the queue if it doesn't exist */
   assertQueue?: boolean;
 }
@@ -112,16 +112,16 @@ export interface AdvancedQueueConfig {
 export interface TopologyConfig {
   /** Exchanges to create and configure */
   exchanges?: AdvancedExchangeConfig[];
-  
+
   /** Queues to create and configure */
   queues?: AdvancedQueueConfig[];
-  
+
   /** Additional bindings to create */
   bindings?: Array<QueueBinding | ExchangeBinding>;
-  
+
   /** Whether to setup topology on module initialization */
   autoSetup?: boolean;
-  
+
   /** Whether to delete topology on module destruction */
   autoCleanup?: boolean;
 }

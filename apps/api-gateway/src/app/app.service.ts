@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ROUTING_KEY_TO_SERVICE } from '@usecapsule/messaging';
 import { ExchangePublisherService } from '@usecapsule/rabbitmq';
-import type { AggregatedHealthResponse, HealthCheckResponse } from '@usecapsule/types';
+import type {
+  AggregatedHealthResponse,
+  HealthCheckResponse,
+} from '@usecapsule/types';
 import { HealthStatus } from '@usecapsule/types';
 
 @Injectable()
 export class AppService {
-  constructor(
-    private readonly exchangePublisher: ExchangePublisherService,
-  ) {}
+  constructor(private readonly exchangePublisher: ExchangePublisherService) {}
 
   /**
    * Checks the health of all microservices by sending RabbitMQ health check messages.

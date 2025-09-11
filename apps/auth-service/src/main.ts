@@ -22,13 +22,13 @@
  * ```
  */
 
-import { INestMicroservice, Logger } from '@nestjs/common'
+import { INestMicroservice, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core'
-import { MicroserviceOptions, Transport } from '@nestjs/microservices'
+import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 import type { AuthServiceSchema } from '@usecapsule/parameters';
-import { AppModule } from './app/app.module'
+import { AppModule } from './app/app.module';
 
 /**
  * Bootstrap function for the Auth Service microservice.

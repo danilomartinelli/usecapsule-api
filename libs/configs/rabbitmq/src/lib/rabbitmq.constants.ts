@@ -27,7 +27,9 @@ export const RABBITMQ_PUBLISHER = Symbol('RABBITMQ_PUBLISHER') as symbol;
  * Injection token for the exchange manager service.
  * Used to inject the exchange management service into other services.
  */
-export const RABBITMQ_EXCHANGE_MANAGER = Symbol('RABBITMQ_EXCHANGE_MANAGER') as symbol;
+export const RABBITMQ_EXCHANGE_MANAGER = Symbol(
+  'RABBITMQ_EXCHANGE_MANAGER',
+) as symbol;
 
 /**
  * Default retry configuration for message processing.

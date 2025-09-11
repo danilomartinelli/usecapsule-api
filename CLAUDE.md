@@ -307,15 +307,20 @@ Specialized health checking with routing key targeting:
 export class RabbitMQService {
   async sendHealthCheck(routingKey: string): Promise<HealthCheckResponse> {
     // Routes to specific service queue via exchange binding
-    return this.client.send('health.check', { routingKey }).pipe(
-      timeout(5000),
-      retry(1),
-      catchError(() => of({
-        status: HealthStatus.UNHEALTHY,
-        service: routingKey.split('.')[0],
-        timestamp: new Date().toISOString(),
-      }))
-    ).toPromise();
+    return this.client
+      .send('health.check', { routingKey })
+      .pipe(
+        timeout(5000),
+        retry(1),
+        catchError(() =>
+          of({
+            status: HealthStatus.UNHEALTHY,
+            service: routingKey.split('.')[0],
+            timestamp: new Date().toISOString(),
+          }),
+        ),
+      )
+      .toPromise();
   }
 }
 ```
@@ -510,29 +515,32 @@ docker exec rabbitmq_dev rabbitmqctl list_queues name messages_ready messages_un
 #### Common RabbitMQ Troubleshooting
 
 1. **Messages Not Being Consumed**
+
    ```bash
    # Check if service is connected to queue
    docker logs auth_service_container
-   
+
    # Verify queue bindings
    # Management UI -> Exchanges -> capsule.commands -> Bindings
    ```
 
 2. **Health Checks Failing**
+
    ```bash
    # Test health check routing
    curl -X GET http://localhost:3000/health
-   
+
    # Check specific service health
    # Management UI -> Queues -> auth_queue -> Publish Message
    # Pattern: health.check, Payload: {"routingKey": "auth.health"}
    ```
 
 3. **Dead Letter Queue Messages**
+
    ```bash
    # Inspect failed messages
    # Management UI -> Queues -> dlq -> Get Messages
-   
+
    # Check DLQ policy application
    docker exec rabbitmq_dev rabbitmqctl list_policies
    ```
@@ -552,7 +560,7 @@ docker exec rabbitmq_dev rabbitmqctl list_queues name messages_ready messages_un
 # Payload: {"email": "test@example.com", "password": "password"}
 
 # Test event publishing
-# Management UI -> Exchanges -> capsule.events -> Publish Message  
+# Management UI -> Exchanges -> capsule.events -> Publish Message
 # Routing Key: user.created
 # Payload: {"userId": "123", "email": "test@example.com"}
 
@@ -567,11 +575,13 @@ docker exec rabbitmq_dev rabbitmqctl list_queues name messages_ready messages_un
 When adding a new bounded context:
 
 1. **Generate Service Structure**
+
    ```bash
    nx g @nx/nest:app [service-name]
    ```
 
 2. **Configure RabbitMQ Microservice Bootstrap**
+
    ```typescript
    // apps/[service-name]/src/main.ts
    const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -588,6 +598,7 @@ When adding a new bounded context:
    ```
 
 3. **Add Message Handlers**
+
    ```typescript
    // Service controller
    @Controller()
@@ -605,6 +616,7 @@ When adding a new bounded context:
    ```
 
 4. **Update RabbitMQ Infrastructure**
+
    ```json
    // devtools/infra/rabbitmq/definitions.json
    {
@@ -629,6 +641,7 @@ When adding a new bounded context:
    ```
 
 5. **Add Database Configuration**
+
    ```yaml
    # compose.yml
    [service-name]-db:

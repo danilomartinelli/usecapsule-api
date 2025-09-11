@@ -1,32 +1,47 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { Observable, firstValueFrom, timeout, retry, catchError, throwError } from 'rxjs';
+import {
+  Observable,
+  firstValueFrom,
+  timeout,
+  retry,
+  catchError,
+  throwError,
+} from 'rxjs';
 
-import { RABBITMQ_CLIENT, RABBITMQ_OPTIONS, DEFAULT_RETRY_CONFIG } from '../rabbitmq.constants';
-import type { RabbitMQModuleOptions, PublishOptions, RetryPolicy } from '../interfaces';
+import {
+  RABBITMQ_CLIENT,
+  RABBITMQ_OPTIONS,
+  DEFAULT_RETRY_CONFIG,
+} from '../rabbitmq.constants';
+import type {
+  RabbitMQModuleOptions,
+  PublishOptions,
+  RetryPolicy,
+} from '../interfaces';
 
 /**
  * Message publisher service for advanced publishing operations.
- * 
+ *
  * This service provides:
  * - Advanced message publishing with custom options
  * - Batch message publishing
  * - Priority message handling
  * - Delayed message publishing
  * - Message routing and filtering
- * 
+ *
  * @example
  * ```typescript
  * // Inject the service
  * constructor(private readonly publisher: MessagePublisherService) {}
- * 
+ *
  * // Publish with custom options
  * await this.publisher.publish('user.notification', data, {
  *   priority: 10,
  *   persistent: true,
  *   expiration: 60000,
  * });
- * 
+ *
  * // Batch publish
  * await this.publisher.publishBatch([
  *   { pattern: 'user.create', data: user1 },
@@ -47,7 +62,7 @@ export class MessagePublisherService {
 
   /**
    * Publishes a message with advanced options.
-   * 
+   *
    * @param pattern - Message pattern or routing key
    * @param data - Message payload
    * @param options - Publishing options
@@ -60,16 +75,17 @@ export class MessagePublisherService {
   ): Promise<void> {
     try {
       const publishOptions = this.buildPublishOptions(options);
-      
-      this.logger.debug(
-        `Publishing message to pattern: ${pattern}`,
-        { options: publishOptions },
-      );
+
+      this.logger.debug(`Publishing message to pattern: ${pattern}`, {
+        options: publishOptions,
+      });
 
       // Use emit for fire-and-forget publishing
       this.client.emit(pattern, data);
-      
-      this.logger.debug(`Message published successfully to pattern: ${pattern}`);
+
+      this.logger.debug(
+        `Message published successfully to pattern: ${pattern}`,
+      );
     } catch (error) {
       this.logger.error(
         `Failed to publish message to pattern ${pattern}:`,
@@ -81,7 +97,7 @@ export class MessagePublisherService {
 
   /**
    * Publishes a message and waits for acknowledgment.
-   * 
+   *
    * @param pattern - Message pattern or routing key
    * @param data - Message payload
    * @param options - Publishing options
@@ -94,12 +110,12 @@ export class MessagePublisherService {
   ): Promise<TResult> {
     try {
       const publishOptions = this.buildPublishOptions(options);
-      const retryPolicy = this.options.globalRetryPolicy || DEFAULT_RETRY_CONFIG;
-      
-      this.logger.debug(
-        `Publishing message with wait to pattern: ${pattern}`,
-        { options: publishOptions },
-      );
+      const retryPolicy =
+        this.options.globalRetryPolicy || DEFAULT_RETRY_CONFIG;
+
+      this.logger.debug(`Publishing message with wait to pattern: ${pattern}`, {
+        options: publishOptions,
+      });
 
       const response$ = this.client.send<TResult, TInput>(pattern, data).pipe(
         timeout(options?.timeout || 30000),
@@ -127,7 +143,7 @@ export class MessagePublisherService {
 
   /**
    * Publishes multiple messages in a batch.
-   * 
+   *
    * @template T - Type of the message data
    * @param messages - Array of messages to publish
    * @param options - Global options for all messages
@@ -144,12 +160,15 @@ export class MessagePublisherService {
     try {
       this.logger.debug(`Publishing batch of ${messages.length} messages`);
 
-      const publishPromises = messages.map(({ pattern, data, options: msgOptions }) =>
-        this.publish(pattern, data, { ...options, ...msgOptions }),
+      const publishPromises = messages.map(
+        ({ pattern, data, options: msgOptions }) =>
+          this.publish(pattern, data, { ...options, ...msgOptions }),
       );
 
       await Promise.all(publishPromises);
-      this.logger.debug(`Successfully published batch of ${messages.length} messages`);
+      this.logger.debug(
+        `Successfully published batch of ${messages.length} messages`,
+      );
     } catch (error) {
       this.logger.error(
         'Failed to publish message batch:',
@@ -161,7 +180,7 @@ export class MessagePublisherService {
 
   /**
    * Publishes a priority message.
-   * 
+   *
    * @template T - Type of the message payload
    * @param pattern - Message pattern or routing key
    * @param data - Message payload
@@ -180,7 +199,7 @@ export class MessagePublisherService {
 
   /**
    * Publishes a message with expiration.
-   * 
+   *
    * @template T - Type of the message payload
    * @param pattern - Message pattern or routing key
    * @param data - Message payload
@@ -199,7 +218,7 @@ export class MessagePublisherService {
 
   /**
    * Publishes a message as a stream and returns an Observable.
-   * 
+   *
    * @param pattern - Message pattern or routing key
    * @param data - Message payload
    * @param options - Publishing options
@@ -212,11 +231,10 @@ export class MessagePublisherService {
   ): Observable<TResult> {
     try {
       const publishOptions = this.buildPublishOptions(options);
-      
-      this.logger.debug(
-        `Publishing stream message to pattern: ${pattern}`,
-        { options: publishOptions },
-      );
+
+      this.logger.debug(`Publishing stream message to pattern: ${pattern}`, {
+        options: publishOptions,
+      });
 
       return this.client.send<TResult, TInput>(pattern, data).pipe(
         timeout(options?.timeout || 30000),
@@ -239,7 +257,7 @@ export class MessagePublisherService {
 
   /**
    * Builds publish options with defaults.
-   * 
+   *
    * @param options - User provided options
    * @returns Complete publish options
    */
@@ -253,7 +271,7 @@ export class MessagePublisherService {
 
   /**
    * Gets publisher statistics and information.
-   * 
+   *
    * @returns Publisher information
    */
   getPublisherInfo(): {

@@ -176,7 +176,10 @@ export class RabbitMQService implements OnModuleDestroy {
           timeout(5000),
           retry(1), // Single retry
           catchError((error) => {
-            this.logger.warn(`Health check failed for ${routingKey}:`, error.message);
+            this.logger.warn(
+              `Health check failed for ${routingKey}:`,
+              error.message,
+            );
             return throwError(() => error);
           }),
         );
@@ -186,7 +189,7 @@ export class RabbitMQService implements OnModuleDestroy {
       return response;
     } catch (error) {
       this.logger.warn(`Health check failed for ${routingKey}:`, error);
-      
+
       // Return unhealthy status instead of throwing
       return {
         status: HealthStatus.UNHEALTHY,
@@ -208,7 +211,9 @@ export class RabbitMQService implements OnModuleDestroy {
    * @deprecated Use sendHealthCheck with routing key instead
    */
   async isHealthy(queue?: string): Promise<HealthCheckResponse> {
-    const routingKey = queue ? `${queue.replace('_queue', '')}.health` : 'health.check';
+    const routingKey = queue
+      ? `${queue.replace('_queue', '')}.health`
+      : 'health.check';
     return this.sendHealthCheck(routingKey);
   }
 
