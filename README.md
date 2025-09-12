@@ -62,7 +62,7 @@ Your Capsule platform is now running! Access it at:
 
 - **API Gateway**: <http://localhost:3000>
 - **API Documentation**: <http://localhost:3000/api/documentation>
-- **RabbitMQ Management**: <http://localhost:15672> (admin/admin)
+- **RabbitMQ Management**: <http://localhost:7020> (usecapsule/usecapsule_dev_password)
 
 ### Verifying Your Setup
 
@@ -316,7 +316,7 @@ Our GitHub Actions pipeline ensures code quality and automates deployments:
 docker logs -f capsule-auth-service
 
 # Access RabbitMQ Management UI
-open http://localhost:15672
+open http://localhost:7020
 
 # Monitor database queries
 docker exec capsule-auth-db psql -U auth_user -c "SELECT * FROM pg_stat_activity;"
@@ -421,10 +421,10 @@ docker logs capsule-auth-db
 
 ```bash
 # Check RabbitMQ is healthy
-curl -u admin:admin http://localhost:15672/api/overview
+curl -u usecapsule:usecapsule_dev_password http://localhost:7020/api/overview
 
 # Reset RabbitMQ
-docker restart capsule-rabbitmq
+docker restart rabbitmq_dev
 ```
 
 - **TypeScript/Build errors**
