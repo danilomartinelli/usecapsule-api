@@ -1,5 +1,5 @@
 import { Connection, Channel, connect, Message } from 'amqplib';
-import { v4 as uuidv4 } from 'uuid';
+import * as uuid from 'uuid';
 
 export interface TestExchange {
   name: string;
@@ -174,7 +174,7 @@ export class RabbitMQTestClient {
 
     return this.channel.publish(exchangeName, routingKey, messageContent, {
       timestamp: Date.now(),
-      messageId: uuidv4(),
+      messageId: uuid.v4(),
       ...options,
     });
   }
@@ -190,7 +190,7 @@ export class RabbitMQTestClient {
     }
 
     return new Promise(async (resolve, reject) => {
-      const correlationId = uuidv4();
+      const correlationId = uuid.v4();
       const exchangeName = this.getTestName(exchange);
 
       // Create temporary queue for response
@@ -227,7 +227,7 @@ export class RabbitMQTestClient {
         correlationId,
         replyTo: replyQueue.queue,
         timestamp: Date.now(),
-        messageId: uuidv4(),
+        messageId: uuid.v4(),
       });
     });
   }

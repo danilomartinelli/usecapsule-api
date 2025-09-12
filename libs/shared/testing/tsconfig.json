@@ -4,6 +4,12 @@
   "include": [],
   "references": [
     {
+      "path": "../../configs/rabbitmq"
+    },
+    {
+      "path": "../types"
+    },
+    {
       "path": "./tsconfig.lib.json"
     },
     {

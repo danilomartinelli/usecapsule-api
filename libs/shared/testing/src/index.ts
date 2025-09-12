@@ -12,6 +12,9 @@ export * from './lib/nestjs/testing-module-builder';
 // Health Testing
 export * from './lib/health/health-test-helpers';
 
+// Custom Jest Matchers
+export * from './lib/matchers/health-response.matcher';
+
 // Fixtures
 export * from './lib/fixtures/message-fixtures';
 export * from './lib/fixtures/http-fixtures';

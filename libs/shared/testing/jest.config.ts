@@ -2,6 +2,8 @@
 export default {
   displayName: '@usecapsule/testing',
   preset: '../../../jest.preset.js',
+  setupFiles: ['<rootDir>/../../../test/setup-reflect-metadata.js'],
+  setupFilesAfterEnv: ['<rootDir>/../../../test/setup-jest-matchers.ts'],
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': [

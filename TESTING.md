@@ -35,9 +35,10 @@ Our testing strategy follows the testing pyramid with four main layers:
 ### Architecture Under Test
 
 The platform consists of:
+
 - **API Gateway**: HTTP entry point (port 3000)
 - **Auth Service**: Authentication bounded context
-- **Billing Service**: Billing and subscription management  
+- **Billing Service**: Billing and subscription management
 - **Deploy Service**: Deployment orchestration
 - **Monitor Service**: Metrics and observability
 - **RabbitMQ**: Message broker for inter-service communication
@@ -53,6 +54,7 @@ Test individual components, services, and controllers in isolation.
 **Coverage Target**: 80%+
 
 **What we test**:
+
 - Business logic in services
 - HTTP controllers
 - Message handlers
@@ -68,6 +70,7 @@ Test interactions between components within a service or with external systems.
 **Coverage Target**: Key integration points
 
 **What we test**:
+
 - RabbitMQ message routing
 - Database operations
 - Health check flows
@@ -82,6 +85,7 @@ Test complete user workflows across the entire system.
 **Coverage Target**: Critical user journeys
 
 **What we test**:
+
 - Complete health check workflow
 - API Gateway to microservices communication
 - Error handling and recovery
@@ -96,6 +100,7 @@ Test system performance under various load conditions.
 **Coverage Target**: SLA compliance
 
 **What we test**:
+
 - Load testing (normal operations)
 - Spike testing (sudden load increases)
 - Soak testing (extended duration)
@@ -225,6 +230,7 @@ npm test
 We use k6 for performance testing with three main scenarios:
 
 #### 1. Load Testing
+
 Tests normal operational load with gradual ramp-up.
 
 ```bash
@@ -234,11 +240,13 @@ k6 run test/performance/health-check-load.js
 ```
 
 **Thresholds**:
+
 - Failure rate < 5%
 - Average response time < 2000ms
 - 95th percentile < 5000ms
 
 #### 2. Spike Testing
+
 Tests system behavior under sudden load spikes.
 
 ```bash
@@ -248,11 +256,13 @@ k6 run test/performance/health-check-spike.js
 ```
 
 **Thresholds**:
+
 - Total failures < 50 requests
 - 90th percentile < 8000ms
 - HTTP error rate < 20%
 
 #### 3. Soak Testing
+
 Extended duration testing to detect memory leaks and degradation.
 
 ```bash
@@ -262,6 +272,7 @@ k6 run test/performance/health-check-soak.js
 ```
 
 **Thresholds**:
+
 - Average response time < 1500ms
 - System degradation rate < 10%
 - Response size stability (no memory leaks)
@@ -284,7 +295,9 @@ BASE_URL=https://staging.example.com npm run test:performance
 ### GitHub Actions Workflows
 
 #### 1. Test Suite (`test.yml`)
+
 Runs on every push and PR:
+
 - Unit tests
 - Integration tests (with real RabbitMQ/PostgreSQL)
 - E2E tests
@@ -292,7 +305,9 @@ Runs on every push and PR:
 - Lint and format checking
 
 #### 2. Performance Tests (`performance.yml`)
+
 Runs weekly and on-demand:
+
 - Complete performance test suite
 - Benchmark comparison
 - Performance regression detection
@@ -336,13 +351,13 @@ describe('AppService', () => {
     const module = await Test.createTestingModule({
       providers: [AppService],
     }).compile();
-    
+
     service = module.get<AppService>(AppService);
   });
 
   it('should return healthy status', () => {
     const result = service.getHealthStatus();
-    
+
     expect(result).toHaveValidHealthResponse();
     expect(result).toBeHealthy();
   });
@@ -362,7 +377,7 @@ describe('RabbitMQ Health Integration', () => {
   beforeAll(async () => {
     container = new RabbitMQTestContainer();
     await container.start();
-    
+
     client = new RabbitMQTestClient({
       connectionUri: container.getConnectionUri(),
     });
@@ -380,7 +395,7 @@ describe('RabbitMQ Health Integration', () => {
       'auth.health',
       {}
     );
-    
+
     expect(response).toHaveValidHealthResponse();
   });
 });
@@ -443,7 +458,7 @@ export const options = {
 
 export default function () {
   const response = http.get('http://localhost:3000/health');
-  
+
   check(response, {
     'status is 200': (r) => r.status === 200,
     'response time < 2s': (r) => r.timings.duration < 2000,
@@ -502,33 +517,39 @@ const connectionUri = postgres.getConnectionUri();
 ### Common Issues
 
 #### 1. TestContainers Timeout
+
 ```
 Error: Container startup timeout
 ```
 
 **Solution**: Increase timeout or check Docker daemon
+
 ```typescript
 const container = new RabbitMQTestContainer();
 await container.start(); // Has built-in 60s timeout
 ```
 
 #### 2. Port Conflicts
+
 ```
 Error: Port 5672 already in use
 ```
 
 **Solution**: Stop existing containers or use different ports
+
 ```bash
 docker ps
 docker stop $(docker ps -q)
 ```
 
 #### 3. Jest Open Handles
+
 ```
 Jest has detected open handles
 ```
 
 **Solution**: Ensure proper cleanup
+
 ```typescript
 afterAll(async () => {
   await testEnvironment.cleanup();
@@ -536,11 +557,13 @@ afterAll(async () => {
 ```
 
 #### 4. RabbitMQ Connection Issues
+
 ```
 Error: AMQP connection failed
 ```
 
 **Solution**: Wait for container readiness
+
 ```typescript
 await new Promise(resolve => setTimeout(resolve, 2000));
 ```
@@ -583,26 +606,31 @@ GITHUB_ACTIONS=true
 ## Best Practices
 
 ### 1. Test Organization
+
 - Group related tests in `describe` blocks
 - Use descriptive test names
 - Follow AAA pattern (Arrange, Act, Assert)
 
 ### 2. Test Isolation
+
 - Each test should be independent
 - Use proper setup/teardown
 - Avoid shared state between tests
 
 ### 3. Mock Strategy
+
 - Mock external dependencies
 - Use real implementations for integration tests
 - Provide meaningful mock data
 
 ### 4. Performance Considerations
+
 - Parallel test execution where possible
 - Optimize TestContainer startup
 - Use appropriate timeouts
 
 ### 5. Maintenance
+
 - Regular test review and cleanup
 - Update dependencies regularly
 - Monitor test execution times
@@ -610,12 +638,14 @@ GITHUB_ACTIONS=true
 ## Metrics and Reporting
 
 ### Test Metrics
+
 - **Test Coverage**: Line, branch, function coverage
 - **Test Duration**: Per suite and overall execution time
 - **Test Reliability**: Pass/fail rates, flaky test detection
 - **Performance Metrics**: Response times, throughput, error rates
 
 ### Reporting
+
 - **Coverage Reports**: HTML and LCOV formats
 - **Performance Reports**: k6 HTML and JSON outputs
 - **CI Reports**: GitHub Actions summaries and artifacts
