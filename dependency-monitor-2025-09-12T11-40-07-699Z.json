@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-12T11:40:47.652Z",
+  "timestamp": "2025-09-12T11:40:03.990Z",
   "security": {
     "vulnerabilities": {},
     "metadata": {
@@ -13,11 +13,11 @@
       },
       "dependencies": {
         "prod": 465,
-        "dev": 1073,
-        "optional": 123,
+        "dev": 1051,
+        "optional": 102,
         "peer": 0,
         "peerOptional": 0,
-        "total": 1543
+        "total": 1521
       }
     },
     "advisories": {},
@@ -93,6 +93,20 @@
       "latest": "0.205.0",
       "dependent": "monitor-service",
       "location": "/Users/danilomartinelli/Code/usecapsule-api/node_modules/@opentelemetry/sdk-node"
+    },
+    "@swc-node/register": {
+      "current": "1.9.2",
+      "wanted": "1.9.2",
+      "latest": "1.11.1",
+      "dependent": "usecapsule-api",
+      "location": "/Users/danilomartinelli/Code/usecapsule-api/node_modules/@swc-node/register"
+    },
+    "@swc/core": {
+      "current": "1.5.29",
+      "wanted": "1.5.29",
+      "latest": "1.13.5",
+      "dependent": "usecapsule-api",
+      "location": "/Users/danilomartinelli/Code/usecapsule-api/node_modules/@swc/core"
     },
     "@types/node": {
       "current": "22.18.1",
@@ -181,7 +195,7 @@
     {
       "priority": "LOW",
       "type": "minor-update",
-      "message": "2 packages have minor version updates available",
+      "message": "4 packages have minor version updates available",
       "action": "Safe to update in next maintenance window",
       "packages": [
         {
@@ -195,6 +209,18 @@
           "current": "0.204.0",
           "latest": "0.205.0",
           "wanted": "0.204.0"
+        },
+        {
+          "name": "@swc-node/register",
+          "current": "1.9.2",
+          "latest": "1.11.1",
+          "wanted": "1.9.2"
+        },
+        {
+          "name": "@swc/core",
+          "current": "1.5.29",
+          "latest": "1.13.5",
+          "wanted": "1.5.29"
         }
       ]
     },
@@ -266,7 +292,7 @@
   ],
   "summary": {
     "totalDependencies": 47,
-    "outdatedCount": 15,
+    "outdatedCount": 17,
     "vulnerabilities": 0,
     "healthScore": 100
   }

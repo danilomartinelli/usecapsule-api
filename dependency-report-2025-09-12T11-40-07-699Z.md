@@ -1,6 +1,6 @@
 # Dependency Monitoring Report
 
-**Generated**: 2025-09-12T11:40:47.652Z  
+**Generated**: 2025-09-12T11:40:03.990Z  
 **Health Score**: 100/100 🟢
 
 ## Summary
@@ -8,7 +8,7 @@
 | Metric | Count | Status |
 |--------|-------|--------|
 | Total Dependencies | 47 | ℹ️ |
-| Outdated Packages | 15 | ⚠️ |
+| Outdated Packages | 17 | ⚠️ |
 | Security Vulnerabilities | 0 | ✅ |
 | Health Issues | 0 | ✅ |
 
@@ -21,7 +21,7 @@
 
 **Update Categories**:
 - Major Updates: 3 packages
-- Minor Updates: 2 packages  
+- Minor Updates: 4 packages  
 - Patch Updates: 10 packages
 
 **Top Priority Updates**:
@@ -42,9 +42,9 @@
 **Affected**: @types/node, dotenv, webpack-cli
 
 
-### LOW: 2 packages have minor version updates available
+### LOW: 4 packages have minor version updates available
 **Action**: Safe to update in next maintenance window
-**Affected**: @opentelemetry/auto-instrumentations-node, @opentelemetry/sdk-node
+**Affected**: @opentelemetry/auto-instrumentations-node, @opentelemetry/sdk-node, @swc-node/register
 
 
 ### LOW: 10 packages have patch updates available
