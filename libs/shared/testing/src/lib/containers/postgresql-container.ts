@@ -36,13 +36,13 @@ export class PostgreSQLTestContainer {
       })
       .withExposedPorts(this.config.port)
       .withWaitStrategy(
-        Wait.forLogMessage('database system is ready to accept connections')
+        Wait.forLogMessage('database system is ready to accept connections'),
       )
       .withStartupTimeout(30000)
       .start();
 
     // Wait a bit more for PostgreSQL to be fully ready
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     return this.container;
   }

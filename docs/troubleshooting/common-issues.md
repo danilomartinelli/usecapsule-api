@@ -141,7 +141,7 @@ const RABBITMQ_URL = 'amqp://usecapsule:usecapsule_dev_password@localhost:7010';
 RabbitMQModule.forMicroservice({
   uri: process.env.RABBITMQ_URL || RABBITMQ_URL,
   serviceName: 'auth-service',
-})
+});
 ```
 
 3. **Reset RabbitMQ State**:

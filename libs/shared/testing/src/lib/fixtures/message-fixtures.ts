@@ -160,11 +160,17 @@ export class MessageFixtureFactory {
     };
   }
 
-  static createBatchMessages(count: number, factory: () => MessageFixture): MessageFixture[] {
+  static createBatchMessages(
+    count: number,
+    factory: () => MessageFixture,
+  ): MessageFixture[] {
     return Array.from({ length: count }, () => factory());
   }
 
-  static createDelayedMessage(baseMessage: MessageFixture, delayMs: number): MessageFixture {
+  static createDelayedMessage(
+    baseMessage: MessageFixture,
+    delayMs: number,
+  ): MessageFixture {
     return {
       ...baseMessage,
       id: uuidv4(),
@@ -172,7 +178,10 @@ export class MessageFixtureFactory {
     };
   }
 
-  static withCorrelationId(message: MessageFixture, correlationId?: string): MessageFixture {
+  static withCorrelationId(
+    message: MessageFixture,
+    correlationId?: string,
+  ): MessageFixture {
     return {
       ...message,
       correlationId: correlationId || uuidv4(),

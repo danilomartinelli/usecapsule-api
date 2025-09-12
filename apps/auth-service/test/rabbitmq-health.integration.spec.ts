@@ -32,14 +32,15 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
   describe('Health Check RPC Handler', () => {
     it('should respond to auth.health routing key', async () => {
       // Arrange
-      const healthMessage = MessageFixtureFactory.createHealthCheckMessage('auth');
+      const healthMessage =
+        MessageFixtureFactory.createHealthCheckMessage('auth');
 
       // Act
       const response: HealthCheckResponse = await rabbitMQClient.sendRPCMessage(
         'capsule.commands',
         'auth.health',
         {},
-        5000
+        5000,
       );
 
       // Assert
@@ -58,7 +59,7 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
         'capsule.commands',
         'auth.health',
         {},
-        1000
+        1000,
       );
 
       const responseTime = Date.now() - startTime;
@@ -72,7 +73,12 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
       // Arrange
       const concurrentRequests = 10;
       const promises = Array.from({ length: concurrentRequests }, () =>
-        rabbitMQClient.sendRPCMessage('capsule.commands', 'auth.health', {}, 5000)
+        rabbitMQClient.sendRPCMessage(
+          'capsule.commands',
+          'auth.health',
+          {},
+          5000,
+        ),
       );
 
       // Act
@@ -89,9 +95,24 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
     it('should provide consistent response structure', async () => {
       // Act
       const responses = await Promise.all([
-        rabbitMQClient.sendRPCMessage('capsule.commands', 'auth.health', {}, 5000),
-        rabbitMQClient.sendRPCMessage('capsule.commands', 'auth.health', {}, 5000),
-        rabbitMQClient.sendRPCMessage('capsule.commands', 'auth.health', {}, 5000),
+        rabbitMQClient.sendRPCMessage(
+          'capsule.commands',
+          'auth.health',
+          {},
+          5000,
+        ),
+        rabbitMQClient.sendRPCMessage(
+          'capsule.commands',
+          'auth.health',
+          {},
+          5000,
+        ),
+        rabbitMQClient.sendRPCMessage(
+          'capsule.commands',
+          'auth.health',
+          {},
+          5000,
+        ),
       ]);
 
       // Assert
@@ -109,13 +130,13 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
         'capsule.commands',
         'auth.health',
         {},
-        5000
+        5000,
       );
 
       // Assert
       expect(response.metadata).toBeDefined();
       expect(typeof response.metadata).toBe('object');
-      
+
       // Service should include any relevant health metadata
       // This could include version, uptime, connections, etc.
     });
@@ -126,7 +147,7 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
         'capsule.commands',
         'auth.health',
         {},
-        5000
+        5000,
       );
 
       // Assert
@@ -139,7 +160,7 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
         'capsule.commands',
         'auth.health',
         null,
-        5000
+        5000,
       );
 
       // Assert
@@ -155,13 +176,13 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
           'capsule.commands',
           'auth.health',
           {},
-          5000
+          5000,
         );
-        
+
         expect(response).toHaveValidHealthResponse();
-        
+
         // Wait between requests
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     });
 
@@ -170,14 +191,19 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
       const captureKey = await rabbitMQClient.captureMessages('health_queue');
 
       // Act - Send health check
-      await rabbitMQClient.sendRPCMessage('capsule.commands', 'auth.health', {}, 5000);
+      await rabbitMQClient.sendRPCMessage(
+        'capsule.commands',
+        'auth.health',
+        {},
+        5000,
+      );
 
       // Small delay to allow message processing
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Assert - Verify message routing
       const capturedMessages = rabbitMQClient.getCapturedMessages(captureKey);
-      
+
       // The health check should not interfere with other message flows
       expect(capturedMessages).toBeDefined();
     });
@@ -187,7 +213,12 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
     it('should timeout appropriately when no response handler', async () => {
       // Act & Assert - Try to send to non-existent routing key
       await expect(
-        rabbitMQClient.sendRPCMessage('capsule.commands', 'nonexistent.health', {}, 1000)
+        rabbitMQClient.sendRPCMessage(
+          'capsule.commands',
+          'nonexistent.health',
+          {},
+          1000,
+        ),
       ).rejects.toThrow(/timeout/i);
     });
 
@@ -198,7 +229,7 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
         'capsule.commands',
         'auth.health',
         { malformedData: 'test' },
-        5000
+        5000,
       );
 
       expect(response).toHaveValidHealthResponse();
@@ -209,26 +240,27 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
     it('should meet response time SLA', async () => {
       // Measure response times over multiple requests
       const responseTimesMs: number[] = [];
-      
+
       for (let i = 0; i < 10; i++) {
         const start = Date.now();
-        
+
         await rabbitMQClient.sendRPCMessage(
           'capsule.commands',
           'auth.health',
           {},
-          5000
+          5000,
         );
-        
+
         responseTimesMs.push(Date.now() - start);
       }
 
       // Assert SLA requirements
-      const averageResponseTime = responseTimesMs.reduce((a, b) => a + b, 0) / responseTimesMs.length;
+      const averageResponseTime =
+        responseTimesMs.reduce((a, b) => a + b, 0) / responseTimesMs.length;
       const maxResponseTime = Math.max(...responseTimesMs);
 
       expect(averageResponseTime).toBeLessThan(100); // Average under 100ms
-      expect(maxResponseTime).toBeLessThan(500);     // Max under 500ms
+      expect(maxResponseTime).toBeLessThan(500); // Max under 500ms
     });
 
     it('should handle burst load appropriately', async () => {
@@ -237,7 +269,12 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
       const startTime = Date.now();
 
       const promises = Array.from({ length: burstSize }, () =>
-        rabbitMQClient.sendRPCMessage('capsule.commands', 'auth.health', {}, 5000)
+        rabbitMQClient.sendRPCMessage(
+          'capsule.commands',
+          'auth.health',
+          {},
+          5000,
+        ),
       );
 
       // Act
@@ -247,7 +284,7 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
       // Assert
       expect(responses).toHaveLength(burstSize);
       expect(totalTime).toBeLessThan(5000); // All requests complete within 5 seconds
-      
+
       for (const response of responses) {
         expect(response).toHaveValidHealthResponse();
       }

@@ -33,11 +33,13 @@ describe('Health Check E2E Workflow', () => {
         { name: 'capsule.commands', type: 'direct' },
         { name: 'capsule.events', type: 'topic' },
       ],
-      queues: [
-        { name: 'health_responses', options: { durable: false } },
-      ],
+      queues: [{ name: 'health_responses', options: { durable: false } }],
       bindings: [
-        { exchange: 'capsule.commands', queue: 'health_responses', routingKey: '*.health' },
+        {
+          exchange: 'capsule.commands',
+          queue: 'health_responses',
+          routingKey: '*.health',
+        },
       ],
     });
 
@@ -52,7 +54,7 @@ describe('Health Check E2E Workflow', () => {
     await app.init();
 
     // Give services time to initialize
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   afterAll(async () => {
@@ -74,15 +76,22 @@ describe('Health Check E2E Workflow', () => {
 
       // Assert HTTP Response Structure
       expect(response.body).toHaveValidAggregatedHealthResponse();
-      
+
       const healthResponse: AggregatedHealthResponse = response.body;
       HealthTestHelper.validateHealthEndpointResponse(healthResponse);
 
       // Verify all expected services are present
-      const expectedServices = ['auth-service', 'billing-service', 'deploy-service', 'monitor-service'];
+      const expectedServices = [
+        'auth-service',
+        'billing-service',
+        'deploy-service',
+        'monitor-service',
+      ];
       for (const serviceName of expectedServices) {
         expect(healthResponse.services).toHaveProperty(serviceName);
-        expect(healthResponse.services[serviceName]).toHaveValidHealthResponse();
+        expect(
+          healthResponse.services[serviceName],
+        ).toHaveValidHealthResponse();
       }
 
       // Verify timestamps are recent and valid
@@ -94,7 +103,8 @@ describe('Health Check E2E Workflow', () => {
 
     it('should handle the complete workflow when services are available', async () => {
       // Setup - Capture RabbitMQ health check messages
-      const captureKey = await rabbitMQClient.captureMessages('health_responses');
+      const captureKey =
+        await rabbitMQClient.captureMessages('health_responses');
 
       // Act - Make health check request
       const startTime = Date.now();
@@ -111,15 +121,25 @@ describe('Health Check E2E Workflow', () => {
       expect(healthResponse).toHaveValidAggregatedHealthResponse();
 
       // Verify each service response has expected structure
-      for (const [serviceName, serviceHealth] of Object.entries(healthResponse.services)) {
+      for (const [serviceName, serviceHealth] of Object.entries(
+        healthResponse.services,
+      )) {
         expect(serviceHealth).toHaveValidHealthResponse();
         expect(serviceHealth.service).toBe(serviceName);
-        
+
         // Check if service responded or timed out
-        if (serviceHealth.status === HealthStatus.UNHEALTHY && serviceHealth.metadata?.error) {
-          expect(serviceHealth.metadata.error).toMatch(/(timeout|unreachable)/i);
+        if (
+          serviceHealth.status === HealthStatus.UNHEALTHY &&
+          serviceHealth.metadata?.error
+        ) {
+          expect(serviceHealth.metadata.error).toMatch(
+            /(timeout|unreachable)/i,
+          );
           expect(serviceHealth.metadata).toHaveProperty('routingKey');
-          expect(serviceHealth.metadata).toHaveProperty('exchange', 'capsule.commands');
+          expect(serviceHealth.metadata).toHaveProperty(
+            'exchange',
+            'capsule.commands',
+          );
         }
       }
     });
@@ -142,15 +162,15 @@ describe('Health Check E2E Workflow', () => {
       const firstResponse = responses[0].body;
       for (let i = 1; i < responses.length; i++) {
         const currentResponse = responses[i].body;
-        
+
         // Compare service availability (allowing for minor timing differences)
         for (const serviceName of Object.keys(firstResponse.services)) {
           const firstStatus = firstResponse.services[serviceName].status;
           const currentStatus = currentResponse.services[serviceName].status;
-          
+
           // Status should be consistent unless there's a timing race condition
           expect([firstStatus, currentStatus]).toEqual(
-            expect.arrayContaining([expect.any(String)])
+            expect.arrayContaining([expect.any(String)]),
           );
         }
       }
@@ -184,7 +204,7 @@ describe('Health Check E2E Workflow', () => {
       const requestCount = 10;
       const maxRetries = 3;
       const retryDelay = 100;
-      
+
       // Create requests with proper timeout and connection handling
       const makeRequest = async (attemptNum = 0): Promise<any> => {
         try {
@@ -192,8 +212,13 @@ describe('Health Check E2E Workflow', () => {
             .get('/health/ready')
             .timeout(5000); // 5 second timeout per request
         } catch (error) {
-          if (attemptNum < maxRetries && (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT')) {
-            await new Promise(resolve => setTimeout(resolve, retryDelay * (attemptNum + 1)));
+          if (
+            attemptNum < maxRetries &&
+            (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT')
+          ) {
+            await new Promise((resolve) =>
+              setTimeout(resolve, retryDelay * (attemptNum + 1)),
+            );
             return makeRequest(attemptNum + 1);
           }
           throw error;
@@ -204,9 +229,9 @@ describe('Health Check E2E Workflow', () => {
       const promises: Promise<any>[] = [];
       for (let i = 0; i < requestCount; i++) {
         promises.push(
-          new Promise(resolve => 
-            setTimeout(() => resolve(makeRequest()), i * 10) // Stagger by 10ms each
-          )
+          new Promise(
+            (resolve) => setTimeout(() => resolve(makeRequest()), i * 10), // Stagger by 10ms each
+          ),
         );
       }
 
@@ -222,14 +247,16 @@ describe('Health Check E2E Workflow', () => {
 
       // Should handle burst load efficiently (allowing for staggering and retries)
       expect(totalTime).toBeLessThan(10000); // All 10 requests in under 10 seconds
-      console.log(`Load balancer test completed ${requestCount} requests in ${totalTime}ms`);
+      console.log(
+        `Load balancer test completed ${requestCount} requests in ${totalTime}ms`,
+      );
     });
   });
 
   describe('Error Scenarios E2E', () => {
     it('should handle complete system degradation gracefully', async () => {
       // This test simulates system degradation but ensures the API still responds
-      
+
       // Act
       const response = await request(app.getHttpServer())
         .get('/health')
@@ -237,10 +264,12 @@ describe('Health Check E2E Workflow', () => {
 
       // Assert
       expect(response.body).toHaveValidAggregatedHealthResponse();
-      
+
       // Even if all services are unhealthy, the structure should be valid
       const healthResponse: AggregatedHealthResponse = response.body;
-      expect(['healthy', 'degraded', 'unhealthy']).toContain(healthResponse.status);
+      expect(['healthy', 'degraded', 'unhealthy']).toContain(
+        healthResponse.status,
+      );
     });
 
     it('should provide meaningful error information when services fail', async () => {
@@ -251,13 +280,15 @@ describe('Health Check E2E Workflow', () => {
 
       // Assert
       const healthResponse: AggregatedHealthResponse = response.body;
-      
-      for (const [serviceName, serviceHealth] of Object.entries(healthResponse.services)) {
+
+      for (const [serviceName, serviceHealth] of Object.entries(
+        healthResponse.services,
+      )) {
         if (serviceHealth.status === HealthStatus.UNHEALTHY) {
           // Unhealthy services should have error metadata
           expect(serviceHealth.metadata).toBeDefined();
           expect(serviceHealth.metadata).toHaveProperty('error');
-          
+
           if (serviceHealth.metadata.routingKey) {
             // Verify routing key matches service
             const expectedRoutingKey = `${serviceName.replace('-service', '')}.health`;
@@ -277,7 +308,7 @@ describe('Health Check E2E Workflow', () => {
 
       for (let i = 0; i < requestCount; i++) {
         const startTime = Date.now();
-        
+
         const response = await request(app.getHttpServer())
           .get('/health')
           .expect(200);
@@ -289,11 +320,12 @@ describe('Health Check E2E Workflow', () => {
         expect(responseTime).toBeLessThan(maxAllowedResponseTime);
 
         // Brief pause between requests
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
       // Calculate performance metrics
-      const averageResponseTime = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
+      const averageResponseTime =
+        responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
       const maxActualResponseTime = Math.max(...responseTimes);
 
       console.log(`Average response time: ${averageResponseTime}ms`);
@@ -301,7 +333,7 @@ describe('Health Check E2E Workflow', () => {
 
       // Performance assertions
       expect(averageResponseTime).toBeLessThan(2000); // Average under 2 seconds
-      expect(maxActualResponseTime).toBeLessThan(5000);     // Max under 5 seconds
+      expect(maxActualResponseTime).toBeLessThan(5000); // Max under 5 seconds
     });
 
     it('should handle concurrent health check requests', async () => {
@@ -310,7 +342,7 @@ describe('Health Check E2E Workflow', () => {
       const startTime = Date.now();
 
       const promises = Array.from({ length: concurrentRequests }, () =>
-        request(app.getHttpServer()).get('/health')
+        request(app.getHttpServer()).get('/health'),
       );
 
       const responses = await Promise.all(promises);
@@ -325,14 +357,16 @@ describe('Health Check E2E Workflow', () => {
       // Concurrent requests shouldn't take significantly longer than sequential
       expect(totalTime).toBeLessThan(10000); // Within 10 seconds
 
-      console.log(`${concurrentRequests} concurrent requests completed in ${totalTime}ms`);
+      console.log(
+        `${concurrentRequests} concurrent requests completed in ${totalTime}ms`,
+      );
     });
   });
 
   describe('Integration with Real Services', () => {
     it('should work with the complete microservices architecture', async () => {
       // This test represents the full integration scenario
-      
+
       // Act
       const response = await request(app.getHttpServer())
         .get('/health')
@@ -340,28 +374,38 @@ describe('Health Check E2E Workflow', () => {
 
       // Assert
       const healthResponse: AggregatedHealthResponse = response.body;
-      
+
       // Verify API Gateway can communicate with all expected services
-      const requiredServices = ['auth-service', 'billing-service', 'deploy-service', 'monitor-service'];
-      
+      const requiredServices = [
+        'auth-service',
+        'billing-service',
+        'deploy-service',
+        'monitor-service',
+      ];
+
       for (const serviceName of requiredServices) {
         expect(healthResponse.services).toHaveProperty(serviceName);
-        
+
         const serviceHealth = healthResponse.services[serviceName];
         expect(serviceHealth).toHaveValidHealthResponse();
         expect(serviceHealth.service).toBe(serviceName);
-        
+
         // Log service status for debugging
         console.log(`${serviceName}: ${serviceHealth.status}`);
-        
-        if (serviceHealth.status === HealthStatus.UNHEALTHY && serviceHealth.metadata?.error) {
+
+        if (
+          serviceHealth.status === HealthStatus.UNHEALTHY &&
+          serviceHealth.metadata?.error
+        ) {
           console.log(`  Error: ${serviceHealth.metadata.error}`);
         }
       }
 
       // Overall system should have a valid status
-      expect(['healthy', 'degraded', 'unhealthy']).toContain(healthResponse.status);
-      
+      expect(['healthy', 'degraded', 'unhealthy']).toContain(
+        healthResponse.status,
+      );
+
       // Log overall system status
       console.log(`Overall system status: ${healthResponse.status}`);
     });

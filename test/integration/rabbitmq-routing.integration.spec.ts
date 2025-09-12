@@ -33,12 +33,32 @@ describe('RabbitMQ Message Routing Integration', () => {
         { name: 'event_queue', options: { durable: false } },
       ],
       bindings: [
-        { exchange: 'capsule.commands', queue: 'auth_queue', routingKey: 'auth.*' },
-        { exchange: 'capsule.commands', queue: 'billing_queue', routingKey: 'billing.*' },
-        { exchange: 'capsule.commands', queue: 'deploy_queue', routingKey: 'deploy.*' },
-        { exchange: 'capsule.commands', queue: 'monitor_queue', routingKey: 'monitor.*' },
+        {
+          exchange: 'capsule.commands',
+          queue: 'auth_queue',
+          routingKey: 'auth.*',
+        },
+        {
+          exchange: 'capsule.commands',
+          queue: 'billing_queue',
+          routingKey: 'billing.*',
+        },
+        {
+          exchange: 'capsule.commands',
+          queue: 'deploy_queue',
+          routingKey: 'deploy.*',
+        },
+        {
+          exchange: 'capsule.commands',
+          queue: 'monitor_queue',
+          routingKey: 'monitor.*',
+        },
         { exchange: 'capsule.events', queue: 'event_queue', routingKey: '*.*' },
-        { exchange: 'test.exchange', queue: 'test_queue', routingKey: 'test.message' },
+        {
+          exchange: 'test.exchange',
+          queue: 'test_queue',
+          routingKey: 'test.message',
+        },
       ],
     });
 
@@ -55,7 +75,14 @@ describe('RabbitMQ Message Routing Integration', () => {
     rabbitMQClient.clearCapturedMessages();
 
     // Purge all test queues
-    const queues = ['auth_queue', 'billing_queue', 'deploy_queue', 'monitor_queue', 'test_queue', 'event_queue'];
+    const queues = [
+      'auth_queue',
+      'billing_queue',
+      'deploy_queue',
+      'monitor_queue',
+      'test_queue',
+      'event_queue',
+    ];
     for (const queue of queues) {
       await rabbitMQClient.purgeQueue(queue);
     }
@@ -65,17 +92,22 @@ describe('RabbitMQ Message Routing Integration', () => {
     it('should route auth commands to auth queue', async () => {
       // Arrange
       const captureKey = await rabbitMQClient.captureMessages('auth_queue');
-      const healthMessage = MessageFixtureFactory.createHealthCheckMessage('auth');
+      const healthMessage =
+        MessageFixtureFactory.createHealthCheckMessage('auth');
 
       // Act
       await rabbitMQClient.publishMessage(
         'capsule.commands',
         'auth.health',
-        healthMessage.content
+        healthMessage.content,
       );
 
       // Assert
-      const messages = await rabbitMQClient.waitForMessages(captureKey, 1, 2000);
+      const messages = await rabbitMQClient.waitForMessages(
+        captureKey,
+        1,
+        2000,
+      );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
         routingKey: 'auth.health',
@@ -95,11 +127,15 @@ describe('RabbitMQ Message Routing Integration', () => {
       await rabbitMQClient.publishMessage(
         'capsule.commands',
         'billing.charge',
-        chargeMessage.content
+        chargeMessage.content,
       );
 
       // Assert
-      const messages = await rabbitMQClient.waitForMessages(captureKey, 1, 2000);
+      const messages = await rabbitMQClient.waitForMessages(
+        captureKey,
+        1,
+        2000,
+      );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
         routingKey: 'billing.charge',
@@ -123,11 +159,15 @@ describe('RabbitMQ Message Routing Integration', () => {
       await rabbitMQClient.publishMessage(
         'capsule.commands',
         'deploy.create',
-        deployMessage.content
+        deployMessage.content,
       );
 
       // Assert
-      const messages = await rabbitMQClient.waitForMessages(captureKey, 1, 2000);
+      const messages = await rabbitMQClient.waitForMessages(
+        captureKey,
+        1,
+        2000,
+      );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
         routingKey: 'deploy.create',
@@ -142,20 +182,25 @@ describe('RabbitMQ Message Routing Integration', () => {
     it('should route monitor commands to monitor queue', async () => {
       // Arrange
       const captureKey = await rabbitMQClient.captureMessages('monitor_queue');
-      const metricsMessage = MessageFixtureFactory.createMonitoringMetricsMessage({
-        serviceId: 'test-service',
-        cpu: 75.5,
-      });
+      const metricsMessage =
+        MessageFixtureFactory.createMonitoringMetricsMessage({
+          serviceId: 'test-service',
+          cpu: 75.5,
+        });
 
       // Act
       await rabbitMQClient.publishMessage(
         'capsule.commands',
         'monitor.track',
-        metricsMessage.content
+        metricsMessage.content,
       );
 
       // Assert
-      const messages = await rabbitMQClient.waitForMessages(captureKey, 1, 2000);
+      const messages = await rabbitMQClient.waitForMessages(
+        captureKey,
+        1,
+        2000,
+      );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
         routingKey: 'monitor.track',
@@ -175,11 +220,11 @@ describe('RabbitMQ Message Routing Integration', () => {
       await rabbitMQClient.publishMessage(
         'capsule.commands',
         'wrong.routing.key',
-        { test: 'data' }
+        { test: 'data' },
       );
 
       // Wait a bit to see if any messages arrive
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Assert
       const messages = rabbitMQClient.getCapturedMessages(captureKey);
@@ -191,17 +236,24 @@ describe('RabbitMQ Message Routing Integration', () => {
     it('should route user events to event queue', async () => {
       // Arrange
       const captureKey = await rabbitMQClient.captureMessages('event_queue');
-      const userEvent = MessageFixtureFactory.createUserCreatedEvent('user-123', 'test@example.com');
+      const userEvent = MessageFixtureFactory.createUserCreatedEvent(
+        'user-123',
+        'test@example.com',
+      );
 
       // Act
       await rabbitMQClient.publishMessage(
         'capsule.events',
         'user.created',
-        userEvent.content
+        userEvent.content,
       );
 
       // Assert
-      const messages = await rabbitMQClient.waitForMessages(captureKey, 1, 2000);
+      const messages = await rabbitMQClient.waitForMessages(
+        captureKey,
+        1,
+        2000,
+      );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
         routingKey: 'user.created',
@@ -226,11 +278,15 @@ describe('RabbitMQ Message Routing Integration', () => {
       await rabbitMQClient.publishMessage(
         'capsule.events',
         'payment.processed',
-        paymentEvent.content
+        paymentEvent.content,
       );
 
       // Assert
-      const messages = await rabbitMQClient.waitForMessages(captureKey, 1, 2000);
+      const messages = await rabbitMQClient.waitForMessages(
+        captureKey,
+        1,
+        2000,
+      );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
         routingKey: 'payment.processed',
@@ -246,17 +302,22 @@ describe('RabbitMQ Message Routing Integration', () => {
     it('should route deployment events to event queue', async () => {
       // Arrange
       const captureKey = await rabbitMQClient.captureMessages('event_queue');
-      const deploymentEvent = MessageFixtureFactory.createDeploymentStartedEvent('deployment-789');
+      const deploymentEvent =
+        MessageFixtureFactory.createDeploymentStartedEvent('deployment-789');
 
       // Act
       await rabbitMQClient.publishMessage(
         'capsule.events',
         'deployment.started',
-        deploymentEvent.content
+        deploymentEvent.content,
       );
 
       // Assert
-      const messages = await rabbitMQClient.waitForMessages(captureKey, 1, 2000);
+      const messages = await rabbitMQClient.waitForMessages(
+        captureKey,
+        1,
+        2000,
+      );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
         routingKey: 'deployment.started',
@@ -273,9 +334,12 @@ describe('RabbitMQ Message Routing Integration', () => {
     it('should route all health checks to correct service queues', async () => {
       // Arrange
       const authCaptureKey = await rabbitMQClient.captureMessages('auth_queue');
-      const billingCaptureKey = await rabbitMQClient.captureMessages('billing_queue');
-      const deployCaptureKey = await rabbitMQClient.captureMessages('deploy_queue');
-      const monitorCaptureKey = await rabbitMQClient.captureMessages('monitor_queue');
+      const billingCaptureKey =
+        await rabbitMQClient.captureMessages('billing_queue');
+      const deployCaptureKey =
+        await rabbitMQClient.captureMessages('deploy_queue');
+      const monitorCaptureKey =
+        await rabbitMQClient.captureMessages('monitor_queue');
 
       // Act - Send health checks for all services
       await Promise.all([
@@ -286,10 +350,26 @@ describe('RabbitMQ Message Routing Integration', () => {
       ]);
 
       // Assert
-      const authMessages = await rabbitMQClient.waitForMessages(authCaptureKey, 1, 2000);
-      const billingMessages = await rabbitMQClient.waitForMessages(billingCaptureKey, 1, 2000);
-      const deployMessages = await rabbitMQClient.waitForMessages(deployCaptureKey, 1, 2000);
-      const monitorMessages = await rabbitMQClient.waitForMessages(monitorCaptureKey, 1, 2000);
+      const authMessages = await rabbitMQClient.waitForMessages(
+        authCaptureKey,
+        1,
+        2000,
+      );
+      const billingMessages = await rabbitMQClient.waitForMessages(
+        billingCaptureKey,
+        1,
+        2000,
+      );
+      const deployMessages = await rabbitMQClient.waitForMessages(
+        deployCaptureKey,
+        1,
+        2000,
+      );
+      const monitorMessages = await rabbitMQClient.waitForMessages(
+        monitorCaptureKey,
+        1,
+        2000,
+      );
 
       expect(authMessages).toHaveLength(1);
       expect(billingMessages).toHaveLength(1);
@@ -310,21 +390,25 @@ describe('RabbitMQ Message Routing Integration', () => {
       const messageCount = 10;
       const messages = MessageFixtureFactory.createBatchMessages(
         messageCount,
-        () => ({ test: 'data', id: Math.random() })
+        () => ({ test: 'data', id: Math.random() }),
       );
 
       // Act
       for (const message of messages) {
-        await rabbitMQClient.publishMessage('test.exchange', 'test.message', message);
+        await rabbitMQClient.publishMessage(
+          'test.exchange',
+          'test.message',
+          message,
+        );
       }
 
       // Assert
       const capturedMessages = await rabbitMQClient.waitForMessages(
         captureKey,
         messageCount,
-        5000
+        5000,
       );
-      
+
       expect(capturedMessages).toHaveLength(messageCount);
     });
 
@@ -339,15 +423,25 @@ describe('RabbitMQ Message Routing Integration', () => {
 
       // Act - Send messages in order
       for (const message of orderedMessages) {
-        await rabbitMQClient.publishMessage('test.exchange', 'test.message', message);
+        await rabbitMQClient.publishMessage(
+          'test.exchange',
+          'test.message',
+          message,
+        );
       }
 
       // Assert
-      const capturedMessages = await rabbitMQClient.waitForMessages(captureKey, 3, 2000);
-      
+      const capturedMessages = await rabbitMQClient.waitForMessages(
+        captureKey,
+        3,
+        2000,
+      );
+
       expect(capturedMessages).toHaveLength(3);
-      
-      const parsedMessages = capturedMessages.map(msg => JSON.parse(msg.content.toString()));
+
+      const parsedMessages = capturedMessages.map((msg) =>
+        JSON.parse(msg.content.toString()),
+      );
       expect(parsedMessages[0].order).toBe(1);
       expect(parsedMessages[1].order).toBe(2);
       expect(parsedMessages[2].order).toBe(3);
@@ -358,7 +452,7 @@ describe('RabbitMQ Message Routing Integration', () => {
     it('should handle messages to non-existent exchanges', async () => {
       // This test ensures the client handles errors gracefully
       await expect(
-        rabbitMQClient.publishMessage('nonexistent.exchange', 'test.key', {})
+        rabbitMQClient.publishMessage('nonexistent.exchange', 'test.key', {}),
       ).rejects.toThrow();
     });
 
@@ -366,9 +460,15 @@ describe('RabbitMQ Message Routing Integration', () => {
       // Test basic functionality after potential connection issues
       const captureKey = await rabbitMQClient.captureMessages('test_queue');
 
-      await rabbitMQClient.publishMessage('test.exchange', 'test.message', { test: 'recovery' });
+      await rabbitMQClient.publishMessage('test.exchange', 'test.message', {
+        test: 'recovery',
+      });
 
-      const messages = await rabbitMQClient.waitForMessages(captureKey, 1, 2000);
+      const messages = await rabbitMQClient.waitForMessages(
+        captureKey,
+        1,
+        2000,
+      );
       expect(messages).toHaveLength(1);
 
       const messageContent = JSON.parse(messages[0].content.toString());

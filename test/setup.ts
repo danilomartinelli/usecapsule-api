@@ -25,7 +25,8 @@ expect.extend({
       };
     } else {
       return {
-        message: () => `expected health status to be healthy, received: ${received?.status}`,
+        message: () =>
+          `expected health status to be healthy, received: ${received?.status}`,
         pass: false,
       };
     }
@@ -40,7 +41,8 @@ expect.extend({
       };
     } else {
       return {
-        message: () => `expected health status to be unhealthy, received: ${received?.status}`,
+        message: () =>
+          `expected health status to be unhealthy, received: ${received?.status}`,
         pass: false,
       };
     }
@@ -55,14 +57,15 @@ expect.extend({
       };
     } else {
       return {
-        message: () => `expected health status to be degraded, received: ${received?.status}`,
+        message: () =>
+          `expected health status to be degraded, received: ${received?.status}`,
         pass: false,
       };
     }
   },
 
   toHaveValidHealthResponse(received) {
-    const hasRequiredFields = 
+    const hasRequiredFields =
       received &&
       typeof received === 'object' &&
       typeof received.status === 'string' &&
@@ -70,10 +73,12 @@ expect.extend({
       typeof received.timestamp === 'string' &&
       received.metadata !== undefined;
 
-    const hasValidTimestamp = received?.timestamp && 
-      !isNaN(new Date(received.timestamp).getTime());
+    const hasValidTimestamp =
+      received?.timestamp && !isNaN(new Date(received.timestamp).getTime());
 
-    const hasValidStatus = ['healthy', 'unhealthy', 'degraded'].includes(received?.status);
+    const hasValidStatus = ['healthy', 'unhealthy', 'degraded'].includes(
+      received?.status,
+    );
 
     const pass = hasRequiredFields && hasValidTimestamp && hasValidStatus;
 
@@ -84,7 +89,8 @@ expect.extend({
       };
     } else {
       return {
-        message: () => `expected object to be a valid health response with status, service, timestamp, and metadata fields`,
+        message: () =>
+          `expected object to be a valid health response with status, service, timestamp, and metadata fields`,
         pass: false,
       };
     }
@@ -99,37 +105,47 @@ expect.extend({
       typeof received.services === 'object' &&
       received.services !== null;
 
-    const hasValidTimestamp = received?.timestamp &&
-      !isNaN(new Date(received.timestamp).getTime());
+    const hasValidTimestamp =
+      received?.timestamp && !isNaN(new Date(received.timestamp).getTime());
 
-    const hasValidStatus = ['healthy', 'unhealthy', 'degraded'].includes(received?.status);
+    const hasValidStatus = ['healthy', 'unhealthy', 'degraded'].includes(
+      received?.status,
+    );
 
-    const hasValidServices = received?.services &&
-      Object.values(received.services).every((service: any) => 
-        service &&
-        typeof service.status === 'string' &&
-        typeof service.service === 'string' &&
-        typeof service.timestamp === 'string' &&
-        service.metadata !== undefined
+    const hasValidServices =
+      received?.services &&
+      Object.values(received.services).every(
+        (service: any) =>
+          service &&
+          typeof service.status === 'string' &&
+          typeof service.service === 'string' &&
+          typeof service.timestamp === 'string' &&
+          service.metadata !== undefined,
       );
 
-    const pass = hasRequiredFields && hasValidTimestamp && hasValidStatus && hasValidServices;
+    const pass =
+      hasRequiredFields &&
+      hasValidTimestamp &&
+      hasValidStatus &&
+      hasValidServices;
 
     if (pass) {
       return {
-        message: () => `expected object not to be a valid aggregated health response`,
+        message: () =>
+          `expected object not to be a valid aggregated health response`,
         pass: true,
       };
     } else {
       return {
-        message: () => `expected object to be a valid aggregated health response with status, services, and timestamp fields`,
+        message: () =>
+          `expected object to be a valid aggregated health response with status, services, and timestamp fields`,
         pass: false,
       };
     }
   },
 
   toMatchMessagePattern(received, pattern) {
-    const pass = 
+    const pass =
       received &&
       typeof received === 'object' &&
       received.content !== undefined &&
@@ -143,7 +159,8 @@ expect.extend({
       };
     } else {
       return {
-        message: () => `expected message to match pattern with routingKey: ${pattern.routingKey} and exchange: ${pattern.exchange}`,
+        message: () =>
+          `expected message to match pattern with routingKey: ${pattern.routingKey} and exchange: ${pattern.exchange}`,
         pass: false,
       };
     }

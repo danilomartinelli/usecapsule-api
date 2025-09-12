@@ -62,7 +62,7 @@ import {
   RegisterUserDto,
   LoginUserDto,
   User,
-  AuthTokenResponse
+  AuthTokenResponse,
 } from '@usecapsule/types';
 
 @Controller()
@@ -99,7 +99,9 @@ export class AuthController {
     exchange: 'capsule.commands',
     routingKey: 'auth.login',
   })
-  async loginUser(@RabbitPayload() dto: LoginUserDto): Promise<AuthTokenResponse> {
+  async loginUser(
+    @RabbitPayload() dto: LoginUserDto,
+  ): Promise<AuthTokenResponse> {
     this.logger.log(`Processing login for: ${dto.email}`);
 
     const tokenResponse = await this.authService.authenticate(dto);
@@ -115,7 +117,9 @@ export class AuthController {
     exchange: 'capsule.commands',
     routingKey: 'auth.validate',
   })
-  async validateToken(@RabbitPayload() payload: { token: string }): Promise<User | null> {
+  async validateToken(
+    @RabbitPayload() payload: { token: string },
+  ): Promise<User | null> {
     try {
       return await this.authService.validateToken(payload.token);
     } catch (error) {
@@ -173,7 +177,10 @@ export class CustomerController {
 
       this.logger.log(`Customer profile created for user: ${event.userId}`);
     } catch (error) {
-      this.logger.error(`Failed to create customer profile for ${event.userId}:`, error);
+      this.logger.error(
+        `Failed to create customer profile for ${event.userId}:`,
+        error,
+      );
       // Don't throw - let it go to DLQ for manual processing
     }
   }
@@ -215,7 +222,10 @@ export class MetricsController {
     exchange: 'capsule.events',
     routingKey: 'user.*', // Matches user.created, user.updated, user.deleted, etc.
   })
-  async onUserEvent(@RabbitPayload() event: any, @RabbitContext() context: any): Promise<void> {
+  async onUserEvent(
+    @RabbitPayload() event: any,
+    @RabbitContext() context: any,
+  ): Promise<void> {
     const eventType = context.routingKey; // e.g., 'user.created'
 
     this.logger.log(`Recording user event: ${eventType}`);
@@ -287,7 +297,6 @@ export class RegistrationSaga {
 
       this.logger.log(`Registration saga completed: ${sagaId}`);
       return user;
-
     } catch (error) {
       this.logger.error(`Registration saga failed: ${sagaId}`, error);
 
@@ -297,7 +306,10 @@ export class RegistrationSaga {
     }
   }
 
-  private async publishUserCreatedEvent(user: User, sagaId: string): Promise<void> {
+  private async publishUserCreatedEvent(
+    user: User,
+    sagaId: string,
+  ): Promise<void> {
     await this.amqpConnection.publish('capsule.events', 'user.created', {
       userId: user.id,
       email: user.email,
@@ -323,11 +335,15 @@ export class RegistrationSaga {
   }
 
   private async triggerQuotaSetup(user: User, sagaId: string): Promise<void> {
-    await this.amqpConnection.publish('capsule.commands', 'deploy.setup-quotas', {
-      userId: user.id,
-      plan: 'free',
-      sagaId,
-    });
+    await this.amqpConnection.publish(
+      'capsule.commands',
+      'deploy.setup-quotas',
+      {
+        userId: user.id,
+        plan: 'free',
+        sagaId,
+      },
+    );
   }
 }
 ```
@@ -346,7 +362,10 @@ export class DeploymentGatewayService {
   /**
    * Complex deployment flow requiring multiple service interactions
    */
-  async createDeployment(dto: CreateDeploymentDto, userId: string): Promise<Deployment> {
+  async createDeployment(
+    dto: CreateDeploymentDto,
+    userId: string,
+  ): Promise<Deployment> {
     // Step 1: Validate user has deployment quota
     const quotaCheck = await this.amqpConnection.request({
       exchange: 'capsule.commands',
@@ -468,13 +487,14 @@ export class RobustController {
     exchange: 'capsule.commands',
     routingKey: 'auth.get-user',
   })
-  async getUser(@RabbitPayload() payload: { userId: string }): Promise<User | null> {
+  async getUser(
+    @RabbitPayload() payload: { userId: string },
+  ): Promise<User | null> {
     const { userId } = payload;
 
     try {
       // Attempt primary data source
       return await this.userService.getUserById(userId);
-
     } catch (error) {
       this.logger.warn(`Primary user lookup failed for ${userId}:`, error);
 
@@ -501,7 +521,10 @@ export class RobustController {
 ```typescript
 // Custom error classes
 export class BusinessLogicException extends Error {
-  constructor(message: string, public readonly code: string) {
+  constructor(
+    message: string,
+    public readonly code: string,
+  ) {
     super(message);
     this.name = 'BusinessLogicException';
   }
@@ -522,7 +545,6 @@ export class InvalidCredentialsException extends BusinessLogicException {
 // Error handling in message handlers
 @Controller()
 export class AuthController {
-
   @RabbitRPC({
     exchange: 'capsule.commands',
     routingKey: 'auth.login',
@@ -530,7 +552,6 @@ export class AuthController {
   async login(@RabbitPayload() dto: LoginUserDto): Promise<AuthTokenResponse> {
     try {
       return await this.authService.authenticate(dto);
-
     } catch (error) {
       // Log error with context
       this.logger.error(`Login failed for ${dto.email}:`, {
@@ -545,7 +566,9 @@ export class AuthController {
       }
 
       // Hide internal errors from clients
-      throw new InternalServerErrorException('Authentication service unavailable');
+      throw new InternalServerErrorException(
+        'Authentication service unavailable',
+      );
     }
   }
 }
@@ -698,16 +721,16 @@ export class BatchProcessingController {
     exchange: 'capsule.events',
     routingKey: 'metrics.batch',
   })
-  async processBatchMetrics(@RabbitPayload() events: MetricEvent[]): Promise<void> {
+  async processBatchMetrics(
+    @RabbitPayload() events: MetricEvent[],
+  ): Promise<void> {
     this.logger.log(`Processing batch of ${events.length} metric events`);
 
     // Process in smaller batches to avoid memory issues
     for (let i = 0; i < events.length; i += this.batchSize) {
       const batch = events.slice(i, i + this.batchSize);
 
-      await Promise.all(
-        batch.map(event => this.processMetricEvent(event))
-      );
+      await Promise.all(batch.map((event) => this.processMetricEvent(event)));
     }
 
     this.logger.log(`Completed processing ${events.length} metric events`);
@@ -734,7 +757,9 @@ export class AsyncTaskProcessor {
     exchange: 'capsule.commands',
     routingKey: 'deploy.create-async',
   })
-  async createDeploymentAsync(@RabbitPayload() dto: CreateDeploymentDto): Promise<{ taskId: string }> {
+  async createDeploymentAsync(
+    @RabbitPayload() dto: CreateDeploymentDto,
+  ): Promise<{ taskId: string }> {
     const taskId = `deploy_${Date.now()}_${Math.random().toString(36)}`;
 
     // Start processing asynchronously
@@ -754,7 +779,9 @@ export class AsyncTaskProcessor {
     exchange: 'capsule.commands',
     routingKey: 'deploy.status',
   })
-  async getDeploymentStatus(@RabbitPayload() payload: { taskId: string }): Promise<TaskStatus> {
+  async getDeploymentStatus(
+    @RabbitPayload() payload: { taskId: string },
+  ): Promise<TaskStatus> {
     const { taskId } = payload;
 
     if (this.processingQueue.has(taskId)) {
@@ -765,20 +792,26 @@ export class AsyncTaskProcessor {
     return await this.deploymentService.getTaskStatus(taskId);
   }
 
-  private async processDeploymentInBackground(dto: CreateDeploymentDto, taskId: string): Promise<void> {
+  private async processDeploymentInBackground(
+    dto: CreateDeploymentDto,
+    taskId: string,
+  ): Promise<void> {
     try {
       this.logger.log(`Starting background deployment: ${taskId}`);
 
       const deployment = await this.deploymentService.create(dto);
 
       // Publish completion event
-      await this.amqpConnection.publish('capsule.events', 'deployment.completed', {
-        taskId,
-        deploymentId: deployment.id,
-        status: 'success',
-        timestamp: new Date().toISOString(),
-      });
-
+      await this.amqpConnection.publish(
+        'capsule.events',
+        'deployment.completed',
+        {
+          taskId,
+          deploymentId: deployment.id,
+          status: 'success',
+          timestamp: new Date().toISOString(),
+        },
+      );
     } catch (error) {
       this.logger.error(`Background deployment failed: ${taskId}`, error);
 

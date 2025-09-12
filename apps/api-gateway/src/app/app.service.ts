@@ -93,12 +93,12 @@ export class AppService {
     // Determine overall system status based on service health distribution
     let overallStatus: HealthStatus;
     const totalServices = healthyCount + degradedCount + unhealthyCount;
-    
+
     if (unhealthyCount === 0 && degradedCount === 0) {
       // All services are healthy
       overallStatus = HealthStatus.HEALTHY;
-    } else if (unhealthyCount >= (totalServices / 2)) {
-      // Majority or half of services are unhealthy 
+    } else if (unhealthyCount >= totalServices / 2) {
+      // Majority or half of services are unhealthy
       overallStatus = HealthStatus.UNHEALTHY;
     } else {
       // Some services have issues but not majority unhealthy

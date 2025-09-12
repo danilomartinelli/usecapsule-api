@@ -11,22 +11,22 @@ const systemDegradation = new Rate('system_degraded');
 // Soak test configuration - runs for extended period with moderate load
 export const options = {
   stages: [
-    { duration: '2m', target: 5 },   // Gentle ramp up
-    { duration: '10m', target: 5 },  // Maintain load for extended period
-    { duration: '1m', target: 0 },   // Ramp down
+    { duration: '2m', target: 5 }, // Gentle ramp up
+    { duration: '10m', target: 5 }, // Maintain load for extended period
+    { duration: '1m', target: 0 }, // Ramp down
   ],
   thresholds: {
     // Stricter thresholds for soak test - should maintain performance over time
-    'health_check_failures': ['count<10'],
-    'health_check_duration': ['avg<1500', 'p(95)<3000'],
-    'http_req_failed': ['rate<0.05'],
-    'http_req_duration': ['p(90)<2000'],
-    
+    health_check_failures: ['count<10'],
+    health_check_duration: ['avg<1500', 'p(95)<3000'],
+    http_req_failed: ['rate<0.05'],
+    http_req_duration: ['p(90)<2000'],
+
     // Monitor for system degradation
-    'system_degraded': ['rate<0.1'],
-    
+    system_degraded: ['rate<0.1'],
+
     // Check for potential memory leaks via response size growth
-    'response_size': ['p(95)<50000'], // Responses shouldn't grow significantly
+    response_size: ['p(95)<50000'], // Responses shouldn't grow significantly
   },
 };
 
@@ -43,10 +43,10 @@ export default function () {
     },
     timeout: '10s',
   });
-  
+
   const duration = Date.now() - startTime;
   const responseSize = response.body ? response.body.length : 0;
-  
+
   healthCheckDuration.add(duration);
   memoryLeakIndicator.add(responseSize);
 
@@ -60,7 +60,10 @@ export default function () {
     'response time stable': (r) => r.timings.duration < 5000,
     'response size stable': (r) => {
       if (baselineResponseSize === 0) return true;
-      return Math.abs(responseSize - baselineResponseSize) < baselineResponseSize * 0.5; // Within 50%
+      return (
+        Math.abs(responseSize - baselineResponseSize) <
+        baselineResponseSize * 0.5
+      ); // Within 50%
     },
   });
 
@@ -72,31 +75,43 @@ export default function () {
   if (response.status === 200) {
     try {
       const healthData = JSON.parse(response.body);
-      
+
       // Monitor system degradation over time
-      const isDegraded = healthData.status === 'degraded' || healthData.status === 'unhealthy';
+      const isDegraded =
+        healthData.status === 'degraded' || healthData.status === 'unhealthy';
       systemDegradation.add(isDegraded ? 1 : 0);
 
       // Periodic detailed logging
       const testRunningTime = Date.now() - testStartTime;
-      if (testRunningTime % 60000 < 2000) { // Every minute (with 2s tolerance)
-        const healthyServices = Object.values(healthData.services || {})
-          .filter(s => s?.status === 'healthy').length;
+      if (testRunningTime % 60000 < 2000) {
+        // Every minute (with 2s tolerance)
+        const healthyServices = Object.values(healthData.services || {}).filter(
+          (s) => s?.status === 'healthy',
+        ).length;
         const totalServices = Object.keys(healthData.services || {}).length;
-        
-        console.log(`Soak Test - Runtime: ${Math.floor(testRunningTime/60000)}m, ` +
-                   `System: ${healthData.status}, ` +
-                   `Services: ${healthyServices}/${totalServices}, ` +
-                   `Avg Duration: ${duration}ms, ` +
-                   `Response Size: ${responseSize}b`);
+
+        console.log(
+          `Soak Test - Runtime: ${Math.floor(testRunningTime / 60000)}m, ` +
+            `System: ${healthData.status}, ` +
+            `Services: ${healthyServices}/${totalServices}, ` +
+            `Avg Duration: ${duration}ms, ` +
+            `Response Size: ${responseSize}b`,
+        );
       }
 
       // Detailed structure validation for soak test
       const structureValid = check(healthData, {
         'services structure intact': (data) => {
           const services = data.services || {};
-          const expectedServices = ['auth-service', 'billing-service', 'deploy-service', 'monitor-service'];
-          return expectedServices.every(svc => services[svc] && services[svc].service === svc);
+          const expectedServices = [
+            'auth-service',
+            'billing-service',
+            'deploy-service',
+            'monitor-service',
+          ];
+          return expectedServices.every(
+            (svc) => services[svc] && services[svc].service === svc,
+          );
         },
         'timestamps are fresh': (data) => {
           const timestamp = new Date(data.timestamp).getTime();
@@ -112,7 +127,6 @@ export default function () {
       if (!structureValid) {
         console.warn('Structure validation failed during soak test');
       }
-
     } catch (e) {
       console.error('Response parsing failed in soak test:', e);
       healthCheckFailures.add(1);
@@ -120,9 +134,12 @@ export default function () {
   }
 
   // Test ready endpoint occasionally to ensure it remains responsive
-  if (Math.random() < 0.1) { // 10% of requests
-    const readyResponse = http.get(`${BASE_URL}/health/ready`, { timeout: '2s' });
-    
+  if (Math.random() < 0.1) {
+    // 10% of requests
+    const readyResponse = http.get(`${BASE_URL}/health/ready`, {
+      timeout: '2s',
+    });
+
     check(readyResponse, {
       'ready endpoint still responsive': (r) => r.status === 200,
       'ready endpoint fast': (r) => r.timings.duration < 500,
@@ -135,10 +152,12 @@ export default function () {
 
 export function setup() {
   console.log('Starting health check soak test...');
-  console.log('This test runs for an extended period to detect memory leaks and performance degradation');
-  
+  console.log(
+    'This test runs for an extended period to detect memory leaks and performance degradation',
+  );
+
   testStartTime = Date.now();
-  
+
   // Initial health check
   const response = http.get(`${BASE_URL}/health`, { timeout: '10s' });
   if (response.status !== 200) {
@@ -149,27 +168,35 @@ export function setup() {
   // Record initial response characteristics
   baselineResponseSize = response.body ? response.body.length : 0;
   console.log(`Baseline response size: ${baselineResponseSize} bytes`);
-  
-  return { 
+
+  return {
     baseUrl: BASE_URL,
     startTime: testStartTime,
-    baselineSize: baselineResponseSize
+    baselineSize: baselineResponseSize,
   };
 }
 
 export function teardown(data) {
   const totalRunTime = Date.now() - data.startTime;
-  console.log(`Soak test completed after ${Math.floor(totalRunTime/60000)} minutes`);
-  console.log('Review metrics for signs of memory leaks or performance degradation');
-  
+  console.log(
+    `Soak test completed after ${Math.floor(totalRunTime / 60000)} minutes`,
+  );
+  console.log(
+    'Review metrics for signs of memory leaks or performance degradation',
+  );
+
   // Final health check
   const finalResponse = http.get(`${BASE_URL}/health`);
   if (finalResponse.status === 200) {
     const finalSize = finalResponse.body ? finalResponse.body.length : 0;
-    console.log(`Final response size: ${finalSize} bytes (baseline: ${data.baselineSize})`);
-    
+    console.log(
+      `Final response size: ${finalSize} bytes (baseline: ${data.baselineSize})`,
+    );
+
     if (finalSize > data.baselineSize * 1.5) {
-      console.warn('Potential memory leak detected - response size increased significantly');
+      console.warn(
+        'Potential memory leak detected - response size increased significantly',
+      );
     }
   }
 }

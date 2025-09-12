@@ -113,7 +113,10 @@ The `@usecapsule/testing` library provides common testing utilities:
 ### TestContainers
 
 ```typescript
-import { RabbitMQTestContainer, PostgreSQLTestContainer } from '@usecapsule/testing';
+import {
+  RabbitMQTestContainer,
+  PostgreSQLTestContainer,
+} from '@usecapsule/testing';
 
 // Start RabbitMQ for testing
 const rabbitMQ = new RabbitMQTestContainer();
@@ -128,7 +131,7 @@ import { RabbitMQTestClient } from '@usecapsule/testing';
 
 const client = new RabbitMQTestClient({
   connectionUri: 'amqp://localhost:5672',
-  exchanges: [{ name: 'test.commands', type: 'direct' }]
+  exchanges: [{ name: 'test.commands', type: 'direct' }],
 });
 
 await client.connect();
@@ -143,11 +146,11 @@ import { HealthTestHelper, HEALTH_TEST_SCENARIOS } from '@usecapsule/testing';
 // Create mock health responses
 const healthResponse = HealthTestHelper.createHealthResponse(
   'auth-service',
-  HealthStatus.HEALTHY
+  HealthStatus.HEALTHY,
 );
 
 // Test health check scenarios
-HEALTH_TEST_SCENARIOS.forEach(scenario => {
+HEALTH_TEST_SCENARIOS.forEach((scenario) => {
   // Test each predefined health scenario
 });
 ```
@@ -393,7 +396,7 @@ describe('RabbitMQ Health Integration', () => {
     const response = await client.sendRPCMessage(
       'capsule.commands',
       'auth.health',
-      {}
+      {},
     );
 
     expect(response).toHaveValidHealthResponse();
@@ -430,7 +433,7 @@ describe('Health Check E2E', () => {
     return request(app.getHttpServer())
       .get('/health')
       .expect(200)
-      .expect(res => {
+      .expect((res) => {
         expect(res.body).toHaveValidAggregatedHealthResponse();
       });
   });
@@ -451,8 +454,8 @@ export const options = {
     { duration: '1m', target: 0 },
   ],
   thresholds: {
-    'http_req_duration': ['p(95)<2000'],
-    'http_req_failed': ['rate<0.05'],
+    http_req_duration: ['p(95)<2000'],
+    http_req_failed: ['rate<0.05'],
   },
 };
 
@@ -477,7 +480,10 @@ expect(healthResponse).toBeUnhealthy();
 expect(healthResponse).toBeDegraded();
 expect(healthResponse).toHaveValidHealthResponse();
 expect(aggregatedResponse).toHaveValidAggregatedHealthResponse();
-expect(message).toMatchMessagePattern({ routingKey: 'auth.health', exchange: 'capsule.commands' });
+expect(message).toMatchMessagePattern({
+  routingKey: 'auth.health',
+  exchange: 'capsule.commands',
+});
 ```
 
 ## Test Data Management
@@ -489,7 +495,10 @@ import { MessageFixtureFactory, HttpFixtureFactory } from '@usecapsule/testing';
 
 // Create test messages
 const healthMessage = MessageFixtureFactory.createHealthCheckMessage('auth');
-const userEvent = MessageFixtureFactory.createUserCreatedEvent('user-123', 'test@example.com');
+const userEvent = MessageFixtureFactory.createUserCreatedEvent(
+  'user-123',
+  'test@example.com',
+);
 
 // Create HTTP test data
 const request = HttpFixtureFactory.createHealthCheckRequest();
@@ -505,7 +514,7 @@ Each service uses isolated test databases:
 const postgres = new PostgreSQLTestContainer({
   database: 'test_auth_db',
   user: 'test_user',
-  password: 'test_pass'
+  password: 'test_pass',
 });
 
 await postgres.start();
@@ -565,7 +574,7 @@ Error: AMQP connection failed
 **Solution**: Wait for container readiness
 
 ```typescript
-await new Promise(resolve => setTimeout(resolve, 2000));
+await new Promise((resolve) => setTimeout(resolve, 2000));
 ```
 
 ### Debug Commands

@@ -57,7 +57,7 @@ describe('Billing Service - AppService', () => {
       // Assert
       const time1 = new Date(result1.timestamp).getTime();
       const time2 = new Date(result2.timestamp).getTime();
-      
+
       expect(time2).toBeGreaterThanOrEqual(time1);
       expect(time2 - time1).toBeLessThan(100); // Should be within 100ms
     });
@@ -147,7 +147,9 @@ describe('Billing Service - AppService', () => {
 
     it('should handle multiple rapid calls', () => {
       // Act
-      const results = Array.from({ length: 100 }, () => service.getHealthStatus());
+      const results = Array.from({ length: 100 }, () =>
+        service.getHealthStatus(),
+      );
 
       // Assert
       for (const result of results) {
@@ -157,7 +159,7 @@ describe('Billing Service - AppService', () => {
       }
 
       // Verify timestamps are in ascending order (or very close)
-      const timestamps = results.map(r => new Date(r.timestamp).getTime());
+      const timestamps = results.map((r) => new Date(r.timestamp).getTime());
       for (let i = 1; i < timestamps.length; i++) {
         expect(timestamps[i]).toBeGreaterThanOrEqual(timestamps[i - 1]);
       }

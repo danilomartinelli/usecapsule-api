@@ -44,7 +44,7 @@ jobs:
 
     outputs:
       api_gateway_ready: ${{ steps.health_check.outputs.ready }}
-      
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -130,7 +130,7 @@ jobs:
         run: |
           echo "## Performance Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ -f "test/performance/results/performance_report_*.md" ]; then
             cat test/performance/results/performance_report_*.md >> $GITHUB_STEP_SUMMARY
           else
@@ -141,7 +141,7 @@ jobs:
         run: |
           # Check if any thresholds were violated
           threshold_violations=false
-          
+
           if find test/performance/results/ -name "*_summary.txt" -exec grep -l "✗" {} \; | head -1 > /dev/null; then
             echo "❌ Performance thresholds were violated!"
             find test/performance/results/ -name "*_summary.txt" -exec grep "✗" {} \;
@@ -149,7 +149,7 @@ jobs:
           else
             echo "✅ All performance thresholds were met"
           fi
-          
+
           # Set output for potential notification
           echo "THRESHOLD_VIOLATIONS=$threshold_violations" >> $GITHUB_ENV
 
@@ -170,7 +170,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: performance-tests
     if: always()
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -192,7 +192,7 @@ jobs:
         run: |
           echo "## Performance Benchmark Comparison" >> comparison.md
           echo "" >> comparison.md
-          
+
           if [ -d "benchmark" ] && [ -d "current-results" ]; then
             echo "Comparing current results with previous benchmark..." >> comparison.md
             echo "" >> comparison.md
@@ -211,7 +211,7 @@ jobs:
           else
             echo "No previous benchmark available. Current results will become the new benchmark." >> comparison.md
           fi
-          
+
           cat comparison.md >> $GITHUB_STEP_SUMMARY
 
       - name: Save current results as new benchmark
@@ -227,7 +227,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [performance-tests, benchmark-comparison]
     if: failure() && github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Send notification
         run: |
@@ -240,7 +240,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [performance-tests, benchmark-comparison]
     if: always()
-    
+
     steps:
       - name: Cleanup old artifacts
         uses: actions/github-script@v7
@@ -252,12 +252,12 @@ jobs:
               repo: context.repo.repo,
               per_page: 100
             });
-            
+
             const performanceArtifacts = artifacts.data.artifacts.filter(artifact => 
               artifact.name.includes('performance-results') && 
               new Date(artifact.created_at) < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // 30 days old
             );
-            
+
             for (const artifact of performanceArtifacts.slice(10)) { // Keep latest 10
               await github.rest.actions.deleteArtifact({
                 owner: context.repo.owner,

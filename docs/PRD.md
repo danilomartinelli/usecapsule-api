@@ -45,14 +45,14 @@ Capsule provides a unique three-layer solution that addresses each pain point sy
 
 ### 1.4 Core Differentiators
 
-| Feature | Capsule | Traditional PaaS | DIY Kubernetes |
-|---------|---------|------------------|----------------|
-| **Setup Time** | < 5 minutes | < 30 minutes | 3-4 weeks |
-| **Nx Monorepo Support** | Native, zero-config | None | Manual setup |
-| **Vendor Lock-in** | Zero - full export | Complete lock-in | None needed |
-| **Configuration Required** | None | Minimal | Extensive |
-| **Cost at Scale** | Linear, predictable | Exponential | Variable |
-| **Infrastructure Ownership** | Full export anytime | None | Always owned |
+| Feature                      | Capsule             | Traditional PaaS | DIY Kubernetes |
+| ---------------------------- | ------------------- | ---------------- | -------------- |
+| **Setup Time**               | < 5 minutes         | < 30 minutes     | 3-4 weeks      |
+| **Nx Monorepo Support**      | Native, zero-config | None             | Manual setup   |
+| **Vendor Lock-in**           | Zero - full export  | Complete lock-in | None needed    |
+| **Configuration Required**   | None                | Minimal          | Extensive      |
+| **Cost at Scale**            | Linear, predictable | Exponential      | Variable       |
+| **Infrastructure Ownership** | Full export anytime | None             | Always owned   |
 
 ### 1.5 Success Metrics
 
@@ -135,37 +135,37 @@ Lerna/Rush:
 
 **Framework Intelligence Matrix**:
 
-| Language | Frameworks | Auto-Detection | Optimization |
-|----------|-----------|----------------|--------------|
-| **JavaScript/TypeScript** | Next.js, Nuxt, NestJS, Express, Fastify, Remix, SvelteKit | Package.json analysis | Tree-shaking, code splitting |
-| **Python** | Django, FastAPI, Flask, Streamlit | Requirements.txt, Pipfile, pyproject.toml | Dependency caching, ASGI/WSGI |
-| **Go** | Gin, Echo, Fiber, Buffalo | go.mod analysis | Binary optimization, minimal containers |
-| **Java/Kotlin** | Spring Boot, Micronaut, Quarkus | pom.xml, build.gradle | JVM tuning, native compilation |
-| **Ruby** | Rails, Sinatra, Hanami | Gemfile analysis | Asset precompilation, bundler optimization |
-| **.NET** | ASP.NET Core, Blazor | .csproj analysis | Runtime optimization, AOT compilation |
+| Language                  | Frameworks                                                | Auto-Detection                            | Optimization                               |
+| ------------------------- | --------------------------------------------------------- | ----------------------------------------- | ------------------------------------------ |
+| **JavaScript/TypeScript** | Next.js, Nuxt, NestJS, Express, Fastify, Remix, SvelteKit | Package.json analysis                     | Tree-shaking, code splitting               |
+| **Python**                | Django, FastAPI, Flask, Streamlit                         | Requirements.txt, Pipfile, pyproject.toml | Dependency caching, ASGI/WSGI              |
+| **Go**                    | Gin, Echo, Fiber, Buffalo                                 | go.mod analysis                           | Binary optimization, minimal containers    |
+| **Java/Kotlin**           | Spring Boot, Micronaut, Quarkus                           | pom.xml, build.gradle                     | JVM tuning, native compilation             |
+| **Ruby**                  | Rails, Sinatra, Hanami                                    | Gemfile analysis                          | Asset precompilation, bundler optimization |
+| **.NET**                  | ASP.NET Core, Blazor                                      | .csproj analysis                          | Runtime optimization, AOT compilation      |
 
 #### 2.1.4 Implementation Requirements
 
 ```typescript
 // Functional Requirements
 interface MagicDeployRequirements {
-  FR_MD_001: "MUST detect project type without configuration files";
-  FR_MD_002: "MUST support nested monorepo structures up to 5 levels deep";
-  FR_MD_003: "MUST generate Dockerfile when absent with 99% success rate";
-  FR_MD_004: "MUST configure optimal resource allocation automatically";
-  FR_MD_005: "MUST detect and configure service dependencies";
-  FR_MD_006: "MUST support polyglot repositories (multiple languages)";
-  FR_MD_007: "MUST handle build tools (Webpack, Vite, Turbopack, etc.)";
-  FR_MD_008: "MUST configure health checks and readiness probes";
+  FR_MD_001: 'MUST detect project type without configuration files';
+  FR_MD_002: 'MUST support nested monorepo structures up to 5 levels deep';
+  FR_MD_003: 'MUST generate Dockerfile when absent with 99% success rate';
+  FR_MD_004: 'MUST configure optimal resource allocation automatically';
+  FR_MD_005: 'MUST detect and configure service dependencies';
+  FR_MD_006: 'MUST support polyglot repositories (multiple languages)';
+  FR_MD_007: 'MUST handle build tools (Webpack, Vite, Turbopack, etc.)';
+  FR_MD_008: 'MUST configure health checks and readiness probes';
 }
 
 // Non-Functional Requirements
 interface MagicDeployNFRs {
-  NFR_MD_001: "Detection must complete in < 10 seconds for 1GB repository";
-  NFR_MD_002: "Support repositories up to 10GB in size";
-  NFR_MD_003: "Handle up to 100 services in single deployment";
-  NFR_MD_004: "Maintain 99.9% detection accuracy";
-  NFR_MD_005: "Support incremental detection for large monorepos";
+  NFR_MD_001: 'Detection must complete in < 10 seconds for 1GB repository';
+  NFR_MD_002: 'Support repositories up to 10GB in size';
+  NFR_MD_003: 'Handle up to 100 services in single deployment';
+  NFR_MD_004: 'Maintain 99.9% detection accuracy';
+  NFR_MD_005: 'Support incremental detection for large monorepos';
 }
 ```
 
@@ -256,20 +256,20 @@ Terraform Export:
 ```typescript
 interface ZeroLockInRequirements {
   // Functional Requirements
-  FR_ZL_001: "MUST export 100% functional Kubernetes manifests";
-  FR_ZL_002: "MUST include all secrets in encrypted format";
-  FR_ZL_003: "MUST generate working CI/CD pipelines";
-  FR_ZL_004: "MUST provide incremental export for changes only";
-  FR_ZL_005: "MUST support multi-environment exports";
-  FR_ZL_006: "MUST include monitoring and observability setup";
-  FR_ZL_007: "MUST generate infrastructure documentation";
-  FR_ZL_008: "MUST provide cost estimates for exported infrastructure";
+  FR_ZL_001: 'MUST export 100% functional Kubernetes manifests';
+  FR_ZL_002: 'MUST include all secrets in encrypted format';
+  FR_ZL_003: 'MUST generate working CI/CD pipelines';
+  FR_ZL_004: 'MUST provide incremental export for changes only';
+  FR_ZL_005: 'MUST support multi-environment exports';
+  FR_ZL_006: 'MUST include monitoring and observability setup';
+  FR_ZL_007: 'MUST generate infrastructure documentation';
+  FR_ZL_008: 'MUST provide cost estimates for exported infrastructure';
 
   // Non-Functional Requirements
-  NFR_ZL_001: "Export generation must complete in < 60 seconds";
-  NFR_ZL_002: "Exported infrastructure must match 100% functionality";
-  NFR_ZL_003: "Support export of up to 1000 resources";
-  NFR_ZL_004: "Maintain export compatibility for 2 years";
+  NFR_ZL_001: 'Export generation must complete in < 60 seconds';
+  NFR_ZL_002: 'Exported infrastructure must match 100% functionality';
+  NFR_ZL_003: 'Support export of up to 1000 resources';
+  NFR_ZL_004: 'Maintain export compatibility for 2 years';
 }
 ```
 
@@ -326,20 +326,20 @@ interface ObservabilityPlatform {
 ```typescript
 interface ObservabilityRequirements {
   // Functional Requirements
-  FR_OB_001: "MUST auto-instrument applications without code changes";
-  FR_OB_002: "MUST provide < 1 second log search latency";
-  FR_OB_003: "MUST correlate metrics, logs, and traces automatically";
-  FR_OB_004: "MUST track costs per service, feature, and customer";
-  FR_OB_005: "MUST detect anomalies using ML algorithms";
-  FR_OB_006: "MUST provide mobile-responsive dashboards";
-  FR_OB_007: "MUST support custom metrics ingestion";
-  FR_OB_008: "MUST export data to external systems";
+  FR_OB_001: 'MUST auto-instrument applications without code changes';
+  FR_OB_002: 'MUST provide < 1 second log search latency';
+  FR_OB_003: 'MUST correlate metrics, logs, and traces automatically';
+  FR_OB_004: 'MUST track costs per service, feature, and customer';
+  FR_OB_005: 'MUST detect anomalies using ML algorithms';
+  FR_OB_006: 'MUST provide mobile-responsive dashboards';
+  FR_OB_007: 'MUST support custom metrics ingestion';
+  FR_OB_008: 'MUST export data to external systems';
 
   // Non-Functional Requirements
-  NFR_OB_001: "Support 1M metrics/second ingestion rate";
-  NFR_OB_002: "Store 30 days of metrics, 7 days of logs";
-  NFR_OB_003: "Provide 99.9% availability for observability stack";
-  NFR_OB_004: "Support 100 concurrent dashboard users";
+  NFR_OB_001: 'Support 1M metrics/second ingestion rate';
+  NFR_OB_002: 'Store 30 days of metrics, 7 days of logs';
+  NFR_OB_003: 'Provide 99.9% availability for observability stack';
+  NFR_OB_004: 'Support 100 concurrent dashboard users';
 }
 ```
 
@@ -521,70 +521,70 @@ interface ExportArtifacts {
 // REST API Structure
 interface APIEndpoints {
   // Public endpoints (no auth)
-  health: "GET /health";
-  status: "GET /status";
-  docs: "GET /api/documentation";
+  health: 'GET /health';
+  status: 'GET /status';
+  docs: 'GET /api/documentation';
 
   // Authentication
   auth: {
-    login: "POST /api/v1/auth/login";
-    logout: "POST /api/v1/auth/logout";
-    refresh: "POST /api/v1/auth/refresh";
-    oauth: "GET /api/v1/auth/:provider/callback";
+    login: 'POST /api/v1/auth/login';
+    logout: 'POST /api/v1/auth/logout';
+    refresh: 'POST /api/v1/auth/refresh';
+    oauth: 'GET /api/v1/auth/:provider/callback';
   };
 
   // Projects & Deployments
   projects: {
-    list: "GET /api/v1/projects";
-    create: "POST /api/v1/projects";
-    get: "GET /api/v1/projects/:id";
-    update: "PUT /api/v1/projects/:id";
-    delete: "DELETE /api/v1/projects/:id";
-    analyze: "POST /api/v1/projects/:id/analyze"; // Magic Deploy
-    deploy: "POST /api/v1/projects/:id/deploy";
-    export: "POST /api/v1/projects/:id/export"; // Zero Lock-in
+    list: 'GET /api/v1/projects';
+    create: 'POST /api/v1/projects';
+    get: 'GET /api/v1/projects/:id';
+    update: 'PUT /api/v1/projects/:id';
+    delete: 'DELETE /api/v1/projects/:id';
+    analyze: 'POST /api/v1/projects/:id/analyze'; // Magic Deploy
+    deploy: 'POST /api/v1/projects/:id/deploy';
+    export: 'POST /api/v1/projects/:id/export'; // Zero Lock-in
   };
 
   // Services
   services: {
-    list: "GET /api/v1/services";
-    get: "GET /api/v1/services/:id";
-    logs: "GET /api/v1/services/:id/logs";
-    metrics: "GET /api/v1/services/:id/metrics";
-    scale: "POST /api/v1/services/:id/scale";
-    restart: "POST /api/v1/services/:id/restart";
+    list: 'GET /api/v1/services';
+    get: 'GET /api/v1/services/:id';
+    logs: 'GET /api/v1/services/:id/logs';
+    metrics: 'GET /api/v1/services/:id/metrics';
+    scale: 'POST /api/v1/services/:id/scale';
+    restart: 'POST /api/v1/services/:id/restart';
   };
 
   // Observability
   observability: {
-    dashboards: "GET /api/v1/dashboards";
-    alerts: "GET /api/v1/alerts";
-    traces: "GET /api/v1/traces/:id";
-    costs: "GET /api/v1/costs";
+    dashboards: 'GET /api/v1/dashboards';
+    alerts: 'GET /api/v1/alerts';
+    traces: 'GET /api/v1/traces/:id';
+    costs: 'GET /api/v1/costs';
   };
 }
 
 // WebSocket Events
 interface RealtimeEvents {
   // Deployment events
-  "deployment.started": DeploymentStartedEvent;
-  "deployment.progress": DeploymentProgressEvent;
-  "deployment.completed": DeploymentCompletedEvent;
-  "deployment.failed": DeploymentFailedEvent;
+  'deployment.started': DeploymentStartedEvent;
+  'deployment.progress': DeploymentProgressEvent;
+  'deployment.completed': DeploymentCompletedEvent;
+  'deployment.failed': DeploymentFailedEvent;
 
   // Service events
-  "service.scaled": ServiceScaledEvent;
-  "service.crashed": ServiceCrashedEvent;
-  "service.recovered": ServiceRecoveredEvent;
+  'service.scaled': ServiceScaledEvent;
+  'service.crashed': ServiceCrashedEvent;
+  'service.recovered': ServiceRecoveredEvent;
 
   // Metrics streams
-  "metrics.cpu": MetricDataPoint;
-  "metrics.memory": MetricDataPoint;
-  "metrics.requests": MetricDataPoint;
+  'metrics.cpu': MetricDataPoint;
+  'metrics.memory': MetricDataPoint;
+  'metrics.requests': MetricDataPoint;
 
   // Log streams
-  "logs.stdout": LogEntry;
-  "logs.stderr": LogEntry;
+  'logs.stdout': LogEntry;
+  'logs.stderr': LogEntry;
 }
 ```
 
@@ -1017,31 +1017,31 @@ Security_Tests:
 // Test Structure for AI Analysis
 interface TestSpecification {
   unit: {
-    framework: "Jest";
-    location: "*.spec.ts alongside source";
-    mocking: "Auto-mock all dependencies";
-    data: "Factories for test data";
+    framework: 'Jest';
+    location: '*.spec.ts alongside source';
+    mocking: 'Auto-mock all dependencies';
+    data: 'Factories for test data';
   };
 
   integration: {
-    framework: "Jest + Supertest";
-    location: "*.integration.spec.ts";
-    database: "Isolated test databases";
-    messaging: "In-memory RabbitMQ";
+    framework: 'Jest + Supertest';
+    location: '*.integration.spec.ts';
+    database: 'Isolated test databases';
+    messaging: 'In-memory RabbitMQ';
   };
 
   e2e: {
-    framework: "Playwright";
-    location: "e2e/*.e2e-spec.ts";
-    environment: "Staging cluster";
-    data: "Seeded test accounts";
+    framework: 'Playwright';
+    location: 'e2e/*.e2e-spec.ts';
+    environment: 'Staging cluster';
+    data: 'Seeded test accounts';
   };
 
   performance: {
-    framework: "k6";
-    location: "performance/*.js";
-    environment: "Load test cluster";
-    metrics: "Prometheus + Grafana";
+    framework: 'k6';
+    location: 'performance/*.js';
+    environment: 'Load test cluster';
+    metrics: 'Prometheus + Grafana';
   };
 }
 ```
@@ -1100,22 +1100,22 @@ Satisfaction_Metrics:
 
 ### 8.1 Technical Risks
 
-| Risk | Impact | Probability | Mitigation Strategy |
-|------|--------|-------------|-------------------|
-| **Magic Deploy Accuracy** | Critical | Medium | Extensive framework testing, fallback to manual config, continuous learning from failures |
-| **Kubernetes Complexity** | High | High | Use managed K8s services, build abstraction layers, hire K8s experts |
-| **Multi-tenant Security** | Critical | Low | Namespace isolation, network policies, regular security audits, penetration testing |
-| **Export Completeness** | High | Low | Comprehensive testing, validation suite, gradual rollout with user feedback |
-| **Scale Bottlenecks** | High | Medium | Horizontal architecture, database sharding ready, caching strategies |
+| Risk                      | Impact   | Probability | Mitigation Strategy                                                                       |
+| ------------------------- | -------- | ----------- | ----------------------------------------------------------------------------------------- |
+| **Magic Deploy Accuracy** | Critical | Medium      | Extensive framework testing, fallback to manual config, continuous learning from failures |
+| **Kubernetes Complexity** | High     | High        | Use managed K8s services, build abstraction layers, hire K8s experts                      |
+| **Multi-tenant Security** | Critical | Low         | Namespace isolation, network policies, regular security audits, penetration testing       |
+| **Export Completeness**   | High     | Low         | Comprehensive testing, validation suite, gradual rollout with user feedback               |
+| **Scale Bottlenecks**     | High     | Medium      | Horizontal architecture, database sharding ready, caching strategies                      |
 
 ### 8.2 Business Risks
 
-| Risk | Impact | Probability | Mitigation Strategy |
-|------|--------|-------------|-------------------|
-| **Slow Adoption** | Critical | Medium | Generous free tier, migration tools, developer advocacy, conference presence |
-| **Competition** | High | High | Focus on unique features (Magic Deploy, Zero Lock-in), rapid iteration |
-| **Funding Runway** | Critical | Medium | Bootstrap with revenue, efficient burn rate, clear path to profitability |
-| **Talent Acquisition** | Medium | High | Remote-first, competitive equity, strong engineering culture |
+| Risk                   | Impact   | Probability | Mitigation Strategy                                                          |
+| ---------------------- | -------- | ----------- | ---------------------------------------------------------------------------- |
+| **Slow Adoption**      | Critical | Medium      | Generous free tier, migration tools, developer advocacy, conference presence |
+| **Competition**        | High     | High        | Focus on unique features (Magic Deploy, Zero Lock-in), rapid iteration       |
+| **Funding Runway**     | Critical | Medium      | Bootstrap with revenue, efficient burn rate, clear path to profitability     |
+| **Talent Acquisition** | Medium   | High        | Remote-first, competitive equity, strong engineering culture                 |
 
 ---
 
@@ -1172,13 +1172,13 @@ Regulatory_Constraints:
 
 ### 10.1 Glossary
 
-| Term | Definition |
-|------|-----------|
-| **Magic Deploy™** | Capsule's zero-configuration deployment system that automatically detects and configures any application |
-| **Zero Lock-in** | Complete infrastructure portability with full export to standard formats |
-| **Bounded Context** | DDD pattern defining clear boundaries around business domains |
-| **Detection Engine** | System that analyzes repository structure to understand project configuration |
-| **Export Artifacts** | Generated Kubernetes, Terraform, and Docker files for infrastructure portability |
+| Term                 | Definition                                                                                               |
+| -------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Magic Deploy™**   | Capsule's zero-configuration deployment system that automatically detects and configures any application |
+| **Zero Lock-in**     | Complete infrastructure portability with full export to standard formats                                 |
+| **Bounded Context**  | DDD pattern defining clear boundaries around business domains                                            |
+| **Detection Engine** | System that analyzes repository structure to understand project configuration                            |
+| **Export Artifacts** | Generated Kubernetes, Terraform, and Docker files for infrastructure portability                         |
 
 ### 10.2 Reference Architecture Diagrams
 
@@ -1205,27 +1205,27 @@ Documentation:
 
 ### 10.4 Decision Log
 
-| Date | Decision | Rationale | Alternatives Considered |
-|------|----------|-----------|------------------------|
-| 2025-01-15 | Use NestJS for all services | DDD support, enterprise-ready, TypeScript native | Express, Fastify, Koa |
-| 2025-01-16 | RabbitMQ for messaging | Reliability, ease of operation, broad support | Kafka, NATS, Redis Pub/Sub |
-| 2025-01-17 | PostgreSQL per service | ACID compliance, JSON support, extensions | MongoDB, CockroachDB |
-| 2025-01-18 | Kubernetes as platform | Industry standard, portability, ecosystem | ECS, Cloud Run, Nomad |
+| Date       | Decision                    | Rationale                                        | Alternatives Considered    |
+| ---------- | --------------------------- | ------------------------------------------------ | -------------------------- |
+| 2025-01-15 | Use NestJS for all services | DDD support, enterprise-ready, TypeScript native | Express, Fastify, Koa      |
+| 2025-01-16 | RabbitMQ for messaging      | Reliability, ease of operation, broad support    | Kafka, NATS, Redis Pub/Sub |
+| 2025-01-17 | PostgreSQL per service      | ACID compliance, JSON support, extensions        | MongoDB, CockroachDB       |
+| 2025-01-18 | Kubernetes as platform      | Industry standard, portability, ecosystem        | ECS, Cloud Run, Nomad      |
 
 ---
 
 ## 11. Approval & Sign-off
 
-| Role | Name | Signature | Date |
-|------|------|-----------|------|
-| CEO & Founder | Danilo Martinelli | _______ | _____ |
-| CTO & Co-founder | Anderson Araújo | _______ | _____ |
-| Lead Platform Engineer | TBD | _______ | _____ |
-| Product Manager | TBD | _______ | _____ |
+| Role                   | Name              | Signature  | Date   |
+| ---------------------- | ----------------- | ---------- | ------ |
+| CEO & Founder          | Danilo Martinelli | **\_\_\_** | **\_** |
+| CTO & Co-founder       | Anderson Araújo   | **\_\_\_** | **\_** |
+| Lead Platform Engineer | TBD               | **\_\_\_** | **\_** |
+| Product Manager        | TBD               | **\_\_\_** | **\_** |
 
 ---
 
-*This document serves as the authoritative technical specification for Capsule Platform development. Updates require approval from technical leadership and must maintain backward compatibility with existing decisions.*
+_This document serves as the authoritative technical specification for Capsule Platform development. Updates require approval from technical leadership and must maintain backward compatibility with existing decisions._
 
 **Document Status**: Living document - Updates tracked in Git
 **Next Review**: End of Phase 1 (March 2025)

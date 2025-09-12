@@ -15,18 +15,18 @@ export function createAmqpConnectionMock(): jest.Mocked<AmqpConnection> {
     publish: publishMock,
     addSetup: addSetupMock,
     channel: channelMock,
-    
+
     // Connection properties
     isConnected: true,
     managedConnection: {
       close: jest.fn(),
       createChannel: jest.fn(),
     },
-    
+
     // Other AmqpConnection methods that might be accessed
     createSubscriber: jest.fn(),
     init: jest.fn(),
-    
+
     // Reset function for test cleanup
     resetMocks: () => {
       requestMock.mockReset();
@@ -80,14 +80,21 @@ export class AmqpConnectionMockHelper {
       if (options.routingKey === routingKey) {
         return Promise.resolve(response);
       }
-      return Promise.reject(new Error(`Unmocked routing key: ${options.routingKey}`));
+      return Promise.reject(
+        new Error(`Unmocked routing key: ${options.routingKey}`),
+      );
     });
   }
 
   /**
    * Verify request was called with expected parameters
    */
-  expectRequestCalled(exchange: string, routingKey: string, payload: any = {}, timeout = 5000) {
+  expectRequestCalled(
+    exchange: string,
+    routingKey: string,
+    payload: any = {},
+    timeout = 5000,
+  ) {
     expect(this.mock.request).toHaveBeenCalledWith({
       exchange,
       routingKey,
@@ -100,7 +107,11 @@ export class AmqpConnectionMockHelper {
    * Verify publish was called with expected parameters
    */
   expectPublishCalled(exchange: string, routingKey: string, payload: any) {
-    expect(this.mock.publish).toHaveBeenCalledWith(exchange, routingKey, payload);
+    expect(this.mock.publish).toHaveBeenCalledWith(
+      exchange,
+      routingKey,
+      payload,
+    );
   }
 
   /**

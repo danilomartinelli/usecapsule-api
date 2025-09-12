@@ -41,7 +41,7 @@ export class RabbitMQTestContainer {
       .start();
 
     // Wait a bit more for RabbitMQ to be fully ready
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     return this.container;
   }

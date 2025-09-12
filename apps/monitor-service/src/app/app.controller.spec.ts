@@ -26,7 +26,7 @@ describe('Monitor Service - AppController', () => {
 
     controller = module.get<AppController>(AppController);
     appService = module.get(AppService);
-    
+
     // Fix for NestJS DI issue with RabbitMQ decorators
     // The @RabbitRPC decorator interferes with constructor parameter injection
     if (!(controller as any).appService) {
@@ -41,10 +41,11 @@ describe('Monitor Service - AppController', () => {
   describe('healthCheck', () => {
     it('should return health response from AppService', () => {
       // Arrange
-      const expectedResponse: HealthCheckResponse = HealthTestHelper.createHealthResponse(
-        'monitor-service',
-        HealthStatus.HEALTHY
-      );
+      const expectedResponse: HealthCheckResponse =
+        HealthTestHelper.createHealthResponse(
+          'monitor-service',
+          HealthStatus.HEALTHY,
+        );
 
       appService.getHealthStatus.mockReturnValue(expectedResponse);
 
@@ -59,10 +60,11 @@ describe('Monitor Service - AppController', () => {
 
     it('should handle healthy status', () => {
       // Arrange
-      const healthyResponse: HealthCheckResponse = HealthTestHelper.createHealthResponse(
-        'monitor-service',
-        HealthStatus.HEALTHY
-      );
+      const healthyResponse: HealthCheckResponse =
+        HealthTestHelper.createHealthResponse(
+          'monitor-service',
+          HealthStatus.HEALTHY,
+        );
 
       appService.getHealthStatus.mockReturnValue(healthyResponse);
 
@@ -76,11 +78,12 @@ describe('Monitor Service - AppController', () => {
 
     it('should handle unhealthy status', () => {
       // Arrange
-      const unhealthyResponse: HealthCheckResponse = HealthTestHelper.createHealthResponse(
-        'monitor-service',
-        HealthStatus.UNHEALTHY,
-        { error: 'Database connection failed' }
-      );
+      const unhealthyResponse: HealthCheckResponse =
+        HealthTestHelper.createHealthResponse(
+          'monitor-service',
+          HealthStatus.UNHEALTHY,
+          { error: 'Database connection failed' },
+        );
 
       appService.getHealthStatus.mockReturnValue(unhealthyResponse);
 
@@ -90,16 +93,20 @@ describe('Monitor Service - AppController', () => {
       // Assert
       expect(result).toBeUnhealthy();
       expect(result.service).toBe('monitor-service');
-      expect(result.metadata).toHaveProperty('error', 'Database connection failed');
+      expect(result.metadata).toHaveProperty(
+        'error',
+        'Database connection failed',
+      );
     });
 
     it('should handle degraded status', () => {
       // Arrange
-      const degradedResponse: HealthCheckResponse = HealthTestHelper.createHealthResponse(
-        'monitor-service',
-        HealthStatus.DEGRADED,
-        { warning: 'High response times detected' }
-      );
+      const degradedResponse: HealthCheckResponse =
+        HealthTestHelper.createHealthResponse(
+          'monitor-service',
+          HealthStatus.DEGRADED,
+          { warning: 'High response times detected' },
+        );
 
       appService.getHealthStatus.mockReturnValue(degradedResponse);
 
@@ -109,16 +116,20 @@ describe('Monitor Service - AppController', () => {
       // Assert
       expect(result).toBeDegraded();
       expect(result.service).toBe('monitor-service');
-      expect(result.metadata).toHaveProperty('warning', 'High response times detected');
+      expect(result.metadata).toHaveProperty(
+        'warning',
+        'High response times detected',
+      );
     });
 
     it('should not modify the response from AppService', () => {
       // Arrange
-      const originalResponse: HealthCheckResponse = HealthTestHelper.createHealthResponse(
-        'monitor-service',
-        HealthStatus.HEALTHY,
-        { customField: 'customValue' }
-      );
+      const originalResponse: HealthCheckResponse =
+        HealthTestHelper.createHealthResponse(
+          'monitor-service',
+          HealthStatus.HEALTHY,
+          { customField: 'customValue' },
+        );
 
       const responseCopy = JSON.parse(JSON.stringify(originalResponse));
       appService.getHealthStatus.mockReturnValue(originalResponse);
@@ -139,16 +150,19 @@ describe('Monitor Service - AppController', () => {
       });
 
       // Act & Assert
-      expect(() => controller.healthCheck()).toThrow('Service initialization failed');
+      expect(() => controller.healthCheck()).toThrow(
+        'Service initialization failed',
+      );
       expect(appService.getHealthStatus).toHaveBeenCalledTimes(1);
     });
 
     it('should handle concurrent health check calls', () => {
       // Arrange
-      const healthyResponse: HealthCheckResponse = HealthTestHelper.createHealthResponse(
-        'monitor-service',
-        HealthStatus.HEALTHY
-      );
+      const healthyResponse: HealthCheckResponse =
+        HealthTestHelper.createHealthResponse(
+          'monitor-service',
+          HealthStatus.HEALTHY,
+        );
 
       appService.getHealthStatus.mockReturnValue(healthyResponse);
 
@@ -175,7 +189,7 @@ describe('Monitor Service - AppController', () => {
         return HealthTestHelper.createHealthResponse(
           'monitor-service',
           HealthStatus.HEALTHY,
-          { callNumber: callCount }
+          { callNumber: callCount },
         );
       });
 
@@ -196,10 +210,11 @@ describe('Monitor Service - AppController', () => {
 
     it('should respond immediately without async operations', () => {
       // Arrange
-      const healthyResponse: HealthCheckResponse = HealthTestHelper.createHealthResponse(
-        'monitor-service',
-        HealthStatus.HEALTHY
-      );
+      const healthyResponse: HealthCheckResponse =
+        HealthTestHelper.createHealthResponse(
+          'monitor-service',
+          HealthStatus.HEALTHY,
+        );
 
       appService.getHealthStatus.mockReturnValue(healthyResponse);
 
@@ -221,7 +236,7 @@ describe('Monitor Service - AppController', () => {
       // This test verifies that the controller method has the correct decorator metadata
       // In a real scenario, we would check that the method is properly registered
       // with the RabbitMQ message handler
-      
+
       const healthCheckMethod = controller.healthCheck;
       expect(healthCheckMethod).toBeDefined();
       expect(typeof healthCheckMethod).toBe('function');
@@ -230,11 +245,12 @@ describe('Monitor Service - AppController', () => {
     it('should be accessible via RabbitMQ routing', () => {
       // This test would ideally verify the RPC routing configuration
       // For unit tests, we verify the method exists and works correctly
-      
-      const healthyResponse: HealthCheckResponse = HealthTestHelper.createHealthResponse(
-        'monitor-service',
-        HealthStatus.HEALTHY
-      );
+
+      const healthyResponse: HealthCheckResponse =
+        HealthTestHelper.createHealthResponse(
+          'monitor-service',
+          HealthStatus.HEALTHY,
+        );
 
       appService.getHealthStatus.mockReturnValue(healthyResponse);
 

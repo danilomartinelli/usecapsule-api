@@ -80,7 +80,9 @@ describe('Auth Service - AppService', () => {
 
     it('should be thread-safe for concurrent calls', () => {
       // Act
-      const results = Array.from({ length: 100 }, () => service.getHealthStatus());
+      const results = Array.from({ length: 100 }, () =>
+        service.getHealthStatus(),
+      );
 
       // Assert
       for (const result of results) {

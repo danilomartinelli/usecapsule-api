@@ -35,12 +35,13 @@ describe('AppController', () => {
   describe('checkHealth', () => {
     it('should return aggregated health status from AppService', async () => {
       // Arrange
-      const expectedResponse: AggregatedHealthResponse = HealthTestHelper.createAggregatedResponse({
-        'auth-service': HealthStatus.HEALTHY,
-        'billing-service': HealthStatus.HEALTHY,
-        'deploy-service': HealthStatus.HEALTHY,
-        'monitor-service': HealthStatus.HEALTHY,
-      });
+      const expectedResponse: AggregatedHealthResponse =
+        HealthTestHelper.createAggregatedResponse({
+          'auth-service': HealthStatus.HEALTHY,
+          'billing-service': HealthStatus.HEALTHY,
+          'deploy-service': HealthStatus.HEALTHY,
+          'monitor-service': HealthStatus.HEALTHY,
+        });
 
       appService.checkAllServicesHealth.mockResolvedValue(expectedResponse);
 
@@ -55,12 +56,16 @@ describe('AppController', () => {
 
     it('should handle degraded health status', async () => {
       // Arrange
-      const expectedResponse: AggregatedHealthResponse = HealthTestHelper.createAggregatedResponse({
-        'auth-service': HealthStatus.HEALTHY,
-        'billing-service': HealthStatus.UNHEALTHY,
-        'deploy-service': HealthStatus.HEALTHY,
-        'monitor-service': HealthStatus.HEALTHY,
-      }, HealthStatus.DEGRADED);
+      const expectedResponse: AggregatedHealthResponse =
+        HealthTestHelper.createAggregatedResponse(
+          {
+            'auth-service': HealthStatus.HEALTHY,
+            'billing-service': HealthStatus.UNHEALTHY,
+            'deploy-service': HealthStatus.HEALTHY,
+            'monitor-service': HealthStatus.HEALTHY,
+          },
+          HealthStatus.DEGRADED,
+        );
 
       appService.checkAllServicesHealth.mockResolvedValue(expectedResponse);
 
@@ -74,12 +79,16 @@ describe('AppController', () => {
 
     it('should handle unhealthy status', async () => {
       // Arrange
-      const expectedResponse: AggregatedHealthResponse = HealthTestHelper.createAggregatedResponse({
-        'auth-service': HealthStatus.UNHEALTHY,
-        'billing-service': HealthStatus.UNHEALTHY,
-        'deploy-service': HealthStatus.UNHEALTHY,
-        'monitor-service': HealthStatus.HEALTHY,
-      }, HealthStatus.UNHEALTHY);
+      const expectedResponse: AggregatedHealthResponse =
+        HealthTestHelper.createAggregatedResponse(
+          {
+            'auth-service': HealthStatus.UNHEALTHY,
+            'billing-service': HealthStatus.UNHEALTHY,
+            'deploy-service': HealthStatus.UNHEALTHY,
+            'monitor-service': HealthStatus.HEALTHY,
+          },
+          HealthStatus.UNHEALTHY,
+        );
 
       appService.checkAllServicesHealth.mockResolvedValue(expectedResponse);
 
@@ -97,18 +106,21 @@ describe('AppController', () => {
       appService.checkAllServicesHealth.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(controller.checkHealth()).rejects.toThrow('Service unavailable');
+      await expect(controller.checkHealth()).rejects.toThrow(
+        'Service unavailable',
+      );
       expect(appService.checkAllServicesHealth).toHaveBeenCalledTimes(1);
     });
 
     it('should not modify the response from AppService', async () => {
       // Arrange
-      const originalResponse: AggregatedHealthResponse = HealthTestHelper.createAggregatedResponse({
-        'auth-service': HealthStatus.HEALTHY,
-        'billing-service': HealthStatus.DEGRADED,
-        'deploy-service': HealthStatus.HEALTHY,
-        'monitor-service': HealthStatus.HEALTHY,
-      });
+      const originalResponse: AggregatedHealthResponse =
+        HealthTestHelper.createAggregatedResponse({
+          'auth-service': HealthStatus.HEALTHY,
+          'billing-service': HealthStatus.DEGRADED,
+          'deploy-service': HealthStatus.HEALTHY,
+          'monitor-service': HealthStatus.HEALTHY,
+        });
 
       const responseCopy = JSON.parse(JSON.stringify(originalResponse));
       appService.checkAllServicesHealth.mockResolvedValue(originalResponse);
@@ -164,7 +176,9 @@ describe('AppController', () => {
       const result = controller.healthReady();
 
       // Assert
-      expect(result.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/);
+      expect(result.timestamp).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/,
+      );
       expect(new Date(result.timestamp)).toBeInstanceOf(Date);
       expect(isNaN(new Date(result.timestamp).getTime())).toBe(false);
     });
@@ -185,7 +199,7 @@ describe('AppController', () => {
       }
 
       // Timestamps should be different (or very close)
-      const timestamps = results.map(r => new Date(r.timestamp).getTime());
+      const timestamps = results.map((r) => new Date(r.timestamp).getTime());
       expect(timestamps[0]).toBeLessThanOrEqual(timestamps[1]);
       expect(timestamps[1]).toBeLessThanOrEqual(timestamps[2]);
     });

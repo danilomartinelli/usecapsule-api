@@ -1,4 +1,4 @@
-import { Connection, Channel, connect, Message } from 'amqplib';
+import { Connection, Channel, connect } from 'amqplib';
 import * as uuid from 'uuid';
 
 export interface TestExchange {
@@ -99,7 +99,7 @@ export class RabbitMQTestClient {
       await this.channel.assertExchange(
         exchangeName,
         exchange.type,
-        exchange.options ?? { durable: false }
+        exchange.options ?? { durable: false },
       );
     }
   }
@@ -109,7 +109,10 @@ export class RabbitMQTestClient {
 
     for (const queue of this.config.queues) {
       const queueName = this.getTestName(queue.name);
-      await this.channel.assertQueue(queueName, queue.options ?? { durable: false });
+      await this.channel.assertQueue(
+        queueName,
+        queue.options ?? { durable: false },
+      );
     }
   }
 
@@ -163,7 +166,7 @@ export class RabbitMQTestClient {
     exchange: string,
     routingKey: string,
     content: any,
-    options: any = {}
+    options: any = {},
   ): Promise<void> {
     if (!this.channel) {
       throw new Error('Not connected. Call connect() first.');
@@ -183,26 +186,28 @@ export class RabbitMQTestClient {
     exchange: string,
     routingKey: string,
     content: any,
-    timeout: number = 5000
+    timeout = 5000,
   ): Promise<T> {
     if (!this.channel) {
       throw new Error('Not connected. Call connect() first.');
     }
 
-    return new Promise(async (resolve, reject) => {
-      const correlationId = uuid.v4();
-      const exchangeName = this.getTestName(exchange);
+    const correlationId = uuid.v4();
+    const exchangeName = this.getTestName(exchange);
 
-      // Create temporary queue for response
-      const replyQueue = await this.channel!.assertQueue('', { exclusive: true });
+    // Create temporary queue for response
+    const replyQueue = await this.channel.assertQueue('', {
+      exclusive: true,
+    });
 
+    return new Promise((resolve, reject) => {
       // Set up timeout
       const timeoutHandle = setTimeout(() => {
         reject(new Error(`RPC request timeout after ${timeout}ms`));
       }, timeout);
 
       // Consume response
-      const consumerTag = await this.channel!.consume(
+      this.channel!.consume(
         replyQueue.queue,
         (msg) => {
           if (msg && msg.properties.correlationId === correlationId) {
@@ -216,25 +221,27 @@ export class RabbitMQTestClient {
             this.channel!.ack(msg);
           }
         },
-        { noAck: false }
-      );
+        { noAck: false },
+      )
+        .then((consumerTag) => {
+          this.consumerTags.push(consumerTag.consumerTag);
 
-      this.consumerTags.push(consumerTag.consumerTag);
-
-      // Send request
-      const messageContent = Buffer.from(JSON.stringify(content));
-      this.channel!.publish(exchangeName, routingKey, messageContent, {
-        correlationId,
-        replyTo: replyQueue.queue,
-        timestamp: Date.now(),
-        messageId: uuid.v4(),
-      });
+          // Send request
+          const messageContent = Buffer.from(JSON.stringify(content));
+          this.channel!.publish(exchangeName, routingKey, messageContent, {
+            correlationId,
+            replyTo: replyQueue.queue,
+            timestamp: Date.now(),
+            messageId: uuid.v4(),
+          });
+        })
+        .catch(reject);
     });
   }
 
   async captureMessages(
     queueName: string,
-    captureKey?: string
+    captureKey?: string,
   ): Promise<string> {
     if (!this.channel) {
       throw new Error('Not connected. Call connect() first.');
@@ -264,7 +271,7 @@ export class RabbitMQTestClient {
           this.channel!.ack(msg);
         }
       },
-      { noAck: false }
+      { noAck: false },
     );
 
     this.consumerTags.push(consumerTag.consumerTag);
@@ -291,15 +298,15 @@ export class RabbitMQTestClient {
   async waitForMessages(
     captureKey: string,
     expectedCount: number,
-    timeout: number = 5000
+    timeout = 5000,
   ): Promise<MessageCapture[]> {
     return new Promise((resolve, reject) => {
       const timeoutHandle = setTimeout(() => {
         const currentCount = this.getCapturedMessages(captureKey).length;
         reject(
           new Error(
-            `Timeout waiting for ${expectedCount} messages. Got ${currentCount} after ${timeout}ms`
-          )
+            `Timeout waiting for ${expectedCount} messages. Got ${currentCount} after ${timeout}ms`,
+          ),
         );
       }, timeout);
 

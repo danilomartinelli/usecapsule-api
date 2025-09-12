@@ -45,9 +45,11 @@ describe('Health Check Integration Tests', () => {
         .expect(200);
 
       expect(response.body).toHaveValidAggregatedHealthResponse();
-      
+
       // Services may be unhealthy in integration tests (microservices not running)
-      expect(['healthy', 'degraded', 'unhealthy']).toContain(response.body.status);
+      expect(['healthy', 'degraded', 'unhealthy']).toContain(
+        response.body.status,
+      );
       expect(response.body.services).toBeDefined();
       expect(Object.keys(response.body.services)).toContain('auth-service');
       expect(Object.keys(response.body.services)).toContain('billing-service');
@@ -55,13 +57,20 @@ describe('Health Check Integration Tests', () => {
       expect(Object.keys(response.body.services)).toContain('monitor-service');
 
       // Verify each service has proper health response structure
-      for (const [serviceName, serviceHealth] of Object.entries(response.body.services)) {
+      for (const [serviceName, serviceHealth] of Object.entries(
+        response.body.services,
+      )) {
         expect(serviceHealth).toHaveValidHealthResponse();
         expect(serviceHealth.service).toBe(serviceName);
-        
+
         // If unhealthy, should have error metadata
-        if (serviceHealth.status === HealthStatus.UNHEALTHY && serviceHealth.metadata?.error) {
-          expect(serviceHealth.metadata.error).toMatch(/(timeout|unreachable)/i);
+        if (
+          serviceHealth.status === HealthStatus.UNHEALTHY &&
+          serviceHealth.metadata?.error
+        ) {
+          expect(serviceHealth.metadata.error).toMatch(
+            /(timeout|unreachable)/i,
+          );
         }
       }
     });
@@ -74,7 +83,9 @@ describe('Health Check Integration Tests', () => {
         .expect(200);
 
       expect(response.body).toHaveValidAggregatedHealthResponse();
-      expect(['healthy', 'degraded', 'unhealthy']).toContain(response.body.status);
+      expect(['healthy', 'degraded', 'unhealthy']).toContain(
+        response.body.status,
+      );
     });
 
     it('should handle service timeout gracefully', async () => {
@@ -84,12 +95,19 @@ describe('Health Check Integration Tests', () => {
         .expect(200);
 
       expect(response.body).toHaveValidAggregatedHealthResponse();
-      
+
       // Check that even if some services timeout, we get a valid response
-      for (const [serviceName, serviceHealth] of Object.entries(response.body.services)) {
+      for (const [serviceName, serviceHealth] of Object.entries(
+        response.body.services,
+      )) {
         expect(serviceHealth).toHaveValidHealthResponse();
-        if (serviceHealth.status === HealthStatus.UNHEALTHY && serviceHealth.metadata?.error) {
-          expect(serviceHealth.metadata.error).toMatch(/(timeout|unreachable)/i);
+        if (
+          serviceHealth.status === HealthStatus.UNHEALTHY &&
+          serviceHealth.metadata?.error
+        ) {
+          expect(serviceHealth.metadata.error).toMatch(
+            /(timeout|unreachable)/i,
+          );
         }
       }
     });
@@ -108,13 +126,15 @@ describe('Health Check Integration Tests', () => {
       const expectedServices = HealthTestHelper.getExpectedServiceNames();
       for (const serviceName of expectedServices) {
         expect(healthResponse.services[serviceName]).toBeDefined();
-        expect(healthResponse.services[serviceName]).toHaveValidHealthResponse();
+        expect(
+          healthResponse.services[serviceName],
+        ).toHaveValidHealthResponse();
       }
     });
 
     it('should include proper timestamps', async () => {
       const startTime = Date.now();
-      
+
       const response = await request(app.getHttpServer())
         .get('/health')
         .expect(200);
@@ -136,7 +156,7 @@ describe('Health Check Integration Tests', () => {
     it('should handle multiple concurrent health check requests', async () => {
       const concurrentRequests = 5;
       const promises = Array.from({ length: concurrentRequests }, () =>
-        request(app.getHttpServer()).get('/health').expect(200)
+        request(app.getHttpServer()).get('/health').expect(200),
       );
 
       const responses = await Promise.all(promises);
@@ -154,17 +174,21 @@ describe('Health Check Integration Tests', () => {
         .get('/health')
         .expect(200);
 
-      for (const [serviceName, serviceHealth] of Object.entries(response.body.services)) {
+      for (const [serviceName, serviceHealth] of Object.entries(
+        response.body.services,
+      )) {
         expect(serviceHealth.metadata).toBeDefined();
-        
+
         if (serviceHealth.status === HealthStatus.UNHEALTHY) {
           // Unhealthy services should have error information
           expect(serviceHealth.metadata).toHaveProperty('error');
-          
+
           if (serviceHealth.metadata.routingKey) {
-            expect(serviceHealth.metadata.routingKey).toBe(`${serviceName.replace('-service', '')}.health`);
+            expect(serviceHealth.metadata.routingKey).toBe(
+              `${serviceName.replace('-service', '')}.health`,
+            );
           }
-          
+
           if (serviceHealth.metadata.exchange) {
             expect(serviceHealth.metadata.exchange).toBe('capsule.commands');
           }
@@ -189,13 +213,11 @@ describe('Health Check Integration Tests', () => {
 
     it('should respond quickly for load balancer checks', async () => {
       const startTime = Date.now();
-      
-      await request(app.getHttpServer())
-        .get('/health/ready')
-        .expect(200);
+
+      await request(app.getHttpServer()).get('/health/ready').expect(200);
 
       const responseTime = Date.now() - startTime;
-      
+
       // Ready endpoint should respond in under 100ms
       expect(responseTime).toBeLessThan(100);
     });
@@ -207,20 +229,20 @@ describe('Health Check Integration Tests', () => {
       it(`should handle ${scenario.name} scenario correctly`, async () => {
         // For integration tests, we would need to mock the RabbitMQ responses
         // This demonstrates the test structure for different scenarios
-        
+
         const expectedResponse = HealthTestHelper.createAggregatedResponse(
           scenario.services,
-          scenario.expectedOverallStatus
+          scenario.expectedOverallStatus,
         );
 
         // In a full integration test, we would:
         // 1. Mock RabbitMQ responses for each service
         // 2. Make the health check request
         // 3. Verify the aggregated response matches expectations
-        
+
         expect(expectedResponse.status).toBe(scenario.expectedOverallStatus);
         expect(Object.keys(expectedResponse.services)).toEqual(
-          Object.keys(scenario.services)
+          Object.keys(scenario.services),
         );
       });
     });

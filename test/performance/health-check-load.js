@@ -10,30 +10,30 @@ const serviceHealthyRate = new Rate('services_healthy');
 // Test configuration
 export const options = {
   stages: [
-    { duration: '1m', target: 10 },  // Ramp up to 10 users
-    { duration: '3m', target: 10 },  // Stay at 10 users
-    { duration: '1m', target: 20 },  // Ramp up to 20 users  
-    { duration: '3m', target: 20 },  // Stay at 20 users
-    { duration: '1m', target: 0 },   // Ramp down
+    { duration: '1m', target: 10 }, // Ramp up to 10 users
+    { duration: '3m', target: 10 }, // Stay at 10 users
+    { duration: '1m', target: 20 }, // Ramp up to 20 users
+    { duration: '3m', target: 20 }, // Stay at 20 users
+    { duration: '1m', target: 0 }, // Ramp down
   ],
   thresholds: {
     // Health check should succeed at least 95% of the time
-    'health_check_failures': ['rate<0.05'],
-    
+    health_check_failures: ['rate<0.05'],
+
     // Average response time should be under 2 seconds
-    'health_check_duration': ['avg<2000'],
-    
+    health_check_duration: ['avg<2000'],
+
     // 95th percentile should be under 5 seconds
-    'health_check_duration': ['p(95)<5000'],
-    
+    health_check_duration: ['p(95)<5000'],
+
     // Most services should be healthy most of the time
-    'services_healthy': ['rate>0.8'],
-    
+    services_healthy: ['rate>0.8'],
+
     // HTTP error rate should be low
-    'http_req_failed': ['rate<0.1'],
-    
+    http_req_failed: ['rate<0.1'],
+
     // Request duration targets
-    'http_req_duration': ['med<1000', 'p(95)<3000'],
+    http_req_duration: ['med<1000', 'p(95)<3000'],
   },
 };
 
@@ -49,14 +49,15 @@ export default function () {
     },
     timeout: '10s',
   });
-  
+
   const duration = Date.now() - startTime;
   healthCheckDuration.add(duration);
 
   // Check response status
   const statusOk = check(response, {
     'status is 200': (r) => r.status === 200,
-    'has valid content-type': (r) => r.headers['Content-Type']?.includes('application/json'),
+    'has valid content-type': (r) =>
+      r.headers['Content-Type']?.includes('application/json'),
     'response time < 10s': (r) => r.timings.duration < 10000,
   });
 
@@ -81,7 +82,8 @@ export default function () {
     'has status field': (data) => data.status !== undefined,
     'has services field': (data) => data.services !== undefined,
     'has timestamp field': (data) => data.timestamp !== undefined,
-    'status is valid': (data) => ['healthy', 'degraded', 'unhealthy'].includes(data.status),
+    'status is valid': (data) =>
+      ['healthy', 'degraded', 'unhealthy'].includes(data.status),
     'timestamp is recent': (data) => {
       const responseTime = new Date(data.timestamp).getTime();
       const now = Date.now();
@@ -96,19 +98,26 @@ export default function () {
 
   // Check individual service health
   const services = healthData.services || {};
-  const expectedServices = ['auth-service', 'billing-service', 'deploy-service', 'monitor-service'];
-  
+  const expectedServices = [
+    'auth-service',
+    'billing-service',
+    'deploy-service',
+    'monitor-service',
+  ];
+
   let healthyServices = 0;
   let totalServices = expectedServices.length;
 
   for (const serviceName of expectedServices) {
     const serviceHealth = services[serviceName];
-    
+
     const serviceValid = check(serviceHealth, {
       [`${serviceName} exists`]: (service) => service !== undefined,
       [`${serviceName} has status`]: (service) => service?.status !== undefined,
-      [`${serviceName} has timestamp`]: (service) => service?.timestamp !== undefined,
-      [`${serviceName} has service field`]: (service) => service?.service === serviceName,
+      [`${serviceName} has timestamp`]: (service) =>
+        service?.timestamp !== undefined,
+      [`${serviceName} has service field`]: (service) =>
+        service?.service === serviceName,
     });
 
     if (serviceValid && serviceHealth?.status === 'healthy') {
@@ -120,12 +129,16 @@ export default function () {
   serviceHealthyRate.add(healthyServices / totalServices);
 
   // Log important metrics occasionally
-  if (Math.random() < 0.1) { // 10% of requests
-    console.log(`Health check - Status: ${healthData.status}, Duration: ${duration}ms, Healthy Services: ${healthyServices}/${totalServices}`);
+  if (Math.random() < 0.1) {
+    // 10% of requests
+    console.log(
+      `Health check - Status: ${healthData.status}, Duration: ${duration}ms, Healthy Services: ${healthyServices}/${totalServices}`,
+    );
   }
 
   // Test the ready endpoint occasionally
-  if (Math.random() < 0.2) { // 20% of requests
+  if (Math.random() < 0.2) {
+    // 20% of requests
     const readyResponse = http.get(`${BASE_URL}/health/ready`, {
       timeout: '2s',
     });
@@ -144,14 +157,14 @@ export default function () {
 export function setup() {
   console.log('Starting health check load test...');
   console.log(`Base URL: ${BASE_URL}`);
-  
+
   // Verify the service is accessible
   const response = http.get(`${BASE_URL}/health/ready`);
   if (response.status !== 200) {
     console.error('Service is not ready for testing!');
     return null;
   }
-  
+
   console.log('Service is ready, beginning load test');
   return { baseUrl: BASE_URL };
 }

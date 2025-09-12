@@ -231,7 +231,7 @@ export class HttpFixtureFactory {
       },
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${deploymentData?.token || 'test-token'}`,
+        Authorization: `Bearer ${deploymentData?.token || 'test-token'}`,
       },
     };
   }
@@ -248,7 +248,7 @@ export class HttpFixtureFactory {
       },
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${chargeData?.token || 'test-token'}`,
+        Authorization: `Bearer ${chargeData?.token || 'test-token'}`,
       },
     };
   }
@@ -256,7 +256,7 @@ export class HttpFixtureFactory {
   static createErrorResponse(
     statusCode: number,
     message: string,
-    details?: any
+    details?: any,
   ): HttpResponseFixture {
     return {
       statusCode,
@@ -277,16 +277,14 @@ export class HttpFixtureFactory {
     return this.createErrorResponse(
       408,
       'Request timeout - service did not respond in time',
-      { timeout: 5000 }
+      { timeout: 5000 },
     );
   }
 
   static createServiceUnavailableResponse(): HttpResponseFixture {
-    return this.createErrorResponse(
-      503,
-      'Service temporarily unavailable',
-      { retryAfter: 60 }
-    );
+    return this.createErrorResponse(503, 'Service temporarily unavailable', {
+      retryAfter: 60,
+    });
   }
 
   private static getErrorName(statusCode: number): string {
@@ -308,7 +306,7 @@ export class HttpFixtureFactory {
 
   static withCustomHeaders(
     fixture: HttpRequestFixture | HttpResponseFixture,
-    headers: Record<string, string>
+    headers: Record<string, string>,
   ): HttpRequestFixture | HttpResponseFixture {
     return {
       ...fixture,
@@ -322,7 +320,7 @@ export class HttpFixtureFactory {
   static withAuth(
     fixture: HttpRequestFixture,
     token: string,
-    type: 'Bearer' | 'Basic' = 'Bearer'
+    type: 'Bearer' | 'Basic' = 'Bearer',
   ): HttpRequestFixture {
     return this.withCustomHeaders(fixture, {
       Authorization: `${type} ${token}`,

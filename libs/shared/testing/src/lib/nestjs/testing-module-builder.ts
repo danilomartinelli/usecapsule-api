@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ModuleMetadata } from '@nestjs/common';
-import { RabbitMQModule } from '@usecapsule/rabbitmq';
 import { RabbitMQTestClient } from '../rabbitmq/rabbitmq-test-client';
 import { RabbitMQTestContainer } from '../containers/rabbitmq-container';
 import { PostgreSQLTestContainer } from '../containers/postgresql-container';
@@ -38,7 +37,7 @@ export class TestingModuleBuilder {
   async build(): Promise<TestEnvironment> {
     const imports = [...(this.config.imports || [])];
     const providers = [...(this.config.providers || [])];
-    
+
     let rabbitMQClient: RabbitMQTestClient | undefined;
     let rabbitMQContainer: RabbitMQTestContainer | undefined;
     let postgresContainer: PostgreSQLTestContainer | undefined;
@@ -53,8 +52,9 @@ export class TestingModuleBuilder {
 
       await rabbitMQContainer.start();
 
-      // Setup RabbitMQ module
-      const rabbitMQModule = RabbitMQModule.forCustom({
+      // Setup RabbitMQ module dynamically to avoid module boundary violation
+      const { RabbitMQModule } = await import('@golevelup/nestjs-rabbitmq');
+      const rabbitMQModule = RabbitMQModule.forRoot(RabbitMQModule, {
         uri: rabbitMQContainer.getConnectionUri(),
         exchanges: [
           {
@@ -85,8 +85,16 @@ export class TestingModuleBuilder {
           { name: 'health_queue', options: { durable: false } },
         ],
         bindings: [
-          { exchange: 'capsule.commands', queue: 'test_queue', routingKey: 'test.*' },
-          { exchange: 'capsule.commands', queue: 'health_queue', routingKey: '*.health' },
+          {
+            exchange: 'capsule.commands',
+            queue: 'test_queue',
+            routingKey: 'test.*',
+          },
+          {
+            exchange: 'capsule.commands',
+            queue: 'health_queue',
+            routingKey: '*.health',
+          },
         ],
       });
 
@@ -94,7 +102,7 @@ export class TestingModuleBuilder {
     } else if (this.config.rabbitMQConfig) {
       // Import the AmqpConnection token properly
       const { AmqpConnection } = await import('@golevelup/nestjs-rabbitmq');
-      
+
       // Mock RabbitMQ providers
       providers.push({
         provide: AmqpConnection,

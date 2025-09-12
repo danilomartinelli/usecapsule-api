@@ -75,18 +75,18 @@ The platform uses consistent routing key conventions:
 
 ```typescript
 // Service Commands (Request/Response)
-'auth.register'     // User registration
-'auth.login'        // User authentication
-'auth.health'       // Service health check
-'billing.charge'    // Process payment
-'deploy.create'     // Create deployment
-'monitor.metrics'   // Collect metrics
+'auth.register'; // User registration
+'auth.login'; // User authentication
+'auth.health'; // Service health check
+'billing.charge'; // Process payment
+'deploy.create'; // Create deployment
+'monitor.metrics'; // Collect metrics
 
 // Domain Events (Fire-and-Forget)
-'user.created'      // New user registered
-'user.updated'      // User profile changed
-'payment.processed' // Payment completed
-'deployment.failed' // Deployment error occurred
+'user.created'; // New user registered
+'user.updated'; // User profile changed
+'payment.processed'; // Payment completed
+'deployment.failed'; // Deployment error occurred
 ```
 
 ## Implementation Details
@@ -171,7 +171,9 @@ export class AppController {
     exchange: 'capsule.commands',
     routingKey: 'auth.register',
   })
-  async registerUser(@RabbitPayload() userData: RegisterUserDto): Promise<User> {
+  async registerUser(
+    @RabbitPayload() userData: RegisterUserDto,
+  ): Promise<User> {
     return this.authService.register(userData);
   }
 }
@@ -225,15 +227,11 @@ export class UserService {
     const user = await this.userRepository.save(userData);
 
     // Publish domain event
-    await this.amqpConnection.publish(
-      'capsule.events',
-      'user.created',
-      {
-        userId: user.id,
-        email: user.email,
-        timestamp: new Date().toISOString(),
-      }
-    );
+    await this.amqpConnection.publish('capsule.events', 'user.created', {
+      userId: user.id,
+      email: user.email,
+      timestamp: new Date().toISOString(),
+    });
 
     return user;
   }
@@ -282,7 +280,7 @@ export class AppService {
     ];
 
     const healthChecks = await Promise.allSettled(
-      services.map(service => this.checkServiceHealth(service))
+      services.map((service) => this.checkServiceHealth(service)),
     );
 
     const servicesHealth: Record<string, HealthCheckResponse> = {};
@@ -313,7 +311,9 @@ export class AppService {
     };
   }
 
-  private async checkServiceHealth(serviceName: ServiceName): Promise<HealthCheckResponse> {
+  private async checkServiceHealth(
+    serviceName: ServiceName,
+  ): Promise<HealthCheckResponse> {
     return this.amqpConnection.request({
       exchange: 'capsule.commands',
       routingKey: `${serviceName.replace('-service', '')}.health`,
@@ -344,8 +344,8 @@ services:
     container_name: rabbitmq_dev
     image: rabbitmq:3.13-management
     ports:
-      - '7010:5672'   # AMQP port
-      - '7020:15672'  # Management UI port
+      - '7010:5672' # AMQP port
+      - '7020:15672' # Management UI port
     environment:
       RABBITMQ_DEFAULT_USER: usecapsule
       RABBITMQ_DEFAULT_PASS: usecapsule_dev_password

@@ -249,9 +249,9 @@ Each microservice exposes a health check handler via RabbitMQ:
 
 ```typescript
 enum HealthStatus {
-  HEALTHY = 'healthy',     // Service fully operational
+  HEALTHY = 'healthy', // Service fully operational
   UNHEALTHY = 'unhealthy', // Service has critical issues
-  DEGRADED = 'degraded',   // Service operational but with non-critical issues
+  DEGRADED = 'degraded', // Service operational but with non-critical issues
 }
 ```
 
@@ -260,16 +260,16 @@ enum HealthStatus {
 ```typescript
 // Service-level health determination
 function determineServiceHealth(checks: HealthCheck[]): HealthStatus {
-  const criticalFailures = checks.filter(check =>
-    check.critical && check.status === 'failed'
+  const criticalFailures = checks.filter(
+    (check) => check.critical && check.status === 'failed',
   );
 
   if (criticalFailures.length > 0) {
     return HealthStatus.UNHEALTHY;
   }
 
-  const nonCriticalFailures = checks.filter(check =>
-    !check.critical && check.status === 'failed'
+  const nonCriticalFailures = checks.filter(
+    (check) => !check.critical && check.status === 'failed',
   );
 
   if (nonCriticalFailures.length > 0) {
@@ -318,8 +318,8 @@ interface HealthCheckResponse {
 
     /** Memory usage statistics */
     memory?: {
-      used: number;    // MB
-      total: number;   // MB
+      used: number; // MB
+      total: number; // MB
       unit: 'MB' | 'GB';
     };
 
@@ -327,7 +327,7 @@ interface HealthCheckResponse {
     database?: {
       connected: boolean;
       responseTime?: number; // milliseconds
-      type?: string;         // postgres, timescaledb, redis
+      type?: string; // postgres, timescaledb, redis
     };
 
     /** Message queue status */
@@ -448,7 +448,7 @@ export class AppController {
 
     // Determine overall health status
     const status = this.determineHealth(checks);
-    const dbCheck = checks.find(c => c.name === 'database');
+    const dbCheck = checks.find((c) => c.name === 'database');
 
     return {
       status,
@@ -474,12 +474,16 @@ export class AppController {
   }
 
   private determineHealth(checks: HealthCheck[]): HealthStatus {
-    const criticalFailures = checks.filter(c => c.critical && c.status === 'failed');
+    const criticalFailures = checks.filter(
+      (c) => c.critical && c.status === 'failed',
+    );
     if (criticalFailures.length > 0) {
       return HealthStatus.UNHEALTHY;
     }
 
-    const nonCriticalFailures = checks.filter(c => !c.critical && c.status === 'failed');
+    const nonCriticalFailures = checks.filter(
+      (c) => !c.critical && c.status === 'failed',
+    );
     if (nonCriticalFailures.length > 0) {
       return HealthStatus.DEGRADED;
     }
@@ -499,7 +503,7 @@ import type {
   AggregatedHealthResponse,
   HealthCheckResponse,
   HealthStatus,
-  ServiceName
+  ServiceName,
 } from '@usecapsule/types';
 
 @Injectable()
@@ -517,8 +521,8 @@ export class AppService {
     ];
 
     // Check all services in parallel with individual error handling
-    const healthCheckPromises = services.map(service =>
-      this.checkServiceHealthSafely(service)
+    const healthCheckPromises = services.map((service) =>
+      this.checkServiceHealthSafely(service),
     );
 
     const healthResults = await Promise.all(healthCheckPromises);
@@ -534,7 +538,10 @@ export class AppService {
       // Determine overall system health
       if (result.status === HealthStatus.UNHEALTHY) {
         overallStatus = HealthStatus.UNHEALTHY;
-      } else if (result.status === HealthStatus.DEGRADED && overallStatus === HealthStatus.HEALTHY) {
+      } else if (
+        result.status === HealthStatus.DEGRADED &&
+        overallStatus === HealthStatus.HEALTHY
+      ) {
         overallStatus = HealthStatus.DEGRADED;
       }
     });
@@ -546,7 +553,9 @@ export class AppService {
     };
   }
 
-  private async checkServiceHealthSafely(serviceName: ServiceName): Promise<HealthCheckResponse> {
+  private async checkServiceHealthSafely(
+    serviceName: ServiceName,
+  ): Promise<HealthCheckResponse> {
     try {
       const routingKey = `${serviceName.replace('-service', '')}.health`;
 
@@ -556,7 +565,6 @@ export class AppService {
         payload: {},
         timeout: 5000,
       });
-
     } catch (error) {
       this.logger.error(`Health check failed for ${serviceName}:`, error);
 
@@ -615,8 +623,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Service {{ $labels.service }} is unhealthy"
-          description: "Service {{ $labels.service }} has been reporting unhealthy status for more than 1 minute"
+          summary: 'Service {{ $labels.service }} is unhealthy'
+          description: 'Service {{ $labels.service }} has been reporting unhealthy status for more than 1 minute'
 
       - alert: ServiceDegraded
         expr: capsule_health_checks_total{status="degraded"} > 0
@@ -624,8 +632,8 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Service {{ $labels.service }} is degraded"
-          description: "Service {{ $labels.service }} has been reporting degraded status for more than 5 minutes"
+          summary: 'Service {{ $labels.service }} is degraded'
+          description: 'Service {{ $labels.service }} has been reporting degraded status for more than 5 minutes'
 ```
 
 ### Load Balancer Integration

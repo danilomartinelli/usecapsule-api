@@ -1,9 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppService } from './app.service';
 import { AmqpConnection } from '@usecapsule/rabbitmq';
-import { HealthTestHelper, HEALTH_TEST_SCENARIOS, createAmqpConnectionMock, AmqpConnectionMockHelper } from '@usecapsule/testing';
+import {
+  HealthTestHelper,
+  HEALTH_TEST_SCENARIOS,
+  createAmqpConnectionMock,
+  AmqpConnectionMockHelper,
+} from '@usecapsule/testing';
 import { HealthStatus } from '@usecapsule/types';
-import type { AggregatedHealthResponse, HealthCheckResponse } from '@usecapsule/types';
+import type {
+  AggregatedHealthResponse,
+  HealthCheckResponse,
+} from '@usecapsule/types';
 
 describe('AppService', () => {
   let service: AppService;
@@ -35,10 +43,11 @@ describe('AppService', () => {
   describe('checkAllServicesHealth', () => {
     it('should return healthy status when all services respond with healthy', async () => {
       // Arrange
-      const healthyResponse: HealthCheckResponse = HealthTestHelper.createHealthResponse(
-        'test-service',
-        HealthStatus.HEALTHY
-      );
+      const healthyResponse: HealthCheckResponse =
+        HealthTestHelper.createHealthResponse(
+          'test-service',
+          HealthStatus.HEALTHY,
+        );
 
       amqpConnection.request.mockResolvedValue(healthyResponse);
 
@@ -58,10 +67,25 @@ describe('AppService', () => {
     it('should return degraded status when one service is unhealthy', async () => {
       // Arrange - billing service fails, others succeed
       amqpConnection.request
-        .mockResolvedValueOnce(HealthTestHelper.createHealthResponse('auth-service', HealthStatus.HEALTHY))
+        .mockResolvedValueOnce(
+          HealthTestHelper.createHealthResponse(
+            'auth-service',
+            HealthStatus.HEALTHY,
+          ),
+        )
         .mockRejectedValueOnce(new Error('Service unreachable'))
-        .mockResolvedValueOnce(HealthTestHelper.createHealthResponse('deploy-service', HealthStatus.HEALTHY))
-        .mockResolvedValueOnce(HealthTestHelper.createHealthResponse('monitor-service', HealthStatus.HEALTHY));
+        .mockResolvedValueOnce(
+          HealthTestHelper.createHealthResponse(
+            'deploy-service',
+            HealthStatus.HEALTHY,
+          ),
+        )
+        .mockResolvedValueOnce(
+          HealthTestHelper.createHealthResponse(
+            'monitor-service',
+            HealthStatus.HEALTHY,
+          ),
+        );
 
       // Act
       const result = await service.checkAllServicesHealth();
@@ -81,7 +105,12 @@ describe('AppService', () => {
         .mockRejectedValueOnce(new Error('Auth service down'))
         .mockRejectedValueOnce(new Error('Billing service down'))
         .mockRejectedValueOnce(new Error('Deploy service down'))
-        .mockResolvedValueOnce(HealthTestHelper.createHealthResponse('monitor-service', HealthStatus.HEALTHY));
+        .mockResolvedValueOnce(
+          HealthTestHelper.createHealthResponse(
+            'monitor-service',
+            HealthStatus.HEALTHY,
+          ),
+        );
 
       // Act
       const result = await service.checkAllServicesHealth();
@@ -99,12 +128,27 @@ describe('AppService', () => {
       // Arrange
       const timeoutError = new Error('Request timeout');
       timeoutError.name = 'TimeoutError';
-      
+
       amqpConnection.request
-        .mockResolvedValueOnce(HealthTestHelper.createHealthResponse('auth-service', HealthStatus.HEALTHY))
+        .mockResolvedValueOnce(
+          HealthTestHelper.createHealthResponse(
+            'auth-service',
+            HealthStatus.HEALTHY,
+          ),
+        )
         .mockRejectedValueOnce(timeoutError)
-        .mockResolvedValueOnce(HealthTestHelper.createHealthResponse('deploy-service', HealthStatus.HEALTHY))
-        .mockResolvedValueOnce(HealthTestHelper.createHealthResponse('monitor-service', HealthStatus.HEALTHY));
+        .mockResolvedValueOnce(
+          HealthTestHelper.createHealthResponse(
+            'deploy-service',
+            HealthStatus.HEALTHY,
+          ),
+        )
+        .mockResolvedValueOnce(
+          HealthTestHelper.createHealthResponse(
+            'monitor-service',
+            HealthStatus.HEALTHY,
+          ),
+        );
 
       // Act
       const result = await service.checkAllServicesHealth();
@@ -112,7 +156,7 @@ describe('AppService', () => {
       // Assert
       expect(result).toHaveValidAggregatedHealthResponse();
       expect(result.status).toBe(HealthStatus.DEGRADED);
-      
+
       const billingHealth = result.services['billing-service'];
       expect(billingHealth).toBeUnhealthy();
       expect(billingHealth.metadata).toMatchObject({
@@ -124,7 +168,10 @@ describe('AppService', () => {
 
     it('should make requests to correct routing keys', async () => {
       // Arrange
-      const healthyResponse = HealthTestHelper.createHealthResponse('service', HealthStatus.HEALTHY);
+      const healthyResponse = HealthTestHelper.createHealthResponse(
+        'service',
+        HealthStatus.HEALTHY,
+      );
       amqpConnection.request.mockResolvedValue(healthyResponse);
 
       // Act
@@ -161,10 +208,25 @@ describe('AppService', () => {
     it('should handle mixed response statuses correctly', async () => {
       // Arrange
       amqpConnection.request
-        .mockResolvedValueOnce(HealthTestHelper.createHealthResponse('auth-service', HealthStatus.HEALTHY))
-        .mockResolvedValueOnce(HealthTestHelper.createHealthResponse('billing-service', HealthStatus.DEGRADED))
+        .mockResolvedValueOnce(
+          HealthTestHelper.createHealthResponse(
+            'auth-service',
+            HealthStatus.HEALTHY,
+          ),
+        )
+        .mockResolvedValueOnce(
+          HealthTestHelper.createHealthResponse(
+            'billing-service',
+            HealthStatus.DEGRADED,
+          ),
+        )
         .mockRejectedValueOnce(new Error('Deploy service error'))
-        .mockResolvedValueOnce(HealthTestHelper.createHealthResponse('monitor-service', HealthStatus.HEALTHY));
+        .mockResolvedValueOnce(
+          HealthTestHelper.createHealthResponse(
+            'monitor-service',
+            HealthStatus.HEALTHY,
+          ),
+        );
 
       // Act
       const result = await service.checkAllServicesHealth();
@@ -181,7 +243,10 @@ describe('AppService', () => {
     it('should include valid timestamps for all responses', async () => {
       // Arrange
       const startTime = Date.now();
-      const healthyResponse = HealthTestHelper.createHealthResponse('service', HealthStatus.HEALTHY);
+      const healthyResponse = HealthTestHelper.createHealthResponse(
+        'service',
+        HealthStatus.HEALTHY,
+      );
       amqpConnection.request.mockResolvedValue(healthyResponse);
 
       // Act
@@ -207,17 +272,25 @@ describe('AppService', () => {
         amqpConnection.request.mockClear();
 
         // Setup mock responses based on scenario
-        const services = ['auth-service', 'billing-service', 'deploy-service', 'monitor-service'];
-        
+        const services = [
+          'auth-service',
+          'billing-service',
+          'deploy-service',
+          'monitor-service',
+        ];
+
         services.forEach((serviceName, index) => {
           const status = scenario.services[serviceName];
-          if (status === HealthStatus.HEALTHY || status === HealthStatus.DEGRADED) {
+          if (
+            status === HealthStatus.HEALTHY ||
+            status === HealthStatus.DEGRADED
+          ) {
             amqpConnection.request.mockResolvedValueOnce(
-              HealthTestHelper.createHealthResponse(serviceName, status)
+              HealthTestHelper.createHealthResponse(serviceName, status),
             );
           } else {
             amqpConnection.request.mockRejectedValueOnce(
-              new Error('Service unreachable')
+              new Error('Service unreachable'),
             );
           }
         });
@@ -230,7 +303,9 @@ describe('AppService', () => {
         expect(result).toHaveValidAggregatedHealthResponse();
 
         // Verify individual service statuses
-        for (const [serviceName, expectedStatus] of Object.entries(scenario.services)) {
+        for (const [serviceName, expectedStatus] of Object.entries(
+          scenario.services,
+        )) {
           const serviceResult = result.services[serviceName];
           expect(serviceResult.status).toBe(expectedStatus);
         }
@@ -239,7 +314,10 @@ describe('AppService', () => {
 
     it('should handle concurrent health checks properly', async () => {
       // Arrange
-      const healthyResponse = HealthTestHelper.createHealthResponse('service', HealthStatus.HEALTHY);
+      const healthyResponse = HealthTestHelper.createHealthResponse(
+        'service',
+        HealthStatus.HEALTHY,
+      );
       amqpConnection.request.mockResolvedValue(healthyResponse);
 
       // Act - make multiple concurrent calls

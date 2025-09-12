@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: '@usecapsule/testing',
   preset: '../../../jest.preset.js',
@@ -15,9 +14,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../../coverage/libs/shared/testing',
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!src/**/index.ts',
-  ],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/index.ts'],
 };

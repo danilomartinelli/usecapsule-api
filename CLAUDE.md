@@ -745,7 +745,7 @@ When adding a new bounded context:
 
 **Import Capsule's documentation folder, treat as if import is in the main CLAUDE.md file.**
 
-  `@./docs/**/*.md`
+`@./docs/**/*.md`
 
 #### Quick Links
 

@@ -150,21 +150,21 @@ Each service implements hexagonal architecture:
 
 ```typescript
 class User {
-  id: UserId
-  email: EmailAddress
-  hashedPassword: HashedPassword
-  profile: UserProfile
-  roles: Role[]
-  createdAt: Date
-  updatedAt: Date
+  id: UserId;
+  email: EmailAddress;
+  hashedPassword: HashedPassword;
+  profile: UserProfile;
+  roles: Role[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 class Session {
-  id: SessionId
-  userId: UserId
-  token: JWTToken
-  expiresAt: Date
-  deviceInfo: DeviceInfo
+  id: SessionId;
+  userId: UserId;
+  token: JWTToken;
+  expiresAt: Date;
+  deviceInfo: DeviceInfo;
 }
 ```
 
@@ -181,19 +181,19 @@ class Session {
 
 ```typescript
 class Customer {
-  id: CustomerId
-  userId: UserId
-  billingAddress: Address
-  paymentMethods: PaymentMethod[]
-  subscriptions: Subscription[]
+  id: CustomerId;
+  userId: UserId;
+  billingAddress: Address;
+  paymentMethods: PaymentMethod[];
+  subscriptions: Subscription[];
 }
 
 class Subscription {
-  id: SubscriptionId
-  customerId: CustomerId
-  plan: Plan
-  status: SubscriptionStatus
-  currentPeriod: BillingPeriod
+  id: SubscriptionId;
+  customerId: CustomerId;
+  plan: Plan;
+  status: SubscriptionStatus;
+  currentPeriod: BillingPeriod;
 }
 ```
 
@@ -210,20 +210,20 @@ class Subscription {
 
 ```typescript
 class Application {
-  id: ApplicationId
-  name: string
-  userId: UserId
-  repository: GitRepository
-  environments: Environment[]
-  deployments: Deployment[]
+  id: ApplicationId;
+  name: string;
+  userId: UserId;
+  repository: GitRepository;
+  environments: Environment[];
+  deployments: Deployment[];
 }
 
 class Deployment {
-  id: DeploymentId
-  applicationId: ApplicationId
-  environment: Environment
-  status: DeploymentStatus
-  resources: KubernetesResources
+  id: DeploymentId;
+  applicationId: ApplicationId;
+  environment: Environment;
+  status: DeploymentStatus;
+  resources: KubernetesResources;
 }
 ```
 
@@ -240,19 +240,19 @@ class Deployment {
 
 ```typescript
 class MetricSeries {
-  id: MetricId
-  name: string
-  labels: Record<string, string>
-  dataPoints: DataPoint[]
-  retention: Duration
+  id: MetricId;
+  name: string;
+  labels: Record<string, string>;
+  dataPoints: DataPoint[];
+  retention: Duration;
 }
 
 class Alert {
-  id: AlertId
-  name: string
-  condition: AlertCondition
-  actions: AlertAction[]
-  status: AlertStatus
+  id: AlertId;
+  name: string;
+  condition: AlertCondition;
+  actions: AlertAction[];
+  status: AlertStatus;
 }
 ```
 
@@ -424,7 +424,7 @@ class UserRegistrationSaga {
 ```yaml
 # compose.yml
 services:
-  rabbitmq:        # Message broker
+  rabbitmq: # Message broker
     ports: [7010, 7020]
 
   # Databases (commented until implementation)

@@ -1,5 +1,8 @@
 import { HealthStatus } from '@usecapsule/types';
-import type { HealthCheckResponse, AggregatedHealthResponse } from '@usecapsule/types';
+import type {
+  HealthCheckResponse,
+  AggregatedHealthResponse,
+} from '@usecapsule/types';
 
 export interface HealthTestScenario {
   name: string;
@@ -70,7 +73,7 @@ export class HealthTestHelper {
   static createHealthResponse(
     service: string,
     status: HealthStatus,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): HealthCheckResponse {
     return {
       status,
@@ -82,25 +85,28 @@ export class HealthTestHelper {
 
   static createAggregatedResponse(
     services: Record<string, HealthStatus>,
-    overallStatus?: HealthStatus
+    overallStatus?: HealthStatus,
   ): AggregatedHealthResponse {
     const serviceResponses: Record<string, HealthCheckResponse> = {};
 
     for (const [serviceName, status] of Object.entries(services)) {
-      serviceResponses[serviceName] = this.createHealthResponse(serviceName, status);
+      serviceResponses[serviceName] = this.createHealthResponse(
+        serviceName,
+        status,
+      );
     }
 
     // Calculate overall status if not provided
     let calculatedStatus = overallStatus;
     if (!calculatedStatus) {
       const healthyCount = Object.values(services).filter(
-        status => status === HealthStatus.HEALTHY
+        (status) => status === HealthStatus.HEALTHY,
       ).length;
       const degradedCount = Object.values(services).filter(
-        status => status === HealthStatus.DEGRADED
+        (status) => status === HealthStatus.DEGRADED,
       ).length;
       const unhealthyCount = Object.values(services).filter(
-        status => status === HealthStatus.UNHEALTHY
+        (status) => status === HealthStatus.UNHEALTHY,
       ).length;
 
       const totalServices = healthyCount + degradedCount + unhealthyCount;
@@ -108,8 +114,8 @@ export class HealthTestHelper {
       if (unhealthyCount === 0 && degradedCount === 0) {
         // All services are healthy
         calculatedStatus = HealthStatus.HEALTHY;
-      } else if (unhealthyCount >= (totalServices / 2)) {
-        // Majority or half of services are unhealthy 
+      } else if (unhealthyCount >= totalServices / 2) {
+        // Majority or half of services are unhealthy
         calculatedStatus = HealthStatus.UNHEALTHY;
       } else {
         // Some services have issues but not majority unhealthy
@@ -126,7 +132,7 @@ export class HealthTestHelper {
 
   static assertHealthResponse(
     actual: HealthCheckResponse,
-    expected: Partial<HealthCheckResponse>
+    expected: Partial<HealthCheckResponse>,
   ): void {
     if (expected.status !== undefined) {
       expect(actual.status).toBe(expected.status);
@@ -143,16 +149,18 @@ export class HealthTestHelper {
 
   static assertAggregatedResponse(
     actual: AggregatedHealthResponse,
-    expected: Partial<AggregatedHealthResponse>
+    expected: Partial<AggregatedHealthResponse>,
   ): void {
     if (expected.status !== undefined) {
       expect(actual.status).toBe(expected.status);
     }
     if (expected.services !== undefined) {
       expect(Object.keys(actual.services)).toEqual(
-        expect.arrayContaining(Object.keys(expected.services))
+        expect.arrayContaining(Object.keys(expected.services)),
       );
-      for (const [serviceName, expectedHealth] of Object.entries(expected.services)) {
+      for (const [serviceName, expectedHealth] of Object.entries(
+        expected.services,
+      )) {
         expect(actual.services[serviceName]).toBeDefined();
         this.assertHealthResponse(actual.services[serviceName], expectedHealth);
       }
@@ -161,7 +169,10 @@ export class HealthTestHelper {
     expect(new Date(actual.timestamp)).toBeInstanceOf(Date);
   }
 
-  static createTimeoutResponse(service: string, routingKey: string): HealthCheckResponse {
+  static createTimeoutResponse(
+    service: string,
+    routingKey: string,
+  ): HealthCheckResponse {
     return this.createHealthResponse(service, HealthStatus.UNHEALTHY, {
       error: 'Service unreachable',
       exchange: 'capsule.commands',
@@ -169,7 +180,10 @@ export class HealthTestHelper {
     });
   }
 
-  static createErrorResponse(service: string, error: string): HealthCheckResponse {
+  static createErrorResponse(
+    service: string,
+    error: string,
+  ): HealthCheckResponse {
     return this.createHealthResponse(service, HealthStatus.UNHEALTHY, {
       error,
     });
@@ -188,7 +202,9 @@ export class HealthTestHelper {
     return Object.keys(this.getServiceRoutingKeys());
   }
 
-  static validateHealthEndpointResponse(response: AggregatedHealthResponse): void {
+  static validateHealthEndpointResponse(
+    response: AggregatedHealthResponse,
+  ): void {
     // Basic structure validation
     expect(response).toHaveProperty('status');
     expect(response).toHaveProperty('services');
@@ -202,13 +218,17 @@ export class HealthTestHelper {
     expect(response.services).not.toBeNull();
 
     // Each service should have valid health response
-    for (const [serviceName, healthResponse] of Object.entries(response.services)) {
+    for (const [serviceName, healthResponse] of Object.entries(
+      response.services,
+    )) {
       expect(this.getExpectedServiceNames()).toContain(serviceName);
       this.assertHealthResponse(healthResponse, {});
     }
 
     // Timestamp should be valid ISO string
-    expect(response.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/);
+    expect(response.timestamp).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/,
+    );
     expect(new Date(response.timestamp)).toBeInstanceOf(Date);
   }
 }

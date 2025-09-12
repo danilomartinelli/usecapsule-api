@@ -203,14 +203,14 @@ jobs:
         run: |
           # Create merged coverage directory
           mkdir -p coverage-merged
-          
+
           # Copy all coverage reports to merged directory
           find . -name "coverage" -type d | while read dir; do
             if [ -f "$dir/coverage-final.json" ]; then
               cp "$dir/coverage-final.json" "coverage-merged/coverage-$(basename $(dirname $dir)).json"
             fi
           done
-          
+
           # Generate combined coverage report
           npx nyc merge coverage-merged coverage-merged/coverage-final.json
           npx nyc report --reporter=text --reporter=lcov --temp-dir=coverage-merged --report-dir=coverage-merged
@@ -266,25 +266,25 @@ jobs:
         run: |
           echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [[ "${{ needs.unit-tests.result }}" == "success" ]]; then
             echo "✅ Unit Tests: Passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Unit Tests: Failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [[ "${{ needs.integration-tests.result }}" == "success" ]]; then
             echo "✅ Integration Tests: Passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Integration Tests: Failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [[ "${{ needs.e2e-tests.result }}" == "success" ]]; then
             echo "✅ E2E Tests: Passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ E2E Tests: Failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [[ "${{ needs.lint-and-format.result }}" == "success" ]]; then
             echo "✅ Lint and Format: Passed" >> $GITHUB_STEP_SUMMARY
           else
