@@ -609,6 +609,7 @@ docker exec rabbitmq_dev rabbitmqctl list_queues name messages_ready messages_un
    ```
 
 4. **Message TTL Expiration**
+
    ```bash
    # Check message TTL settings (6 hours = 21,600,000ms)
    # Management UI -> Queues -> [queue_name] -> Features -> TTL
@@ -719,6 +720,7 @@ When adding a new bounded context:
    ```
 
 6. **Register with API Gateway**
+
    ```typescript
    // apps/api-gateway/src/modules/[domain]/[domain].service.ts
    @Injectable()
@@ -736,3 +738,8 @@ When adding a new bounded context:
 - E2E tests: In dedicated e2e projects
 - Each service uses isolated test databases
 - Run `npm run test:affected` to test only changed code
+
+## Task Master AI Instructions
+
+**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+@./.taskmaster/CLAUDE.md
