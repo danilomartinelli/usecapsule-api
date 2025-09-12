@@ -66,18 +66,6 @@ export const authServiceSchema = z
       .describe('RabbitMQ connection URL for inter-service communication'),
 
     /**
-     * RabbitMQ queue name for the Auth Service.
-     * The specific queue that this service will consume messages from.
-     *
-     * @default 'auth_queue'
-     */
-    RABBITMQ_QUEUE: z
-      .string()
-      .min(1)
-      .default('auth_queue')
-      .describe('RabbitMQ queue name for Auth Service messages'),
-
-    /**
      * Database host for the Auth Service.
      * PostgreSQL server hostname or IP address for auth-specific data.
      */

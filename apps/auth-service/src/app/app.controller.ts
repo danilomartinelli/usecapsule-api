@@ -1,4 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { RabbitRPC } from '@usecapsule/rabbitmq';
+import type { HealthCheckResponse } from '@usecapsule/types';
 
 import { AppService } from './app.service';
 
@@ -14,12 +16,20 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   /**
-   * Health check endpoint returning service identification.
+   * Health check RPC handler for RabbitMQ monitoring.
    *
-   * @returns Service status information
+   * This handler responds to RPC calls with routing key 'auth.health',
+   * allowing the system to verify that the auth-service is running
+   * and responding to messages properly. Uses the @golevelup/nestjs-rabbitmq
+   * library for exchange-based routing via capsule.commands exchange.
+   *
+   * @returns Service health status
    */
-  @Get()
-  getData(): Readonly<{ message: string }> {
-    return this.appService.getData();
+  @RabbitRPC({
+    exchange: 'capsule.commands',
+    routingKey: 'auth.health',
+  })
+  healthCheck(): HealthCheckResponse {
+    return this.appService.getHealthStatus();
   }
 }

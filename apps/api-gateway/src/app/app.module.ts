@@ -4,6 +4,7 @@ import {
   apiGatewaySchema,
   ParametersModule,
 } from '@usecapsule/parameters';
+import { RabbitMQModule } from '@usecapsule/rabbitmq';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -30,7 +31,7 @@ import { AppService } from './app.service';
  * @example
  * ```typescript
  * // In other services/controllers
- * constructor(private configService: ConfigService<ApiGatewayConfig>) {
+ * constructor(private configService: ConfigService) {
  *   const port = this.configService.get('SERVICE_PORT', { infer: true });
  *   const jwtSecret = this.configService.get('JWT_SECRET', { infer: true });
  *   const corsOrigins = this.configService.get('CORS_ORIGINS', { infer: true });
@@ -49,6 +50,12 @@ import { AppService } from './app.service';
         abortEarly: false,
         stripUnknown: true,
       },
+    }),
+    // Configure RabbitMQ for API Gateway (client mode)
+    RabbitMQModule.forGateway({
+      uri:
+        process.env.RABBITMQ_URL ||
+        'amqp://usecapsule:usecapsule_dev_password@localhost:7010',
     }),
   ],
   controllers: [AppController],

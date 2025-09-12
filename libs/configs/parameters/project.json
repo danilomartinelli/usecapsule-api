@@ -13,7 +13,8 @@
         "tsConfig": "libs/configs/parameters/tsconfig.lib.json",
         "packageJson": "libs/configs/parameters/package.json",
         "main": "libs/configs/parameters/src/index.ts",
-        "assets": ["libs/configs/parameters/*.md"]
+        "assets": ["libs/configs/parameters/*.md"],
+        "rootDir": "libs/configs/parameters/src"
       }
     }
   }

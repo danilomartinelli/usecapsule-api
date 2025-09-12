@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "tslib": "^2.3.0",
-    "@nestjs/common": "^11.1.6"
+    "@nestjs/common": "^11.1.6",
+    "@golevelup/nestjs-rabbitmq": "^6.0.2"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.7"

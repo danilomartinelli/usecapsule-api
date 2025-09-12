@@ -200,7 +200,11 @@ jobs:
           npm outdated --json > outdated.json || true
 
           # Count outdated packages
-          OUTDATED_COUNT=$(jq 'length' outdated.json)
+          if [ "$(cat outdated.json)" = "[]" ] || [ "$(cat outdated.json)" = "{}" ]; then
+            OUTDATED_COUNT=0
+          else
+            OUTDATED_COUNT=$(jq 'length' outdated.json)
+          fi
 
           if [ "$OUTDATED_COUNT" -eq 0 ]; then
             echo "✅ All dependencies are up to date!" >> $GITHUB_STEP_SUMMARY

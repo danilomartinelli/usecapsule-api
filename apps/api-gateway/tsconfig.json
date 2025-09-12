@@ -4,7 +4,13 @@
   "include": [],
   "references": [
     {
+      "path": "../../libs/configs/rabbitmq"
+    },
+    {
       "path": "../../libs/configs/parameters"
+    },
+    {
+      "path": "../../libs/shared/types"
     },
     {
       "path": "./tsconfig.app.json"

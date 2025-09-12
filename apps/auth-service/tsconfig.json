@@ -7,6 +7,12 @@
       "path": "../../libs/configs/parameters"
     },
     {
+      "path": "../../libs/shared/types"
+    },
+    {
+      "path": "../../libs/configs/rabbitmq"
+    },
+    {
       "path": "./tsconfig.app.json"
     }
   ]
