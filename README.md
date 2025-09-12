@@ -370,6 +370,7 @@ We welcome contributions! Please follow these guidelines:
 
 ### Documentation
 
+- [docs/](./docs/) - Complete technical documentation and implementation guides
 - [CLAUDE.md](./CLAUDE.md) - Comprehensive architecture guide
 - [API Documentation](http://localhost:3000/api/documentation) - Swagger/OpenAPI specs
 - [Nx Documentation](https://nx.dev) - Monorepo tooling
