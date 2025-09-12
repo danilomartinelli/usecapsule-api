@@ -17,7 +17,8 @@
   "dependencies": {
     "@nestjs/common": "^11.1.6",
     "slonik": "^48.6.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "zod": "4.1.8"
   },
   "devDependencies": {
     "@types/pg": "^8.15.5"

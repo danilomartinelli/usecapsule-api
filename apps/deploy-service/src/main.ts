@@ -23,7 +23,7 @@
  * ```
  */
 
-import { Logger } from '@nestjs/common';
+import { Logger, INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 
@@ -70,7 +70,7 @@ async function bootstrap(): Promise<void> {
  * @param app - The NestJS application instance
  * @param logger - Logger instance for shutdown messages
  */
-function setupGracefulShutdown(app: any, logger: Logger): void {
+function setupGracefulShutdown(app: INestApplication, logger: Logger): void {
   const shutdown = async (signal: string) => {
     logger.log(`Received ${signal}. Starting graceful shutdown...`);
 

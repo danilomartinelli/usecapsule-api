@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { RabbitRPC, RabbitPayload } from '@usecapsule/rabbitmq';
+import { RabbitRPC } from '@usecapsule/rabbitmq';
 import type { HealthCheckResponse } from '@usecapsule/types';
 
 import { AppService } from './app.service';
@@ -22,7 +22,7 @@ export class AppController {
     exchange: 'capsule.commands',
     routingKey: 'monitor.health',
   })
-  healthCheck(@RabbitPayload() payload?: any): HealthCheckResponse {
+  healthCheck(): HealthCheckResponse {
     return this.appService.getHealthStatus();
   }
 }
