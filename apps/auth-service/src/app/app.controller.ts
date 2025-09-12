@@ -21,7 +21,8 @@ export class AppController {
    *
    * This handler responds to 'health.check' messages sent via RabbitMQ,
    * allowing the system to verify that the auth-service is running
-   * and responding to messages properly.
+   * and responding to messages properly. The routing is handled by
+   * RabbitMQ exchange bindings that route auth.* messages to auth_queue.
    *
    * @returns Service health status
    */

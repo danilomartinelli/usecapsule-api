@@ -21,7 +21,8 @@
         "main": "libs/shared/messaging/src/index.ts",
         "assets": [
           "libs/shared/messaging/*.md"
-        ]
+        ],
+        "rootDir": "libs/shared/messaging/src"
       }
     }
   }

@@ -21,7 +21,8 @@
         "main": "libs/configs/rabbitmq/src/index.ts",
         "assets": [
           "libs/configs/rabbitmq/*.md"
-        ]
+        ],
+        "rootDir": "libs/configs/rabbitmq/src"
       }
     }
   }

@@ -14,7 +14,8 @@
         "tsConfig": "libs/shared/types/tsconfig.lib.json",
         "packageJson": "libs/shared/types/package.json",
         "main": "libs/shared/types/src/index.ts",
-        "assets": ["libs/shared/types/*.md"]
+        "assets": ["libs/shared/types/*.md"],
+        "rootDir": "libs/shared/types/src"
       }
     }
   }

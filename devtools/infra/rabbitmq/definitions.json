@@ -52,7 +52,7 @@
     {
       "name": "capsule.commands",
       "vhost": "/",
-      "type": "direct",
+      "type": "topic",
       "durable": true,
       "auto_delete": false,
       "internal": false,
@@ -74,45 +74,35 @@
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {
-        "x-message-ttl": 21600000
-      }
+      "arguments": {}
     },
     {
       "name": "billing_queue",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {
-        "x-message-ttl": 21600000
-      }
+      "arguments": {}
     },
     {
       "name": "deploy_queue",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {
-        "x-message-ttl": 21600000
-      }
+      "arguments": {}
     },
     {
       "name": "monitor_queue",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {
-        "x-message-ttl": 21600000
-      }
+      "arguments": {}
     },
     {
       "name": "dlq",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
-      "arguments": {
-        "x-message-ttl": 21600000
-      }
+      "arguments": {}
     }
   ],
   "bindings": [

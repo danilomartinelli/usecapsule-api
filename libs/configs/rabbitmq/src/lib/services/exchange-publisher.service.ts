@@ -30,16 +30,8 @@ export class ExchangePublisherService {
     try {
       this.logger.debug(`Sending health check with routing key: ${routingKey}`);
 
-      // Use the routing key as the message pattern and include routing key in the data
-      // The NestJS client will use the routing key for exchange routing
-      const response = await this.rabbitMQService.send<HealthCheckResponse>(
-        routingKey, // Use routing key as pattern for exchange routing
-        {
-          pattern: 'health.check', // Include the pattern services expect
-          routingKey, // Include routing key for completeness
-        },
-        { timeout: 5000 },
-      );
+      // Delegate to the RabbitMQService which has the correct health check implementation
+      const response = await this.rabbitMQService.sendHealthCheck(routingKey);
 
       this.logger.debug(`Health check successful for ${routingKey}`);
       return response;

@@ -198,6 +198,8 @@ export class RabbitMQModule {
       config.optionsProvider,
       config.clientProvider,
       RabbitMQService,
+      MessagePublisherService,
+      ExchangeManagerService,
       ExchangePublisherService,
       {
         provide: RABBITMQ_PUBLISHER,
@@ -249,8 +251,7 @@ export class RabbitMQModule {
   private static createClientProvider(): Provider {
     return {
       provide: RABBITMQ_CLIENT,
-      useFactory: (clientsModule: { get: (token: string) => unknown }) =>
-        clientsModule.get('RABBITMQ_CLIENT'),
+      useFactory: (client: unknown) => client,
       inject: ['RABBITMQ_CLIENT'],
     };
   }
@@ -263,8 +264,7 @@ export class RabbitMQModule {
   private static createAsyncClientProvider(): Provider {
     return {
       provide: RABBITMQ_CLIENT,
-      useFactory: (clientsModule: { get: (token: string) => unknown }) =>
-        clientsModule.get('RABBITMQ_CLIENT'),
+      useFactory: (client: unknown) => client,
       inject: ['RABBITMQ_CLIENT'],
     };
   }

@@ -35,7 +35,7 @@ import { RABBITMQ_CLIENT, RABBITMQ_OPTIONS } from '../rabbitmq.constants';
  * this.rabbitMQService.emit('user.created', { id: 1, name: 'John' });
  *
  * // Check connection health
- * const isHealthy = await this.rabbitMQService.isHealthy();
+ * const isHealthy = await this.rabbitMQService.sendHealthCheck('auth.health');
  * ```
  */
 @Injectable()
@@ -204,17 +204,6 @@ export class RabbitMQService implements OnModuleDestroy {
         },
       } satisfies HealthCheckResponse;
     }
-  }
-
-  /**
-   * Legacy method - kept for backward compatibility.
-   * @deprecated Use sendHealthCheck with routing key instead
-   */
-  async isHealthy(queue?: string): Promise<HealthCheckResponse> {
-    const routingKey = queue
-      ? `${queue.replace('_queue', '')}.health`
-      : 'health.check';
-    return this.sendHealthCheck(routingKey);
   }
 
   /**
