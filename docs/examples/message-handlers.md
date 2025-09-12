@@ -58,11 +58,11 @@ export class AppController {
 ```typescript
 import { Controller, Logger } from '@nestjs/common';
 import { RabbitRPC, RabbitPayload } from '@golevelup/nestjs-rabbitmq';
-import { 
-  RegisterUserDto, 
-  LoginUserDto, 
-  User, 
-  AuthTokenResponse 
+import {
+  RegisterUserDto,
+  LoginUserDto,
+  User,
+  AuthTokenResponse
 } from '@usecapsule/types';
 
 @Controller()
@@ -80,10 +80,10 @@ export class AuthController {
   })
   async registerUser(@RabbitPayload() dto: RegisterUserDto): Promise<User> {
     this.logger.log(`Processing user registration for: ${dto.email}`);
-    
+
     try {
       const user = await this.authService.register(dto);
-      
+
       this.logger.log(`User registered successfully: ${user.id}`);
       return user;
     } catch (error) {
@@ -101,9 +101,9 @@ export class AuthController {
   })
   async loginUser(@RabbitPayload() dto: LoginUserDto): Promise<AuthTokenResponse> {
     this.logger.log(`Processing login for: ${dto.email}`);
-    
+
     const tokenResponse = await this.authService.authenticate(dto);
-    
+
     this.logger.log(`Login successful for: ${dto.email}`);
     return tokenResponse;
   }
@@ -217,7 +217,7 @@ export class MetricsController {
   })
   async onUserEvent(@RabbitPayload() event: any, @RabbitContext() context: any): Promise<void> {
     const eventType = context.routingKey; // e.g., 'user.created'
-    
+
     this.logger.log(`Recording user event: ${eventType}`);
 
     await this.metricsService.recordEvent({
@@ -269,7 +269,7 @@ export class RegistrationSaga {
    */
   async executeRegistrationFlow(dto: RegisterUserDto): Promise<User> {
     const sagaId = `registration_${Date.now()}_${Math.random().toString(36)}`;
-    
+
     this.logger.log(`Starting registration saga: ${sagaId}`);
 
     try {
@@ -290,7 +290,7 @@ export class RegistrationSaga {
 
     } catch (error) {
       this.logger.error(`Registration saga failed: ${sagaId}`, error);
-      
+
       // Publish compensation event
       await this.publishRegistrationFailed(dto, sagaId, error);
       throw error;
@@ -428,7 +428,7 @@ export class RobustController {
       // Check database connectivity
       const dbHealth = await this.checkDatabaseHealth();
       response.metadata.database = dbHealth;
-      
+
       if (!dbHealth.connected) {
         response.status = HealthStatus.DEGRADED;
       }
@@ -445,7 +445,7 @@ export class RobustController {
       // Check external API connectivity
       const externalApiHealth = await this.checkExternalApiHealth();
       response.metadata.externalApi = externalApiHealth;
-      
+
       if (!externalApiHealth.connected) {
         response.status = HealthStatus.DEGRADED;
       }
@@ -474,7 +474,7 @@ export class RobustController {
     try {
       // Attempt primary data source
       return await this.userService.getUserById(userId);
-      
+
     } catch (error) {
       this.logger.warn(`Primary user lookup failed for ${userId}:`, error);
 
@@ -522,7 +522,7 @@ export class InvalidCredentialsException extends BusinessLogicException {
 // Error handling in message handlers
 @Controller()
 export class AuthController {
-  
+
   @RabbitRPC({
     exchange: 'capsule.commands',
     routingKey: 'auth.login',
@@ -530,7 +530,7 @@ export class AuthController {
   async login(@RabbitPayload() dto: LoginUserDto): Promise<AuthTokenResponse> {
     try {
       return await this.authService.authenticate(dto);
-      
+
     } catch (error) {
       // Log error with context
       this.logger.error(`Login failed for ${dto.email}:`, {
@@ -704,7 +704,7 @@ export class BatchProcessingController {
     // Process in smaller batches to avoid memory issues
     for (let i = 0; i < events.length; i += this.batchSize) {
       const batch = events.slice(i, i + this.batchSize);
-      
+
       await Promise.all(
         batch.map(event => this.processMetricEvent(event))
       );
@@ -736,7 +736,7 @@ export class AsyncTaskProcessor {
   })
   async createDeploymentAsync(@RabbitPayload() dto: CreateDeploymentDto): Promise<{ taskId: string }> {
     const taskId = `deploy_${Date.now()}_${Math.random().toString(36)}`;
-    
+
     // Start processing asynchronously
     const processingPromise = this.processDeploymentInBackground(dto, taskId);
     this.processingQueue.set(taskId, processingPromise);
@@ -756,7 +756,7 @@ export class AsyncTaskProcessor {
   })
   async getDeploymentStatus(@RabbitPayload() payload: { taskId: string }): Promise<TaskStatus> {
     const { taskId } = payload;
-    
+
     if (this.processingQueue.has(taskId)) {
       return { status: 'processing', taskId };
     }
@@ -768,9 +768,9 @@ export class AsyncTaskProcessor {
   private async processDeploymentInBackground(dto: CreateDeploymentDto, taskId: string): Promise<void> {
     try {
       this.logger.log(`Starting background deployment: ${taskId}`);
-      
+
       const deployment = await this.deploymentService.create(dto);
-      
+
       // Publish completion event
       await this.amqpConnection.publish('capsule.events', 'deployment.completed', {
         taskId,
@@ -778,10 +778,10 @@ export class AsyncTaskProcessor {
         status: 'success',
         timestamp: new Date().toISOString(),
       });
-      
+
     } catch (error) {
       this.logger.error(`Background deployment failed: ${taskId}`, error);
-      
+
       // Publish failure event
       await this.amqpConnection.publish('capsule.events', 'deployment.failed', {
         taskId,
@@ -796,6 +796,7 @@ export class AsyncTaskProcessor {
 ---
 
 **Next Steps**:
+
 - Review [Integration Test Examples](./integration-tests.md) for comprehensive testing patterns
 - See [Domain Entity Examples](./domain-entities.md) for DDD implementation patterns
 - Check [Common Issues](../troubleshooting/common-issues.md) for debugging message handlers

@@ -78,6 +78,15 @@
           "buildTarget": "@usecapsule/api-gateway:build:production"
         }
       }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "options": {
+        "jestConfig": "apps/api-gateway/jest.config.ts"
+      }
     }
   }
 }

@@ -18,6 +18,7 @@
 ### Problem: Services Won't Start
 
 **Symptoms**:
+
 - Services crash on startup
 - Port already in use errors
 - Module resolution failures
@@ -72,6 +73,7 @@ export RABBITMQ_URL="amqp://usecapsule:usecapsule_dev_password@localhost:7010"
 ### Problem: TypeScript Compilation Errors
 
 **Symptoms**:
+
 - Build fails with type errors
 - Module import errors
 - Missing type definitions
@@ -95,6 +97,7 @@ nx typecheck auth-service --verbose
 ### Problem: Cannot Connect to RabbitMQ
 
 **Symptoms**:
+
 - "ECONNREFUSED" errors
 - Services hang during startup
 - Health checks fail
@@ -154,6 +157,7 @@ npm run infrastructure:up
 ### Problem: Messages Not Being Consumed
 
 **Symptoms**:
+
 - Messages accumulate in queues
 - RPC calls timeout
 - Services appear healthy but unresponsive
@@ -204,6 +208,7 @@ nx serve auth-service --watch
 ### Problem: Database Connection Refused
 
 **Symptoms**:
+
 - "Connection refused" to database ports
 - Migration failures
 - Service startup hangs on database connection
@@ -240,6 +245,7 @@ docker exec -it auth_db_dev psql -U auth_user -d auth_service_db
 ### Problem: RPC Calls Timeout or Fail
 
 **Symptoms**:
+
 - Timeout errors on message requests
 - "No consumers" errors
 - Health checks return unhealthy status
@@ -281,7 +287,7 @@ const ROUTING_KEYS = {
 # Via RabbitMQ Management UI (http://localhost:7020):
 # 1. Go to Exchanges -> capsule.commands
 # 2. Expand "Publish message"
-# 3. Set routing key: "auth.health"  
+# 3. Set routing key: "auth.health"
 # 4. Set payload: {}
 # 5. Click "Publish message"
 ```
@@ -301,6 +307,7 @@ const response = await this.amqpConnection.request({
 ### Problem: Events Not Being Processed
 
 **Symptoms**:
+
 - Domain events published but not consumed
 - Event subscribers not triggered
 - Cross-service synchronization fails
@@ -332,6 +339,7 @@ docker exec rabbitmq_dev rabbitmqctl list_bindings | grep "capsule.events"
 ### Problem: Services Report Unhealthy Status
 
 **Symptoms**:
+
 - `/health` endpoint returns unhealthy services
 - Individual service health checks fail
 - System appears degraded
@@ -397,6 +405,7 @@ private async checkServiceHealth(serviceName: string): Promise<HealthCheckRespon
 ### Problem: Nx Build Failures
 
 **Symptoms**:
+
 - Build commands fail with dependency errors
 - Module resolution issues
 - Asset compilation failures
@@ -438,6 +447,7 @@ import type { HealthCheckResponse } from '@usecapsule/types';
 ### Problem: Hot Reload Not Working
 
 **Symptoms**:
+
 - Changes not reflected in running services
 - Need to restart services manually
 - File watching not working
@@ -460,6 +470,7 @@ npm run dev:auth
 ### Problem: Slow Message Processing
 
 **Symptoms**:
+
 - High response times
 - Message queue backlog
 - Timeout errors under load
@@ -477,13 +488,13 @@ npm run dev:auth
 async registerUser(@RabbitPayload() dto: RegisterUserDto): Promise<User> {
   // Avoid blocking operations
   const user = await this.authService.register(dto);
-  
+
   // Publish events asynchronously (fire-and-forget)
   this.amqpConnection.publish('capsule.events', 'user.created', {
     userId: user.id,
     email: user.email,
   }).catch(error => this.logger.error('Event publish failed', error));
-  
+
   return user;
 }
 ```
@@ -509,6 +520,7 @@ docker exec rabbitmq_dev rabbitmqctl list_queues name messages_ready messages_un
 ### Problem: Docker Containers Won't Start
 
 **Symptoms**:
+
 - "Port already in use" errors
 - Container health checks failing
 - Volume mounting issues
@@ -547,6 +559,7 @@ docker system df
 ### Problem: Volume Permission Issues
 
 **Symptoms**:
+
 - Database fails to write to mounted volumes
 - Permission denied errors in logs
 
@@ -589,7 +602,7 @@ ps aux | grep -E "(node|nx)" | head -10
 When you encounter issues not covered here:
 
 1. **Check Recent Changes**: Review recent commits for potential causes
-2. **Search Logs**: Look for error messages in service and container logs  
+2. **Search Logs**: Look for error messages in service and container logs
 3. **Verify Configuration**: Compare working configuration with current setup
 4. **Test Incrementally**: Start with basic functionality and add complexity
 5. **Document Issues**: Add new problems and solutions to this guide
@@ -597,6 +610,7 @@ When you encounter issues not covered here:
 ---
 
 **Next Steps**:
+
 - See [RabbitMQ Debugging Guide](./rabbitmq-debugging.md) for detailed message queue troubleshooting
 - Check [Performance Monitoring](./performance-monitoring.md) for system optimization techniques
 - Review [Examples](../examples/) for working implementation patterns

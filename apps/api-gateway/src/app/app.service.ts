@@ -60,6 +60,7 @@ export class AppService {
     // Process results and determine overall status
     const services: Record<string, HealthCheckResponse> = {};
     let healthyCount = 0;
+    let degradedCount = 0;
     let unhealthyCount = 0;
 
     healthChecks.forEach((result) => {
@@ -69,6 +70,8 @@ export class AppService {
 
         if (health.status === HealthStatus.HEALTHY) {
           healthyCount++;
+        } else if (health.status === HealthStatus.DEGRADED) {
+          degradedCount++;
         } else {
           unhealthyCount++;
         }
@@ -87,14 +90,19 @@ export class AppService {
       }
     });
 
-    // Determine overall system status
+    // Determine overall system status based on service health distribution
     let overallStatus: HealthStatus;
-    if (unhealthyCount === 0) {
+    const totalServices = healthyCount + degradedCount + unhealthyCount;
+    
+    if (unhealthyCount === 0 && degradedCount === 0) {
+      // All services are healthy
       overallStatus = HealthStatus.HEALTHY;
-    } else if (healthyCount > unhealthyCount) {
-      overallStatus = HealthStatus.DEGRADED;
-    } else {
+    } else if (unhealthyCount >= (totalServices / 2)) {
+      // Majority or half of services are unhealthy 
       overallStatus = HealthStatus.UNHEALTHY;
+    } else {
+      // Some services have issues but not majority unhealthy
+      overallStatus = HealthStatus.DEGRADED;
     }
 
     return {

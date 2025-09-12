@@ -739,7 +739,14 @@ When adding a new bounded context:
 - Each service uses isolated test databases
 - Run `npm run test:affected` to test only changed code
 
-## Task Master AI Instructions
+## Appendix
 
-**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
-@./.taskmaster/CLAUDE.md
+### Capsule Repository Documentation
+
+**Import Capsule's documentation folder, treat as if import is in the main CLAUDE.md file.**
+
+  `@./docs/**/*.md`
+
+#### Quick Links
+
+- `@./docs/guides/task-master-Integration.md` (Task Master's development workflow commands and guidelines)

@@ -1,0 +1,29 @@
+{
+  "name": "@usecapsule/testing",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/testing/src",
+  "projectType": "library",
+  "tags": ["npm:private", "scope:shared", "type:lib", "layer:infrastructure"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared/testing",
+        "main": "libs/shared/testing/src/index.ts",
+        "tsConfig": "libs/shared/testing/tsconfig.lib.json",
+        "assets": ["libs/shared/testing/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/shared/testing/jest.config.ts"
+      }
+    }
+  }
+}

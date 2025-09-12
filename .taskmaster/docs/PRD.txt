@@ -5,6 +5,7 @@ Capsule Platform revolutionizes application deployment by eliminating the tradit
 **Problem Statement**: Current deployment landscape forces developers into impossible choice: accept vendor lock-in with simple PaaS solutions, or spend 40-60% of engineering time managing complex Kubernetes configurations. Modern teams struggle with Configuration Hell (3-4 weeks minimum setup time), Platform Prison (migration costs exceed development by 3-5x), and Monorepo Complexity (no platform provides native support for Nx/Turborepo structures).
 
 **Solution Architecture**: Three-layer solution addressing each pain point:
+
 - Magic Deploy™ Layer: Auto-detection, zero-config, framework intelligence
 - Infrastructure Abstraction: Kubernetes core, multi-cloud, managed services
 - Zero Lock-in Export Layer: IaC generation, complete portability, migration tools
@@ -12,7 +13,9 @@ Capsule Platform revolutionizes application deployment by eliminating the tradit
 **Success Metrics**: Deploy time < 60 seconds, 95% zero-config success rate, 99.99% platform availability, 100% functional exports, customer acquisition cost < $500, monthly churn < 5%.
 
 # Core Features
+
 **1. Magic Deploy™ - Intelligent Zero-Configuration Deployment**
+
 - Automatically analyzes repository structure and detects frameworks, build tools, and dependencies
 - Generates optimal Kubernetes configurations, Dockerfiles, and resource allocations without human intervention
 - Native support for monorepo architectures (Nx, Turborepo, Lerna) with dependency graph optimization
@@ -20,6 +23,7 @@ Capsule Platform revolutionizes application deployment by eliminating the tradit
 - Critical for eliminating deployment complexity and achieving sub-60-second deploy times
 
 **2. Zero Vendor Lock-in - Complete Infrastructure Portability**
+
 - Exports complete, functional infrastructure as standard Kubernetes manifests, Terraform modules, Docker Compose, and CI/CD pipelines
 - Includes all secrets (encrypted), monitoring configurations, and networking setup
 - Provides migration tools, validation suites, and rollback procedures for seamless platform exit
@@ -27,6 +31,7 @@ Capsule Platform revolutionizes application deployment by eliminating the tradit
 - Essential for enterprise adoption and competitive differentiation against PaaS solutions
 
 **3. Complete Observability Suite**
+
 - Auto-instruments applications with OpenTelemetry without code changes
 - Unified visibility across metrics (Prometheus/VictoriaMetrics), logs (Loki), and traces (Tempo)
 - Auto-generated Grafana dashboards, pre-configured alerts, and cost tracking per service/feature
@@ -34,23 +39,28 @@ Capsule Platform revolutionizes application deployment by eliminating the tradit
 - Provides enterprise-grade monitoring that typically requires weeks of manual setup
 
 # User Experience
+
 **Primary User Personas:**
+
 - **Startup Developers**: Need rapid deployment without DevOps expertise, value simplicity and cost predictability
 - **Scale-up Engineering Teams**: Require sophisticated monorepo support and migration flexibility as they grow
 - **Enterprise Platform Teams**: Need compliance, SSO, audit logs, and complete infrastructure ownership
 
 **Core User Flows:**
+
 1. **First Deploy**: Connect GitHub repo → Automatic analysis (< 10 seconds) → Review detected configuration → Deploy with single click (< 60 seconds)
 2. **Ongoing Development**: Git push → Automatic build and deploy → Real-time logs and metrics → Rollback if needed
 3. **Infrastructure Export**: Select export format → Generate artifacts (< 60 seconds) → Download complete infrastructure code → Optional migration assistance
 
 **Key UX Principles:**
+
 - Zero configuration required for 95% of projects
 - Progressive disclosure of complexity (simple by default, powerful when needed)
 - Real-time feedback during all operations with WebSocket updates
 - Mobile-responsive dashboards for monitoring on-the-go
 - One-click rollback and recovery operations
 </context>
+
 <PRD>
 # Technical Architecture
 **System Components:**
@@ -66,12 +76,14 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 ```
 
 **Technology Stack:**
+
 - Backend: TypeScript 5.8+, Node.js 20+, NestJS 11, RabbitMQ 3.13+
 - Infrastructure: Kubernetes 1.28+, Docker 24+, Istio 1.20+, PostgreSQL 15+
 - Observability: Prometheus + VictoriaMetrics, FluentBit + Loki, OpenTelemetry + Tempo, Grafana 10+
 - Development: Nx 18+ monorepo, GitHub Actions CI/CD, Terraform 1.7+ IaC
 
 **Core Data Models:**
+
 - Organization: Multi-tenant container with subscription tiers and settings
 - Project: Repository-linked container with monorepo configuration and service mapping
 - Service: Individual deployable unit with framework detection, build config, and resource allocation
@@ -79,12 +91,14 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 - Export Request: Infrastructure export job with format selection and artifact generation
 
 **API Architecture:**
+
 - REST endpoints for CRUD operations with OpenAPI documentation
 - GraphQL for complex data fetching and real-time subscriptions
 - WebSocket events for deployment progress, service status, and metric streams
 - RabbitMQ message patterns for inter-service communication (RPC and pub/sub)
 
 **Infrastructure Requirements:**
+
 - Kubernetes control plane with multi-tenant namespace isolation
 - PostgreSQL per service with automated backups and replication
 - Redis clustering for session management and caching
@@ -92,7 +106,9 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 - Object storage for container registry and artifact storage
 
 # Development Roadmap
+
 **Phase 1: Foundation & Core Platform (MVP)**
+
 - Nx monorepo setup with TypeScript, NestJS, and DDD structure
 - API Gateway with authentication (OAuth GitHub/GitLab) and rate limiting
 - Basic Magic Deploy detection engine for Nx workspaces and common frameworks (Next.js, NestJS, React)
@@ -101,6 +117,7 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 - Web dashboard for project management and deployment monitoring
 
 **Phase 2: Magic Deploy Intelligence**
+
 - Advanced framework detection supporting 20+ frameworks across multiple languages
 - Polyglot monorepo support with dependency graph analysis and optimization
 - Automatic resource allocation based on framework profiling and usage prediction
@@ -109,6 +126,7 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 - Enhanced dashboard with real-time deployment logs and metrics visualization
 
 **Phase 3: Zero Lock-in Implementation**
+
 - Kubernetes manifest export engine with complete YAML generation
 - Terraform module generation for AWS, GCP, Azure with provider abstraction
 - Docker Compose export for local development environments
@@ -117,6 +135,7 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 - Export validation suite ensuring 100% functional infrastructure portability
 
 **Phase 4: Complete Observability & Enterprise Features**
+
 - OpenTelemetry auto-instrumentation for metrics, logs, and traces correlation
 - Cost tracking and optimization recommendations with ML-based forecasting
 - Enterprise SSO (SAML), audit logging, and compliance reporting (SOC2 ready)
@@ -125,7 +144,9 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 - Performance optimization for handling 10,000+ services and 100,000+ deployments/day
 
 # Logical Dependency Chain
+
 **Foundation First (Immediately Usable):**
+
 1. Nx monorepo setup → API Gateway → Basic auth → Simple web dashboard
 2. Project creation and Git integration → Basic framework detection
 3. Docker container builds → Kubernetes deployment → Success/failure feedback
@@ -142,19 +163,23 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 10. Enterprise features → SSO, compliance, and multi-region support
 
 **Atomic Feature Scope:**
+
 - Each phase delivers working, deployable functionality that provides user value
 - Magic Deploy starts with basic detection (Phase 1) and incrementally adds intelligence (Phase 2)
 - Zero Lock-in begins with simple exports (Phase 3) and adds validation/migration tools
 - Observability starts with basic monitoring (Phase 1) and evolves to full auto-instrumentation (Phase 4)
 
 **Getting to Usable Frontend Quickly:**
+
 - Priority 1: Basic web dashboard showing project list, deployment status, and logs
 - Priority 2: Real-time deployment progress with WebSocket updates
 - Priority 3: Framework detection results display and manual override capabilities
 - Priority 4: Export functionality UI and migration assistance tools
 
 # Risks and Mitigations
+
 **Technical Challenges:**
+
 - **Magic Deploy Accuracy Risk**: Complex framework configurations may not be detected correctly
   - *Mitigation*: Start with popular frameworks (Next.js, NestJS), build extensive test suite, provide manual override capability, continuous learning from failures
 - **Kubernetes Complexity**: Multi-tenant K8s management is operationally complex
@@ -163,12 +188,14 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
   - *Mitigation*: Comprehensive validation suite, gradual rollout with user feedback, extensive testing across cloud providers
 
 **MVP Strategy:**
+
 - **Core MVP**: Focus on Nx monorepo + Next.js/NestJS detection + basic K8s deployment + simple dashboard
 - **Validation Approach**: Deploy real projects (internal and beta users) to prove Magic Deploy accuracy
 - **Iterative Improvement**: Add framework support based on user demand and detection accuracy metrics
 - **Fallback Plan**: Manual configuration override for edge cases while detection engine improves
 
 **Resource Constraints:**
+
 - **Team Size**: 5-10 engineers require careful prioritization and clear ownership
   - *Mitigation*: Start with 2-3 core engineers, focus on MVP scope, hire gradually based on traction
 - **Time to Market**: 6-month MVP timeline requires aggressive scope management
@@ -177,11 +204,14 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
   - *Mitigation*: Bootstrap with revenue, focus on user acquisition, clear pricing tiers, track unit economics
 
 **Competition Risk:**
+
 - Established players (Vercel, Railway, Render) may copy core features
   - *Mitigation*: Focus on unique combination (Magic Deploy + Zero Lock-in), rapid iteration, strong developer advocacy
 
 # Appendix
+
 **Technical Specifications:**
+
 - Node.js 20+ with NestJS 11 framework for all backend services
 - PostgreSQL 15+ with database-per-service pattern for data isolation
 - RabbitMQ for inter-service messaging with exchange-based routing
@@ -190,6 +220,7 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 - Prometheus + Grafana for platform observability and user monitoring
 
 **Performance Requirements:**
+
 - API response time: P95 < 200ms, P99 < 500ms
 - Deployment time: < 60 seconds from git push to production
 - Framework detection: < 10 seconds for 1GB repository
@@ -197,6 +228,7 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 - Platform availability: 99.99% SLA with < 30 second failover
 
 **Security Model:**
+
 - TLS 1.3 for all communications with AES-256-GCM encryption at rest
 - OAuth 2.0 with GitHub/GitLab providers, JWT tokens with 15-minute expiration
 - Namespace isolation per tenant with Kubernetes RBAC and network policies
@@ -204,12 +236,14 @@ Kubernetes Data Plane (Multi-tenant workloads, Service Mesh, Ingress)
 - Regular security audits and penetration testing
 
 **Compliance Requirements:**
+
 - SOC2 Type II compliance by month 12 of operation
 - GDPR compliance with data residency controls for EU customers
 - Audit logging for all user actions and system operations
 - Data retention policies with automated cleanup and backup procedures
 
 **Research Findings:**
+
 - 67% of developers struggle with Kubernetes complexity (Stack Overflow Survey 2024)
 - Average DevOps setup time: 3-4 weeks for production-ready configuration
 - Monorepo adoption growing 40% year-over-year (GitHub State of the Octoverse)

@@ -81,7 +81,7 @@ The Capsule Platform is a cloud-native application deployment platform that elim
 **Bounded Contexts**: Each microservice represents a distinct business domain with clear boundaries:
 
 - **Authentication Context**: User identity, sessions, and authorization
-- **Billing Context**: Subscriptions, payments, and financial operations  
+- **Billing Context**: Subscriptions, payments, and financial operations
 - **Deployment Context**: Application deployment, scaling, and infrastructure management
 - **Monitoring Context**: Observability, metrics collection, and alerting
 
@@ -107,7 +107,7 @@ Each service implements hexagonal architecture:
 │  │  ┌─────────────────────────┐    │    │
 │  │  │   APPLICATION LAYER     │    │    │
 │  │  │  • Commands             │    │    │
-│  │  │  • Queries              │    │    │  
+│  │  │  • Queries              │    │    │
 │  │  │  • Event Handlers       │    │    │
 │  │  │  • Application Services │    │    │
 │  │  └─────────────────────────┘    │    │
@@ -130,7 +130,7 @@ Each service implements hexagonal architecture:
 **Domain Events**: Services publish events when significant business activities occur:
 
 - `user.created` → Triggers customer profile creation in billing
-- `payment.processed` → Enables deployment quota increases  
+- `payment.processed` → Enables deployment quota increases
 - `deployment.failed` → Triggers monitoring alerts and rollback procedures
 
 **Eventual Consistency**: Services maintain their own data and synchronize through events, accepting temporary inconsistencies for improved resilience and scalability.
@@ -140,12 +140,14 @@ Each service implements hexagonal architecture:
 ### Auth Service (Authentication Bounded Context)
 
 **Responsibilities**:
+
 - User registration, authentication, and profile management
 - JWT token generation and validation
 - Password reset and email verification flows
 - Role-based access control (RBAC)
 
 **Domain Entities**:
+
 ```typescript
 class User {
   id: UserId
@@ -169,12 +171,14 @@ class Session {
 ### Billing Service (Financial Bounded Context)
 
 **Responsibilities**:
+
 - Subscription management and billing cycles
 - Payment processing integration (Stripe, PayPal)
 - Invoice generation and delivery
 - Usage tracking and quota management
 
 **Domain Entities**:
+
 ```typescript
 class Customer {
   id: CustomerId
@@ -196,12 +200,14 @@ class Subscription {
 ### Deploy Service (Deployment Bounded Context)
 
 **Responsibilities**:
+
 - Application deployment orchestration
 - Kubernetes resource management
 - Container image building and registry management
 - Environment provisioning (staging, production)
 
 **Domain Entities**:
+
 ```typescript
 class Application {
   id: ApplicationId
@@ -224,12 +230,14 @@ class Deployment {
 ### Monitor Service (Observability Bounded Context)
 
 **Responsibilities**:
+
 - Metrics collection and aggregation
 - Log management and analysis
 - Alert configuration and notification
 - Performance monitoring and reporting
 
 **Domain Entities**:
+
 ```typescript
 class MetricSeries {
   id: MetricId
@@ -320,7 +328,7 @@ Each service owns its database completely:
 │  AUTH SERVICE   │    │ BILLING SERVICE │    │ DEPLOY SERVICE  │
 │                 │    │                 │    │                 │
 │ ┌─────────────┐ │    │ ┌─────────────┐ │    │ ┌─────────────┐ │
-│ │   AUTH DB   │ │    │ │ BILLING DB  │ │    │ │  DEPLOY DB  │ │  
+│ │   AUTH DB   │ │    │ │ BILLING DB  │ │    │ │  DEPLOY DB  │ │
 │ │ PostgreSQL  │ │    │ │ PostgreSQL  │ │    │ │ PostgreSQL  │ │
 │ │             │ │    │ │             │ │    │ │             │ │
 │ │ • Users     │ │    │ │ • Customers │ │    │ │ • Apps      │ │
@@ -360,13 +368,13 @@ apps/billing-service/migrations/
 class UserRegistrationSaga {
   async handle(command: RegisterUserCommand) {
     const user = await this.authService.createUser(command);
-    
+
     // Publish event for other services
     await this.eventPublisher.publish('user.created', {
       userId: user.id,
       email: user.email,
     });
-    
+
     // Billing service will eventually create customer profile
     // Deploy service will eventually set up default quotas
   }
@@ -418,10 +426,10 @@ class UserRegistrationSaga {
 services:
   rabbitmq:        # Message broker
     ports: [7010, 7020]
-  
+
   # Databases (commented until implementation)
   # auth-db:       # PostgreSQL 15
-  # billing-db:    # PostgreSQL 15  
+  # billing-db:    # PostgreSQL 15
   # deploy-db:     # PostgreSQL 15
   # monitor-db:    # TimescaleDB
 ```
@@ -454,19 +462,21 @@ services:
 ### Horizontal Scaling Strategies
 
 1. **API Gateway**: Load balance multiple instances behind Nginx
-2. **Microservices**: Auto-scale based on CPU/memory/queue depth metrics  
+2. **Microservices**: Auto-scale based on CPU/memory/queue depth metrics
 3. **RabbitMQ**: Cluster nodes for high availability and throughput
 4. **Databases**: Read replicas and connection pooling
 
 ### Performance Characteristics
 
 **Target Metrics**:
+
 - API Response Time: < 200ms (95th percentile)
 - Message Processing: < 100ms average
 - System Throughput: 1000+ requests/second
 - Availability: 99.9% uptime
 
 **Optimization Techniques**:
+
 - Message queue prefetching and batching
 - Database query optimization and indexing
 - HTTP response caching at API Gateway
@@ -501,7 +511,8 @@ services:
 
 ---
 
-**Next Steps**: 
+**Next Steps**:
+
 - Review [Microservices Architecture](./microservices.md) for detailed service design
 - See [Message Queue Architecture](./message-queues.md) for RabbitMQ implementation details
 - Check [RabbitMQ Implementation Guide](../guides/rabbitmq-implementation.md) for practical examples

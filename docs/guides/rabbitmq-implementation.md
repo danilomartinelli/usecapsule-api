@@ -50,18 +50,21 @@ The Capsule Platform uses RabbitMQ as the central nervous system for all inter-s
 ### Exchange Types and Purpose
 
 #### 1. capsule.commands (Direct Exchange)
+
 - **Purpose**: RPC-style service commands requiring responses
 - **Type**: Direct (exact routing key matching)
 - **Pattern**: `{service}.{action}`
 - **Examples**: `auth.register`, `billing.charge`, `deploy.create`
 
-#### 2. capsule.events (Topic Exchange)  
+#### 2. capsule.events (Topic Exchange)
+
 - **Purpose**: Domain events for publish-subscribe patterns
 - **Type**: Topic (wildcard routing key matching)
 - **Pattern**: `{context}.{event}`
 - **Examples**: `user.created`, `payment.processed`, `deployment.completed`
 
 #### 3. dlx (Dead Letter Exchange)
+
 - **Purpose**: Failed message collection for manual recovery
 - **Type**: Fanout (broadcasts to bound queues)
 - **Auto-Configuration**: Applied to all service queues
@@ -73,7 +76,7 @@ The platform uses consistent routing key conventions:
 ```typescript
 // Service Commands (Request/Response)
 'auth.register'     // User registration
-'auth.login'        // User authentication  
+'auth.login'        // User authentication
 'auth.health'       // Service health check
 'billing.charge'    // Process payment
 'deploy.create'     // Create deployment
@@ -113,7 +116,7 @@ export class RabbitMQModule {
           options: { durable: true },
         },
         {
-          name: 'capsule.events', 
+          name: 'capsule.events',
           type: 'topic',
           options: { durable: true },
         },
@@ -165,7 +168,7 @@ export class AppController {
   }
 
   @RabbitRPC({
-    exchange: 'capsule.commands', 
+    exchange: 'capsule.commands',
     routingKey: 'auth.register',
   })
   async registerUser(@RabbitPayload() userData: RegisterUserDto): Promise<User> {
@@ -187,7 +190,7 @@ export class AuthGatewayService {
   async registerUser(userData: RegisterUserDto): Promise<User> {
     return this.amqpConnection.request({
       exchange: 'capsule.commands',
-      routingKey: 'auth.register', 
+      routingKey: 'auth.register',
       payload: userData,
       timeout: 10000,
     });
@@ -220,7 +223,7 @@ export class UserService {
 
   async createUser(userData: CreateUserDto): Promise<User> {
     const user = await this.userRepository.save(userData);
-    
+
     // Publish domain event
     await this.amqpConnection.publish(
       'capsule.events',
@@ -231,7 +234,7 @@ export class UserService {
         timestamp: new Date().toISOString(),
       }
     );
-    
+
     return user;
   }
 }
@@ -239,7 +242,7 @@ export class UserService {
 
 #### Event Subscriber
 
-```typescript  
+```typescript
 // apps/billing-service/src/modules/customer/customer.controller.ts
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 
@@ -273,7 +276,7 @@ export class AppService {
   async checkAllServicesHealth(): Promise<AggregatedHealthResponse> {
     const services: ServiceName[] = [
       'auth-service',
-      'billing-service', 
+      'billing-service',
       'deploy-service',
       'monitor-service',
     ];
@@ -365,7 +368,7 @@ services:
 default_user = $(RABBITMQ_DEFAULT_USER)
 default_pass = $(RABBITMQ_DEFAULT_PASS)
 
-## Network Configuration  
+## Network Configuration
 listeners.tcp.default = 5672
 management.tcp.port = 15672
 
@@ -386,7 +389,7 @@ All queues are automatically configured with dead letter exchange policies:
 
 ```json
 {
-  "name": "dlq-policy", 
+  "name": "dlq-policy",
   "pattern": "^(?!.*\\.dlq$).*",
   "definition": {
     "dead-letter-exchange": "dlx",
@@ -399,7 +402,7 @@ All queues are automatically configured with dead letter exchange policies:
 
 1. **Message Processing Fails**: Handler throws unhandled exception
 2. **Retry Logic**: Automatic retry (up to 3 times with exponential backoff)
-3. **DLQ Routing**: After retry exhaustion, message sent to `dlx` exchange  
+3. **DLQ Routing**: After retry exhaustion, message sent to `dlx` exchange
 4. **Dead Letter Storage**: Message stored in `dlq` queue with failure metadata
 5. **Manual Recovery**: Operations team investigates and reprocesses
 
@@ -421,7 +424,7 @@ open http://localhost:7020
 Access at `http://localhost:7020` with credentials `usecapsule/usecapsule_dev_password`:
 
 1. **Queue Monitoring**: Message counts, consumer information
-2. **Exchange Visualization**: Routing topology and bindings  
+2. **Exchange Visualization**: Routing topology and bindings
 3. **Message Publishing**: Test message routing manually
 4. **Performance Metrics**: Throughput and connection statistics
 
@@ -431,7 +434,7 @@ Access at `http://localhost:7020` with credentials `usecapsule/usecapsule_dev_pa
 # Check queue status
 docker exec rabbitmq_dev rabbitmqctl list_queues name messages consumers
 
-# Inspect exchange bindings  
+# Inspect exchange bindings
 docker exec rabbitmq_dev rabbitmqctl list_bindings
 
 # Monitor connections
@@ -451,7 +454,7 @@ Use the Management UI to test message routing:
 # Routing Key: auth.health
 # Payload: {}
 
-# Test Event Publishing  
+# Test Event Publishing
 # Exchange: capsule.events
 # Routing Key: user.created
 # Payload: {"userId": "123", "email": "test@example.com"}
@@ -473,7 +476,7 @@ interface UserCreatedEvent {
 const ROUTING_KEYS = {
   AUTH: {
     REGISTER: 'auth.register',
-    LOGIN: 'auth.login', 
+    LOGIN: 'auth.login',
     HEALTH: 'auth.health',
   },
   EVENTS: {
@@ -539,7 +542,7 @@ healthCheck(): HealthCheckResponse {
 async onModuleInit() {
   try {
     // Wait for RabbitMQ connection
-    await this.amqpConnection.managedConnection.then(connection => 
+    await this.amqpConnection.managedConnection.then(connection =>
       connection.waitForConnect()
     );
     this.logger.log('RabbitMQ connection established');
@@ -552,7 +555,8 @@ async onModuleInit() {
 
 ---
 
-**Next Steps**: 
+**Next Steps**:
+
 - Review [Message Contracts](../api/message-contracts.md) for detailed payload schemas
-- See [Common Issues](../troubleshooting/common-issues.md) for debugging guidance  
+- See [Common Issues](../troubleshooting/common-issues.md) for debugging guidance
 - Check [Integration Test Examples](../examples/integration-tests.md) for testing patterns

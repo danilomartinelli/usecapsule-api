@@ -57,7 +57,7 @@ curl http://localhost:3000/health
     },
     "billing-service": {
       "status": "healthy",
-      "service": "billing-service", 
+      "service": "billing-service",
       "timestamp": "2024-01-12T10:30:00.000Z",
       "metadata": {
         "version": "1.0.0",
@@ -84,7 +84,7 @@ curl http://localhost:3000/health
     "monitor-service": {
       "status": "healthy",
       "service": "monitor-service",
-      "timestamp": "2024-01-12T10:30:00.000Z", 
+      "timestamp": "2024-01-12T10:30:00.000Z",
       "metadata": {
         "version": "1.0.0",
         "memory": {
@@ -137,6 +137,7 @@ Each microservice exposes a health check handler via RabbitMQ:
 **Request Payload**: `{}` (empty)
 
 **Response**:
+
 ```json
 {
   "status": "healthy",
@@ -150,7 +151,7 @@ Each microservice exposes a health check handler via RabbitMQ:
       "unit": "MB"
     },
     "queue": {
-      "name": "auth_queue", 
+      "name": "auth_queue",
       "connected": true,
       "responseTime": 12
     }
@@ -163,6 +164,7 @@ Each microservice exposes a health check handler via RabbitMQ:
 **Routing Key**: `billing.health`
 
 **Response**:
+
 ```json
 {
   "status": "healthy",
@@ -188,10 +190,11 @@ Each microservice exposes a health check handler via RabbitMQ:
 **Routing Key**: `deploy.health`
 
 **Response**:
+
 ```json
 {
   "status": "healthy",
-  "service": "deploy-service", 
+  "service": "deploy-service",
   "timestamp": "2024-01-12T10:30:00.000Z",
   "metadata": {
     "version": "1.0.0",
@@ -214,13 +217,14 @@ Each microservice exposes a health check handler via RabbitMQ:
 **Routing Key**: `monitor.health`
 
 **Response**:
+
 ```json
 {
   "status": "healthy",
   "service": "monitor-service",
   "timestamp": "2024-01-12T10:30:00.000Z",
   "metadata": {
-    "version": "1.0.0", 
+    "version": "1.0.0",
     "memory": {
       "used": 290,
       "total": 512,
@@ -256,22 +260,22 @@ enum HealthStatus {
 ```typescript
 // Service-level health determination
 function determineServiceHealth(checks: HealthCheck[]): HealthStatus {
-  const criticalFailures = checks.filter(check => 
+  const criticalFailures = checks.filter(check =>
     check.critical && check.status === 'failed'
   );
-  
+
   if (criticalFailures.length > 0) {
     return HealthStatus.UNHEALTHY;
   }
-  
-  const nonCriticalFailures = checks.filter(check => 
+
+  const nonCriticalFailures = checks.filter(check =>
     !check.critical && check.status === 'failed'
   );
-  
+
   if (nonCriticalFailures.length > 0) {
     return HealthStatus.DEGRADED;
   }
-  
+
   return HealthStatus.HEALTHY;
 }
 
@@ -280,11 +284,11 @@ function determineSystemHealth(serviceStatuses: HealthStatus[]): HealthStatus {
   if (serviceStatuses.includes(HealthStatus.UNHEALTHY)) {
     return HealthStatus.UNHEALTHY;
   }
-  
+
   if (serviceStatuses.includes(HealthStatus.DEGRADED)) {
     return HealthStatus.DEGRADED;
   }
-  
+
   return HealthStatus.HEALTHY;
 }
 ```
@@ -297,49 +301,49 @@ function determineSystemHealth(serviceStatuses: HealthStatus[]): HealthStatus {
 interface HealthCheckResponse {
   /** Current health status */
   status: HealthStatus;
-  
+
   /** Service identifier */
   service?: string;
-  
+
   /** ISO timestamp when check was performed */
   timestamp: string;
-  
+
   /** Optional additional health metadata */
   metadata?: {
     /** Service version */
     version?: string;
-    
+
     /** Error message if unhealthy */
     error?: string;
-    
+
     /** Memory usage statistics */
     memory?: {
       used: number;    // MB
       total: number;   // MB
       unit: 'MB' | 'GB';
     };
-    
+
     /** Database connectivity status */
     database?: {
       connected: boolean;
       responseTime?: number; // milliseconds
       type?: string;         // postgres, timescaledb, redis
     };
-    
+
     /** Message queue status */
     queue?: {
       name: string;
       connected: boolean;
       responseTime?: number; // milliseconds
     };
-    
+
     /** External service dependencies */
     kubernetes?: {
       connected: boolean;
       cluster?: string;
       nodes?: number;
     };
-    
+
     /** Service-specific metrics */
     metrics?: {
       collected?: number;
@@ -355,10 +359,10 @@ interface HealthCheckResponse {
 interface AggregatedHealthResponse {
   /** Overall system health status */
   status: HealthStatus;
-  
+
   /** Individual service health statuses */
   services: Record<string, HealthCheckResponse>;
-  
+
   /** ISO timestamp when aggregated check was performed */
   timestamp: string;
 }
@@ -370,7 +374,7 @@ interface AggregatedHealthResponse {
 interface SimpleHealthResponse {
   /** Ready status indicator */
   status: 'ready';
-  
+
   /** ISO timestamp */
   timestamp: string;
 }
@@ -405,7 +409,7 @@ export class AppController {
       const dbStart = Date.now();
       await this.databaseService.ping();
       const dbResponseTime = Date.now() - dbStart;
-      
+
       checks.push({
         name: 'database',
         status: 'passed',
@@ -425,7 +429,7 @@ export class AppController {
     const memoryUsage = process.memoryUsage();
     const memoryUsedMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
     const memoryTotalMB = Math.round(memoryUsage.heapTotal / 1024 / 1024);
-    
+
     // Flag as degraded if using > 90% of allocated memory
     if (memoryUsedMB / memoryTotalMB > 0.9) {
       checks.push({
@@ -491,11 +495,11 @@ export class AppController {
 // apps/api-gateway/src/app/app.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import type { 
-  AggregatedHealthResponse, 
+import type {
+  AggregatedHealthResponse,
   HealthCheckResponse,
   HealthStatus,
-  ServiceName 
+  ServiceName
 } from '@usecapsule/types';
 
 @Injectable()
@@ -508,17 +512,17 @@ export class AppService {
     const services: ServiceName[] = [
       'auth-service',
       'billing-service',
-      'deploy-service', 
+      'deploy-service',
       'monitor-service',
     ];
 
     // Check all services in parallel with individual error handling
-    const healthCheckPromises = services.map(service => 
+    const healthCheckPromises = services.map(service =>
       this.checkServiceHealthSafely(service)
     );
 
     const healthResults = await Promise.all(healthCheckPromises);
-    
+
     // Build services health map
     const servicesHealth: Record<string, HealthCheckResponse> = {};
     let overallStatus = HealthStatus.HEALTHY;
@@ -526,7 +530,7 @@ export class AppService {
     services.forEach((service, index) => {
       const result = healthResults[index];
       servicesHealth[service] = result;
-      
+
       // Determine overall system health
       if (result.status === HealthStatus.UNHEALTHY) {
         overallStatus = HealthStatus.UNHEALTHY;
@@ -545,7 +549,7 @@ export class AppService {
   private async checkServiceHealthSafely(serviceName: ServiceName): Promise<HealthCheckResponse> {
     try {
       const routingKey = `${serviceName.replace('-service', '')}.health`;
-      
+
       return await this.amqpConnection.request({
         exchange: 'capsule.commands',
         routingKey,
@@ -555,7 +559,7 @@ export class AppService {
 
     } catch (error) {
       this.logger.error(`Health check failed for ${serviceName}:`, error);
-      
+
       return {
         status: HealthStatus.UNHEALTHY,
         service: serviceName,
@@ -614,7 +618,7 @@ groups:
           summary: "Service {{ $labels.service }} is unhealthy"
           description: "Service {{ $labels.service }} has been reporting unhealthy status for more than 1 minute"
 
-      - alert: ServiceDegraded  
+      - alert: ServiceDegraded
         expr: capsule_health_checks_total{status="degraded"} > 0
         for: 5m
         labels:
@@ -631,7 +635,7 @@ groups:
 upstream api_gateway {
     server localhost:3000;
     server localhost:3001 backup;
-    
+
     # Health check configuration
     check interval=10000 rise=2 fall=3 timeout=5000 type=http;
     check_http_send "GET /health/ready HTTP/1.0\r\n\r\n";
@@ -642,6 +646,7 @@ upstream api_gateway {
 ---
 
 **Next Steps**:
+
 - Review [Message Contracts](./message-contracts.md) for detailed payload schemas
 - See [Gateway API Reference](./gateway-api.md) for HTTP endpoint documentation
 - Check [Common Issues](../troubleshooting/common-issues.md) for health check troubleshooting
