@@ -4,6 +4,7 @@ import {
   authServiceSchema,
   ParametersModule,
 } from '@usecapsule/parameters';
+import { RabbitMQModule } from '@usecapsule/rabbitmq';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -44,6 +45,13 @@ import { AppService } from './app.service';
         abortEarly: false,
         stripUnknown: true,
       },
+    }),
+    // Configure RabbitMQ for microservice
+    RabbitMQModule.forMicroservice({
+      uri:
+        process.env.RABBITMQ_URL ||
+        'amqp://usecapsule:usecapsule_dev_password@localhost:7010',
+      serviceName: 'auth-service',
     }),
   ],
   controllers: [AppController],

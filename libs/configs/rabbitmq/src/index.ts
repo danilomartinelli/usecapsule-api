@@ -1,19 +1,30 @@
 // Core module
 export * from './lib/rabbitmq.module';
 
+// Re-export @golevelup/nestjs-rabbitmq components for convenience
+export {
+  AmqpConnection,
+  RabbitRPC,
+  RabbitSubscribe,
+  RabbitPayload,
+  RabbitRequest,
+  Nack,
+} from '@golevelup/nestjs-rabbitmq';
+
+// Legacy exports for backward compatibility (deprecated - use @golevelup decorators instead)
 // Constants
 export * from './lib/rabbitmq.constants';
 
 // Interfaces
 export * from './lib/interfaces';
 
-// Services
+// Services (deprecated - use AmqpConnection instead)
 export * from './lib/services';
 
 // Types and utilities
 export * from './lib/types';
 
-// Decorators
+// Legacy decorators (deprecated - use @RabbitRPC/@RabbitSubscribe instead)
 export {
   RabbitMQMessagePattern,
   MessagePattern,

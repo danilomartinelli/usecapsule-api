@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ROUTING_KEY_TO_SERVICE } from '@usecapsule/messaging';
-import { ExchangePublisherService } from '@usecapsule/rabbitmq';
+import { AmqpConnection } from '@usecapsule/rabbitmq';
 import type {
   AggregatedHealthResponse,
   HealthCheckResponse,
@@ -9,22 +8,32 @@ import { HealthStatus } from '@usecapsule/types';
 
 @Injectable()
 export class AppService {
-  constructor(private readonly exchangePublisher: ExchangePublisherService) {}
+  constructor(private readonly amqpConnection: AmqpConnection) {}
 
   /**
-   * Checks the health of all microservices by sending RabbitMQ health check messages.
+   * Checks the health of all microservices by sending RabbitMQ RPC requests.
    *
    * @returns Aggregated health status of all microservices
    */
   async checkAllServicesHealth(): Promise<AggregatedHealthResponse> {
-    // Microservices to health check using constants
-    const servicesToCheck = ROUTING_KEY_TO_SERVICE;
+    // Services to health check with their routing keys
+    const servicesToCheck = {
+      'auth.health': 'auth-service',
+      'billing.health': 'billing-service',
+      'deploy.health': 'deploy-service',
+      'monitor.health': 'monitor-service',
+    };
 
     const healthChecks = await Promise.allSettled(
       Object.entries(servicesToCheck).map(async ([routingKey, serviceName]) => {
         try {
-          const response =
-            await this.exchangePublisher.sendHealthCheck(routingKey);
+          const response: HealthCheckResponse =
+            await this.amqpConnection.request({
+              exchange: 'capsule.commands',
+              routingKey,
+              payload: {},
+              timeout: 5000,
+            });
           return { serviceName, health: response };
         } catch (error) {
           // If service doesn't respond, mark as unhealthy
@@ -39,10 +48,8 @@ export class AppService {
                   error instanceof Error
                     ? error.message
                     : 'Service unreachable',
-                queue: {
-                  name: routingKey,
-                  connected: false,
-                },
+                exchange: 'capsule.commands',
+                routingKey,
               },
             } as HealthCheckResponse,
           };

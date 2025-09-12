@@ -13,7 +13,6 @@ services:
       RABBITMQ_DEFAULT_VHOST: /
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-      - ./devtools/infra/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
       - ./devtools/infra/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     healthcheck:
       test: rabbitmq-diagnostics -q ping

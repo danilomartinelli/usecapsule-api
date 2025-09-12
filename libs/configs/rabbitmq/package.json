@@ -18,6 +18,7 @@
     "tslib": "^2.3.0",
     "@nestjs/common": "^11.1.6",
     "@nestjs/microservices": "^11.1.6",
+    "@golevelup/nestjs-rabbitmq": "^6.0.2",
     "rxjs": "^7.8.1",
     "@usecapsule/types": "0.0.1"
   },

@@ -194,7 +194,7 @@ Failed Messages → dlx (Dead Letter Exchange) → dlq → Manual Recovery
 
 ### Exchange-Based Routing Architecture
 
-The system uses a sophisticated exchange-based routing system defined in `/devtools/infra/rabbitmq/definitions.json`:
+The system uses @golevelup/nestjs-rabbitmq for sophisticated exchange-based routing with declarative configuration:
 
 #### Core Exchanges
 
@@ -215,15 +215,78 @@ The system uses a sophisticated exchange-based routing system defined in `/devto
    - **Type**: Fanout (broadcasts to all bound queues)
    - **Auto-configured**: All queues have DLQ policy applied
 
-#### Service Queues with TTL
+#### @golevelup/nestjs-rabbitmq Architecture
 
-All service queues are configured with 6-hour message TTL (21,600,000ms):
+The platform uses the @golevelup/nestjs-rabbitmq library for unified, exchange-based messaging:
 
-- **`auth_queue`** - Authentication service messages
-- **`billing_queue`** - Billing and subscription management
-- **`deploy_queue`** - Deployment orchestration messages
-- **`monitor_queue`** - Metrics and observability data
-- **`dlq`** - Dead letter queue for failed messages
+**Key Features:**
+
+- **Declarative Configuration**: Exchanges and queues created automatically via code
+- **Type-safe Decorators**: `@RabbitRPC` and `@RabbitSubscribe` for message handlers
+- **AmqpConnection**: Direct access to AMQP channel for publishing and RPC calls
+- **Built-in Error Handling**: Automatic retries and dead letter queue support
+- **Health Check Integration**: Connection monitoring and health reporting
+
+**Module Configuration:**
+
+```typescript
+// API Gateway (HTTP Client)
+RabbitMQModule.forGateway({
+  uri: 'amqp://usecapsule:usecapsule_dev_password@localhost:7010',
+});
+
+// Microservices
+RabbitMQModule.forMicroservice({
+  uri: 'amqp://usecapsule:usecapsule_dev_password@localhost:7010',
+  serviceName: 'auth-service',
+});
+```
+
+**Message Handlers:**
+
+```typescript
+// RPC Handler (Request/Response)
+@RabbitRPC({
+  exchange: 'capsule.commands',
+  routingKey: 'auth.health',
+})
+healthCheck(@RabbitPayload() payload?: any): HealthCheckResponse {
+  return this.appService.getHealthStatus();
+}
+
+// Event Subscriber (Fire-and-Forget)
+@RabbitSubscribe({
+  exchange: 'capsule.events',
+  routingKey: 'user.created',
+})
+onUserCreated(@RabbitPayload() event: UserCreatedEvent): void {
+  // Handle event
+}
+```
+
+**Publishing Messages:**
+
+```typescript
+// RPC Request
+const response = await this.amqpConnection.request({
+  exchange: 'capsule.commands',
+  routingKey: 'auth.health',
+  payload: {},
+  timeout: 5000,
+});
+
+// Event Publishing
+await this.amqpConnection.publish('capsule.events', 'user.created', eventData);
+```
+
+#### Service Queue Management
+
+The @golevelup/nestjs-rabbitmq library automatically creates and manages queues based on message handlers:
+
+- **Dynamic Queue Creation**: Queues are created automatically when services register @RabbitRPC handlers
+- **Direct Reply-To**: RPC responses use AMQP's Direct Reply-To feature for efficient request/response patterns
+- **Exchange-based Routing**: All messages route through exchanges rather than direct queue bindings
+- **Auto-reconnection**: Built-in connection recovery and health monitoring
 
 #### Exchange Bindings and Routing
 

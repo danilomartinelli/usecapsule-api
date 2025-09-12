@@ -3,25 +3,17 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/messaging/src",
   "projectType": "library",
-  "tags": [
-    "scope:shared",
-    "type:lib",
-    "layer:infrastructure"
-  ],
+  "tags": ["scope:shared", "type:lib", "layer:infrastructure"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/messaging",
         "tsConfig": "libs/shared/messaging/tsconfig.lib.json",
         "packageJson": "libs/shared/messaging/package.json",
         "main": "libs/shared/messaging/src/index.ts",
-        "assets": [
-          "libs/shared/messaging/*.md"
-        ],
+        "assets": ["libs/shared/messaging/*.md"],
         "rootDir": "libs/shared/messaging/src"
       }
     }

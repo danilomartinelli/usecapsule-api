@@ -10,7 +10,7 @@
       "path": "../../libs/shared/types"
     },
     {
-      "path": "../../libs/shared/messaging"
+      "path": "../../libs/configs/rabbitmq"
     },
     {
       "path": "./tsconfig.app.json"
