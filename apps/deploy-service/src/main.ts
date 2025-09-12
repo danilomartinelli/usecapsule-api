@@ -1,16 +1,16 @@
 /**
  * Deploy Service Bootstrap Module
  *
- * This module bootstraps the Deploy Service microservice in the DDD architecture.
- * It creates a RabbitMQ-based microservice that communicates with the API Gateway
- * and other services via message queues.
+ * This module bootstraps the Deploy Service using @golevelup/nestjs-rabbitmq.
+ * It creates a standard NestJS application that uses RabbitMQ for inter-service
+ * communication via exchange-based routing.
  *
  * Key features:
- * - Type-safe configuration management using ConfigService
- * - RabbitMQ transport for inter-service communication
+ * - @golevelup/nestjs-rabbitmq for unified exchange-based messaging
+ * - Declarative RabbitMQ configuration via RabbitMQModule
+ * - @RabbitRPC decorators for message handlers
  * - Comprehensive error handling and logging
  * - Graceful shutdown handling
- * - Production-ready service lifecycle management
  * - Kubernetes and container registry integration
  *
  * @example
@@ -23,89 +23,37 @@
  * ```
  */
 
-import { INestMicroservice, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-
-import type { DeployServiceSchema } from '@usecapsule/parameters';
 import { AppModule } from './app/app.module';
 
 /**
- * Bootstrap function for the Deploy Service microservice.
+ * Bootstrap function for the Deploy Service.
  *
- * This function:
- * 1. Creates the NestJS application context (which loads and validates configuration)
- * 2. Retrieves validated configuration from ConfigService
- * 3. Configures RabbitMQ transport with proper connection settings
- * 4. Sets up error handling and graceful shutdown
- * 5. Starts the microservice listener
+ * Creates a standard NestJS application that uses @golevelup/nestjs-rabbitmq
+ * for RabbitMQ integration. The RabbitMQ configuration is handled declaratively
+ * through the RabbitMQModule.forMicroservice() configuration.
  *
- * The service will exit with code 1 if configuration validation fails
- * or if any critical errors occur during startup.
- *
- * @throws {Error} When configuration is invalid or missing
- * @throws {Error} When RabbitMQ connection cannot be established
- * @throws {Error} When microservice fails to start
+ * @throws {Error} When application fails to start
  */
 async function bootstrap(): Promise<void> {
   const logger = new Logger('DeployServiceBootstrap');
 
   try {
-    logger.log('Starting Deploy Service microservice...');
+    logger.log('Starting Deploy Service...');
 
-    // First create the application context to initialize the ParametersModule
-    // This will load and validate the configuration
-    logger.log('Creating application context and loading configuration...');
-    const appContext = await NestFactory.createApplicationContext(AppModule);
-
-    // Get the validated configuration from ConfigService
-    const configService = appContext.get(ConfigService<DeployServiceSchema>);
-
-    // Build RabbitMQ configuration from validated config
-    const rabbitUrl = configService.get('RABBITMQ_URL', { infer: true });
-    const rabbitQueue = configService.get('RABBITMQ_QUEUE', { infer: true });
-
-    if (!rabbitUrl) {
-      throw new Error('RABBITMQ_URL is required but not configured');
-    }
-
-    const rabbitConfig = {
-      urls: [rabbitUrl],
-      queue: rabbitQueue,
-      queueOptions: {
-        durable: true,
-      },
-    };
-
-    logger.log(
-      `RabbitMQ config: ${rabbitConfig.urls[0]} -> ${rabbitConfig.queue}`,
-    );
-
-    // Close the application context as we only needed it for configuration
-    await appContext.close();
-
-    logger.log('Creating microservice with RabbitMQ transport...');
-    const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-      AppModule,
-      {
-        transport: Transport.RMQ,
-        options: rabbitConfig,
-      },
-    );
+    const app = await NestFactory.create(AppModule);
 
     // Setup graceful shutdown handling
     setupGracefulShutdown(app, logger);
 
-    // Start the microservice
-    logger.log('Starting microservice listener...');
-    await app.listen();
-    logger.log(
-      `Deploy Service microservice successfully started and listening on queue: ${rabbitConfig.queue}`,
-    );
+    const port = process.env.DEPLOY_SERVICE_PORT || 3004;
+    await app.listen(port);
+
+    logger.log(`Deploy Service started successfully on port ${port}`);
   } catch (error) {
     logger.error(
-      'Failed to start Deploy Service microservice:',
+      'Failed to start Deploy Service:',
       error instanceof Error ? error.stack : error,
     );
     process.exit(1);
@@ -113,22 +61,22 @@ async function bootstrap(): Promise<void> {
 }
 
 /**
- * Sets up graceful shutdown handling for the microservice.
+ * Sets up graceful shutdown handling for the application.
  *
  * This function ensures that the service shuts down gracefully when receiving
  * termination signals, allowing ongoing requests to complete and cleaning up
  * resources properly.
  *
- * @param app - The NestJS microservice application instance
+ * @param app - The NestJS application instance
  * @param logger - Logger instance for shutdown messages
  */
-function setupGracefulShutdown(app: INestMicroservice, logger: Logger): void {
+function setupGracefulShutdown(app: any, logger: Logger): void {
   const shutdown = async (signal: string) => {
     logger.log(`Received ${signal}. Starting graceful shutdown...`);
 
     try {
       await app.close();
-      logger.log('Deploy Service microservice shut down gracefully');
+      logger.log('Deploy Service shut down gracefully');
       process.exit(0);
     } catch (error) {
       logger.error(

@@ -1,6 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
-import { HEALTH_CHECK_ROUTING_KEYS } from '@usecapsule/messaging';
+import { RabbitRPC, RabbitPayload } from '@usecapsule/rabbitmq';
 import type { HealthCheckResponse } from '@usecapsule/types';
 
 import { AppService } from './app.service';
@@ -10,16 +9,20 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   /**
-   * Health check message pattern for RabbitMQ monitoring.
+   * Health check RPC handler for RabbitMQ monitoring.
    *
-   * This handler responds to 'monitor.health' messages sent via RabbitMQ,
+   * This handler responds to RPC calls with routing key 'monitor.health',
    * allowing the system to verify that the monitor-service is running
-   * and responding to messages properly.
+   * and responding to messages properly. Uses the @golevelup/nestjs-rabbitmq
+   * library for exchange-based routing via capsule.commands exchange.
    *
    * @returns Service health status
    */
-  @MessagePattern(HEALTH_CHECK_ROUTING_KEYS.MONITOR)
-  healthCheck(): HealthCheckResponse {
+  @RabbitRPC({
+    exchange: 'capsule.commands',
+    routingKey: 'monitor.health',
+  })
+  healthCheck(@RabbitPayload() payload?: any): HealthCheckResponse {
     return this.appService.getHealthStatus();
   }
 }

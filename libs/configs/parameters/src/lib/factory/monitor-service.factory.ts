@@ -34,7 +34,6 @@ export const monitorServiceFactory = (): MonitorServiceSchema => ({
       | 'canary') || 'local',
   SERVICE_NAME: 'monitor-service' as const,
   RABBITMQ_URL: process.env.RABBITMQ_URL || '',
-  RABBITMQ_QUEUE: process.env.RABBITMQ_QUEUE || 'monitor_queue',
   MONITOR_DB_HOST: process.env.DB_HOST || '',
   MONITOR_DB_PORT: Number.parseInt(process.env.DB_PORT || '5432', 10),
   MONITOR_DB_NAME: process.env.DB_NAME || '',

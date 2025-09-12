@@ -34,7 +34,6 @@ export const deployServiceFactory = (): DeployServiceSchema => ({
       | 'canary') || 'local',
   SERVICE_NAME: 'deploy-service' as const,
   RABBITMQ_URL: process.env.RABBITMQ_URL || '',
-  RABBITMQ_QUEUE: process.env.RABBITMQ_QUEUE || 'deploy_queue',
   DEPLOY_DB_HOST: process.env.DB_HOST || '',
   DEPLOY_DB_PORT: Number.parseInt(process.env.DB_PORT || '5432', 10),
   DEPLOY_DB_NAME: process.env.DB_NAME || '',

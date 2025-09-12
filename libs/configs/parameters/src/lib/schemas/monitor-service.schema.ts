@@ -68,18 +68,6 @@ export const monitorServiceSchema = z
       .describe('RabbitMQ connection URL for inter-service communication'),
 
     /**
-     * RabbitMQ queue name for the Monitor Service.
-     * The specific queue that this service will consume monitoring messages from.
-     *
-     * @default 'monitor_queue'
-     */
-    RABBITMQ_QUEUE: z
-      .string()
-      .min(1)
-      .default('monitor_queue')
-      .describe('RabbitMQ queue name for Monitor Service messages'),
-
-    /**
      * Database host for the Monitor Service.
      * PostgreSQL server hostname or IP address for monitoring-specific data.
      */

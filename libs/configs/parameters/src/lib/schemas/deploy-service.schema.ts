@@ -68,18 +68,6 @@ export const deployServiceSchema = z
       .describe('RabbitMQ connection URL for inter-service communication'),
 
     /**
-     * RabbitMQ queue name for the Deploy Service.
-     * The specific queue that this service will consume deployment messages from.
-     *
-     * @default 'deploy_queue'
-     */
-    RABBITMQ_QUEUE: z
-      .string()
-      .min(1)
-      .default('deploy_queue')
-      .describe('RabbitMQ queue name for Deploy Service messages'),
-
-    /**
      * Database host for the Deploy Service.
      * PostgreSQL server hostname or IP address for deploy-specific data.
      */

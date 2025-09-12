@@ -6,30 +6,6 @@
  */
 
 // ============================================================================
-// Message Pattern Symbols
-// ============================================================================
-
-/**
- * Symbol for health check message pattern metadata.
- */
-export const HEALTH_CHECK_PATTERN = Symbol('health.check.pattern');
-
-/**
- * Symbol for retry policy metadata.
- */
-export const RETRY_POLICY_METADATA = Symbol('rabbitmq:retry-policy');
-
-/**
- * Symbol for message timeout metadata.
- */
-export const MESSAGE_TIMEOUT_METADATA = Symbol('rabbitmq:timeout');
-
-/**
- * Symbol for message priority metadata.
- */
-export const MESSAGE_PRIORITY_METADATA = Symbol('rabbitmq:priority');
-
-// ============================================================================
 // Message Patterns
 // ============================================================================
 
@@ -105,26 +81,6 @@ export const ROUTING_KEYS = {
 } as const;
 
 /**
- * Health check routing keys for each service.
- */
-export const HEALTH_CHECK_ROUTING_KEYS = {
-  AUTH: 'auth.health',
-  BILLING: 'billing.health',
-  DEPLOY: 'deploy.health',
-  MONITOR: 'monitor.health',
-} as const;
-
-/**
- * Routing key to service name mapping for health checks.
- */
-export const ROUTING_KEY_TO_SERVICE = {
-  'auth.health': 'auth-service',
-  'billing.health': 'billing-service',
-  'deploy.health': 'deploy-service',
-  'monitor.health': 'monitor-service',
-} as const;
-
-/**
  * Event routing keys for event-driven communication.
  */
 export const EVENT_ROUTING_KEYS = {
@@ -139,16 +95,6 @@ export const EVENT_ROUTING_KEYS = {
   ALERT_TRIGGERED: 'alert.triggered',
   METRICS_COLLECTED: 'metrics.collected',
 } as const;
-
-// ============================================================================
-// Exchange Names
-// ============================================================================
-
-/**
- * RabbitMQ exchange names.
- */
-// Note: Exchange and queue names are defined in /devtools/infra/rabbitmq/definitions.json
-// and managed by RabbitMQ infrastructure. Only application-level constants are kept here.
 
 // ============================================================================
 // Message Types

@@ -34,7 +34,6 @@ export const billingServiceFactory = (): BillingServiceSchema => ({
       | 'canary') || 'local',
   SERVICE_NAME: 'billing-service' as const,
   RABBITMQ_URL: process.env.RABBITMQ_URL || '',
-  RABBITMQ_QUEUE: process.env.RABBITMQ_QUEUE || 'billing_queue',
   BILLING_DB_HOST: process.env.DB_HOST || '',
   BILLING_DB_PORT: Number.parseInt(process.env.DB_PORT || '5432', 10),
   BILLING_DB_NAME: process.env.DB_NAME || '',

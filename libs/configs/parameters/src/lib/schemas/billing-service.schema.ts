@@ -68,18 +68,6 @@ export const billingServiceSchema = z
       .describe('RabbitMQ connection URL for inter-service communication'),
 
     /**
-     * RabbitMQ queue name for the Billing Service.
-     * The specific queue that this service will consume billing messages from.
-     *
-     * @default 'billing_queue'
-     */
-    RABBITMQ_QUEUE: z
-      .string()
-      .min(1)
-      .default('billing_queue')
-      .describe('RabbitMQ queue name for Billing Service messages'),
-
-    /**
      * Database host for the Billing Service.
      * PostgreSQL server hostname or IP address for billing-specific data.
      */
