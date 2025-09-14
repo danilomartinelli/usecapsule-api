@@ -1,4 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
+import {
+  EXCHANGES,
+  AUTH_ROUTING_KEYS,
+  BILLING_ROUTING_KEYS,
+  DEPLOY_ROUTING_KEYS,
+  MONITOR_ROUTING_KEYS,
+  EVENT_ROUTING_KEYS,
+  ServiceName,
+} from '@usecapsule/messaging';
 
 export interface MessageFixture {
   id: string;
@@ -17,21 +26,35 @@ export interface RPCFixture extends MessageFixture {
 
 export class MessageFixtureFactory {
   static createHealthCheckMessage(serviceName: string): MessageFixture {
+    const routingKeyMap = {
+      auth: AUTH_ROUTING_KEYS.HEALTH,
+      billing: BILLING_ROUTING_KEYS.HEALTH,
+      deploy: DEPLOY_ROUTING_KEYS.HEALTH,
+      monitor: MONITOR_ROUTING_KEYS.HEALTH,
+    };
+
     return {
       id: uuidv4(),
       content: {},
-      routingKey: `${serviceName}.health`,
-      exchange: 'capsule.commands',
+      routingKey: routingKeyMap[serviceName] || `${serviceName}.health`,
+      exchange: EXCHANGES.COMMANDS,
       timestamp: new Date().toISOString(),
     };
   }
 
   static createHealthCheckRPC(serviceName: string): RPCFixture {
+    const serviceNameMap = {
+      auth: ServiceName.AUTH,
+      billing: ServiceName.BILLING,
+      deploy: ServiceName.DEPLOY,
+      monitor: ServiceName.MONITOR,
+    };
+
     return {
       ...this.createHealthCheckMessage(serviceName),
       expectedResponse: {
         status: 'healthy',
-        service: `${serviceName}-service`,
+        service: serviceNameMap[serviceName] || `${serviceName}-service`,
         timestamp: expect.any(String),
       },
       timeout: 5000,
@@ -47,8 +70,8 @@ export class MessageFixtureFactory {
         firstName: userData.firstName || 'Test',
         lastName: userData.lastName || 'User',
       },
-      routingKey: 'auth.register',
-      exchange: 'capsule.commands',
+      routingKey: AUTH_ROUTING_KEYS.REGISTER,
+      exchange: EXCHANGES.COMMANDS,
       timestamp: new Date().toISOString(),
     };
   }
@@ -61,8 +84,8 @@ export class MessageFixtureFactory {
         email,
         createdAt: new Date().toISOString(),
       },
-      routingKey: 'user.created',
-      exchange: 'capsule.events',
+      routingKey: EVENT_ROUTING_KEYS.USER_CREATED,
+      exchange: EXCHANGES.EVENTS,
       timestamp: new Date().toISOString(),
     };
   }
@@ -76,8 +99,8 @@ export class MessageFixtureFactory {
         currency: chargeData.currency || 'usd',
         description: chargeData.description || 'Test charge',
       },
-      routingKey: 'billing.charge',
-      exchange: 'capsule.commands',
+      routingKey: BILLING_ROUTING_KEYS.CHARGE,
+      exchange: EXCHANGES.COMMANDS,
       timestamp: new Date().toISOString(),
     };
   }
@@ -92,8 +115,8 @@ export class MessageFixtureFactory {
         status: paymentData.status || 'succeeded',
         processedAt: new Date().toISOString(),
       },
-      routingKey: 'payment.processed',
-      exchange: 'capsule.events',
+      routingKey: EVENT_ROUTING_KEYS.PAYMENT_PROCESSED,
+      exchange: EXCHANGES.EVENTS,
       timestamp: new Date().toISOString(),
     };
   }
@@ -107,8 +130,8 @@ export class MessageFixtureFactory {
         imageTag: deploymentData.imageTag || 'latest',
         replicas: deploymentData.replicas || 1,
       },
-      routingKey: 'deploy.create',
-      exchange: 'capsule.commands',
+      routingKey: DEPLOY_ROUTING_KEYS.CREATE,
+      exchange: EXCHANGES.COMMANDS,
       timestamp: new Date().toISOString(),
     };
   }
@@ -121,8 +144,8 @@ export class MessageFixtureFactory {
         status: 'started',
         startedAt: new Date().toISOString(),
       },
-      routingKey: 'deployment.started',
-      exchange: 'capsule.events',
+      routingKey: EVENT_ROUTING_KEYS.DEPLOYMENT_STARTED,
+      exchange: EXCHANGES.EVENTS,
       timestamp: new Date().toISOString(),
     };
   }
@@ -139,8 +162,8 @@ export class MessageFixtureFactory {
         },
         timestamp: new Date().toISOString(),
       },
-      routingKey: 'monitor.track',
-      exchange: 'capsule.commands',
+      routingKey: MONITOR_ROUTING_KEYS.TRACK,
+      exchange: EXCHANGES.COMMANDS,
       timestamp: new Date().toISOString(),
     };
   }
@@ -154,8 +177,8 @@ export class MessageFixtureFactory {
         service: error.service || 'test-service',
         timestamp: new Date().toISOString(),
       },
-      routingKey: 'error.occurred',
-      exchange: 'capsule.events',
+      routingKey: EVENT_ROUTING_KEYS.ERROR_OCCURRED,
+      exchange: EXCHANGES.EVENTS,
       timestamp: new Date().toISOString(),
     };
   }

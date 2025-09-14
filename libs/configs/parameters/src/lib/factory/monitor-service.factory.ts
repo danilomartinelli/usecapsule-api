@@ -1,4 +1,5 @@
 import type { MonitorServiceSchema } from '../schemas/monitor-service.schema';
+import { timeoutFactory } from './timeout.factory';
 
 /**
  * Configuration factory for the Monitor Service.
@@ -72,6 +73,7 @@ export const monitorServiceFactory = (): MonitorServiceSchema => ({
   REDIS_PORT: Number.parseInt(process.env.REDIS_PORT || '6379', 10),
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   REDIS_DB: Number.parseInt(process.env.REDIS_DB || '0', 10),
+  ...timeoutFactory(),
 });
 
 /**

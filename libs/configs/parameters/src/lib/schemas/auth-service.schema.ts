@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { timeoutConfigSchema } from './timeout.schema';
 
 /**
  * Zod schema for Auth Service environment variables validation.
@@ -255,6 +256,8 @@ export const authServiceSchema = z
       .default(0)
       .describe('Redis database number to use'),
   })
+  // Merge with timeout configuration schema
+  .merge(timeoutConfigSchema)
   .strict(); // Reject undefined environment variables
 
 /**

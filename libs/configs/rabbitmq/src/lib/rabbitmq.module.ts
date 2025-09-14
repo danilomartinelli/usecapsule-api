@@ -1,5 +1,9 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { RabbitMQModule as GolevelupRabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import type { TimeoutConfig } from '@usecapsule/parameters';
+import { TimeoutAwareAmqpService } from './timeout-aware-amqp.service';
+import { CircuitBreakerAwareAmqpService } from './circuit-breaker-aware-amqp.service';
+import { CircuitBreakerModule } from './circuit-breaker/circuit-breaker.module';
 
 /**
  * RabbitMQ module using @golevelup/nestjs-rabbitmq for proper exchange-based routing.
@@ -30,57 +34,97 @@ import { RabbitMQModule as GolevelupRabbitMQModule } from '@golevelup/nestjs-rab
 export class RabbitMQModule {
   /**
    * Configures RabbitMQ module for API Gateway (HTTP client).
-   * Enables publishing and RPC requests to microservices.
+   * Enables publishing and RPC requests to microservices with circuit breaker protection.
    */
   static forGateway(options: {
     uri: string;
     connectionInitOptions?: { wait: boolean };
+    timeoutConfig?: Partial<TimeoutConfig>;
+    enableCircuitBreaker?: boolean;
   }): DynamicModule {
-    return GolevelupRabbitMQModule.forRoot({
-      exchanges: [
-        {
-          name: 'capsule.commands',
-          type: 'direct',
-          options: { durable: true },
-        },
-        {
-          name: 'capsule.events',
-          type: 'topic',
-          options: { durable: true },
-        },
+    const enableCircuitBreaker = options.enableCircuitBreaker !== false; // Default to true
+
+    return {
+      module: RabbitMQModule,
+      imports: [
+        CircuitBreakerModule,
+        GolevelupRabbitMQModule.forRoot({
+          exchanges: [
+            {
+              name: 'capsule.commands',
+              type: 'direct',
+              options: { durable: true },
+            },
+            {
+              name: 'capsule.events',
+              type: 'topic',
+              options: { durable: true },
+            },
+          ],
+          uri: options.uri,
+          connectionInitOptions: options.connectionInitOptions ?? {
+            wait: false,
+          },
+          enableControllerDiscovery: true,
+        }),
       ],
-      uri: options.uri,
-      connectionInitOptions: options.connectionInitOptions ?? { wait: false },
-      enableControllerDiscovery: true,
-    });
+      providers: [
+        TimeoutAwareAmqpService,
+        ...(enableCircuitBreaker ? [CircuitBreakerAwareAmqpService] : []),
+      ],
+      exports: [
+        TimeoutAwareAmqpService,
+        ...(enableCircuitBreaker ? [CircuitBreakerAwareAmqpService] : []),
+      ],
+    };
   }
 
   /**
    * Configures RabbitMQ module for microservices.
-   * Enables message handlers with @RabbitRPC and @RabbitSubscribe decorators.
+   * Enables message handlers with @RabbitRPC and @RabbitSubscribe decorators with circuit breaker protection.
    */
   static forMicroservice(options: {
     uri: string;
     serviceName: string;
     connectionInitOptions?: { wait: boolean };
+    timeoutConfig?: Partial<TimeoutConfig>;
+    enableCircuitBreaker?: boolean;
   }): DynamicModule {
-    return GolevelupRabbitMQModule.forRoot({
-      exchanges: [
-        {
-          name: 'capsule.commands',
-          type: 'direct',
-          options: { durable: true },
-        },
-        {
-          name: 'capsule.events',
-          type: 'topic',
-          options: { durable: true },
-        },
+    const enableCircuitBreaker = options.enableCircuitBreaker !== false; // Default to true
+
+    return {
+      module: RabbitMQModule,
+      imports: [
+        CircuitBreakerModule,
+        GolevelupRabbitMQModule.forRoot({
+          exchanges: [
+            {
+              name: 'capsule.commands',
+              type: 'direct',
+              options: { durable: true },
+            },
+            {
+              name: 'capsule.events',
+              type: 'topic',
+              options: { durable: true },
+            },
+          ],
+          uri: options.uri,
+          connectionInitOptions: options.connectionInitOptions ?? {
+            wait: false,
+          },
+          enableControllerDiscovery: true,
+        }),
       ],
-      uri: options.uri,
-      connectionInitOptions: options.connectionInitOptions ?? { wait: false },
-      enableControllerDiscovery: true,
-    });
+      providers: [
+        TimeoutAwareAmqpService,
+        ...(enableCircuitBreaker ? [CircuitBreakerAwareAmqpService] : []),
+      ],
+      exports: [
+        TimeoutAwareAmqpService,
+        ...(enableCircuitBreaker ? [CircuitBreakerAwareAmqpService] : []),
+      ],
+    };
   }
 
   /**

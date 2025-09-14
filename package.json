@@ -98,8 +98,11 @@
     "@golevelup/nestjs-rabbitmq": "^6.0.2",
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",
+    "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/platform-express": "^11.1.6",
+    "@types/opossum": "^8.1.9",
     "dotenv": "^17.2.2",
+    "opossum": "^8.5.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.0"
   }

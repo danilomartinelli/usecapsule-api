@@ -11,22 +11,23 @@
  * - `billingServiceFactory` - Billing Service configuration factory
  * - `deployServiceFactory` - Deploy Service configuration factory
  * - `monitorServiceFactory` - Monitor Service configuration factory
+ * - `timeoutFactory` - Timeout configuration factory
  *
  * @example
  * ```typescript
- * import { 
- *   authServiceFactory, 
- *   apiGatewayFactory, 
+ * import {
+ *   authServiceFactory,
+ *   apiGatewayFactory,
  *   billingServiceFactory,
  *   deployServiceFactory,
- *   monitorServiceFactory 
+ *   monitorServiceFactory
  * } from '@usecapsule/parameters';
- * import { 
- *   authServiceSchema, 
- *   apiGatewaySchema, 
+ * import {
+ *   authServiceSchema,
+ *   apiGatewaySchema,
  *   billingServiceSchema,
  *   deployServiceSchema,
- *   monitorServiceSchema 
+ *   monitorServiceSchema
  * } from '@usecapsule/parameters';
  *
  * // Create and validate configurations
@@ -43,3 +44,4 @@ export * from './auth-service.factory';
 export * from './billing-service.factory';
 export * from './deploy-service.factory';
 export * from './monitor-service.factory';
+export * from './timeout.factory';

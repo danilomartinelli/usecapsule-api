@@ -3,6 +3,7 @@ import { ModuleMetadata } from '@nestjs/common';
 import { RabbitMQTestClient } from '../rabbitmq/rabbitmq-test-client';
 import { RabbitMQTestContainer } from '../containers/rabbitmq-container';
 import { PostgreSQLTestContainer } from '../containers/postgresql-container';
+import { ROUTING_KEY_PATTERNS } from '@usecapsule/messaging';
 
 export interface TestingModuleConfig extends ModuleMetadata {
   useRealRabbitMQ?: boolean;
@@ -93,7 +94,7 @@ export class TestingModuleBuilder {
           {
             exchange: 'capsule.commands',
             queue: 'health_queue',
-            routingKey: '*.health',
+            routingKey: ROUTING_KEY_PATTERNS.ALL_HEALTH,
           },
         ],
       });

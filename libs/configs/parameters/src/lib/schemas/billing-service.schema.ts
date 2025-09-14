@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { timeoutConfigSchema } from './timeout.schema';
 
 /**
  * Zod schema for Billing Service environment variables validation.
@@ -280,6 +281,8 @@ export const billingServiceSchema = z
       .default(0)
       .describe('Redis database number to use'),
   })
+  // Merge with timeout configuration schema
+  .merge(timeoutConfigSchema)
   .strict(); // Reject undefined environment variables
 
 /**

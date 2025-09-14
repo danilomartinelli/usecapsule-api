@@ -1,5 +1,11 @@
 import { HealthStatus } from '@usecapsule/types';
 import type { AggregatedHealthResponse } from '@usecapsule/types';
+import {
+  AUTH_ROUTING_KEYS,
+  BILLING_ROUTING_KEYS,
+  DEPLOY_ROUTING_KEYS,
+  ServiceName,
+} from '@usecapsule/messaging';
 
 export interface HttpRequestFixture {
   method: string;
@@ -95,7 +101,7 @@ export class HttpFixtureFactory {
           metadata: {
             error: 'Service unreachable',
             exchange: 'capsule.commands',
-            routingKey: 'billing.health',
+            routingKey: BILLING_ROUTING_KEYS.HEALTH,
           },
         },
         'deploy-service': {
@@ -134,7 +140,7 @@ export class HttpFixtureFactory {
           metadata: {
             error: 'Service unreachable',
             exchange: 'capsule.commands',
-            routingKey: 'auth.health',
+            routingKey: AUTH_ROUTING_KEYS.HEALTH,
           },
         },
         'billing-service': {
@@ -144,7 +150,7 @@ export class HttpFixtureFactory {
           metadata: {
             error: 'Service unreachable',
             exchange: 'capsule.commands',
-            routingKey: 'billing.health',
+            routingKey: BILLING_ROUTING_KEYS.HEALTH,
           },
         },
         'deploy-service': {
@@ -154,7 +160,7 @@ export class HttpFixtureFactory {
           metadata: {
             error: 'Service unreachable',
             exchange: 'capsule.commands',
-            routingKey: 'deploy.health',
+            routingKey: DEPLOY_ROUTING_KEYS.HEALTH,
           },
         },
         'monitor-service': {

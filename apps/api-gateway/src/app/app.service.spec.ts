@@ -12,6 +12,12 @@ import type {
   AggregatedHealthResponse,
   HealthCheckResponse,
 } from '@usecapsule/types';
+import {
+  AUTH_ROUTING_KEYS,
+  BILLING_ROUTING_KEYS,
+  DEPLOY_ROUTING_KEYS,
+  MONITOR_ROUTING_KEYS,
+} from '@usecapsule/messaging';
 
 describe('AppService', () => {
   let service: AppService;
@@ -162,7 +168,7 @@ describe('AppService', () => {
       expect(billingHealth.metadata).toMatchObject({
         error: 'Request timeout',
         exchange: 'capsule.commands',
-        routingKey: 'billing.health',
+        routingKey: BILLING_ROUTING_KEYS.HEALTH,
       });
     });
 
@@ -181,25 +187,25 @@ describe('AppService', () => {
       expect(amqpConnection.request).toHaveBeenCalledTimes(4);
       expect(amqpConnection.request).toHaveBeenCalledWith({
         exchange: 'capsule.commands',
-        routingKey: 'auth.health',
+        routingKey: AUTH_ROUTING_KEYS.HEALTH,
         payload: {},
         timeout: 5000,
       });
       expect(amqpConnection.request).toHaveBeenCalledWith({
         exchange: 'capsule.commands',
-        routingKey: 'billing.health',
+        routingKey: BILLING_ROUTING_KEYS.HEALTH,
         payload: {},
         timeout: 5000,
       });
       expect(amqpConnection.request).toHaveBeenCalledWith({
         exchange: 'capsule.commands',
-        routingKey: 'deploy.health',
+        routingKey: DEPLOY_ROUTING_KEYS.HEALTH,
         payload: {},
         timeout: 5000,
       });
       expect(amqpConnection.request).toHaveBeenCalledWith({
         exchange: 'capsule.commands',
-        routingKey: 'monitor.health',
+        routingKey: MONITOR_ROUTING_KEYS.HEALTH,
         payload: {},
         timeout: 5000,
       });

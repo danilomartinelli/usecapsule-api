@@ -1,4 +1,5 @@
 import type { ApiGatewaySchema } from '../schemas/api-gateway.schema';
+import { timeoutFactory } from './timeout.factory';
 
 /**
  * Configuration factory for the API Gateway.
@@ -55,6 +56,7 @@ export const apiGatewayFactory = (): ApiGatewaySchema => ({
   REDIS_PORT: Number.parseInt(process.env.REDIS_PORT || '6379', 10),
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   REDIS_DB: Number.parseInt(process.env.REDIS_DB || '0', 10),
+  ...timeoutFactory(),
 });
 
 /**

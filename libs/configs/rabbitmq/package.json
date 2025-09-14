@@ -17,9 +17,16 @@
   "dependencies": {
     "tslib": "^2.3.0",
     "@nestjs/common": "^11.1.6",
-    "@golevelup/nestjs-rabbitmq": "^6.0.2"
+    "@golevelup/nestjs-rabbitmq": "^6.0.2",
+    "@nestjs/config": "^3.2.3",
+    "@nestjs/terminus": "^10.2.3",
+    "@nestjs/event-emitter": "^2.0.4",
+    "opossum": "^8.1.4",
+    "@usecapsule/parameters": "0.0.1",
+    "@nestjs/swagger": "11.2.0"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.10.7"
+    "@types/amqplib": "^0.10.7",
+    "@types/opossum": "^8.1.2"
   }
 }

@@ -3,6 +3,15 @@ import {
   RabbitMQTestClient,
   MessageFixtureFactory,
 } from '@usecapsule/testing';
+import {
+  EXCHANGES,
+  AUTH_ROUTING_KEYS,
+  BILLING_ROUTING_KEYS,
+  DEPLOY_ROUTING_KEYS,
+  MONITOR_ROUTING_KEYS,
+  EVENT_ROUTING_KEYS,
+  ROUTING_KEY_PATTERNS,
+} from '@usecapsule/messaging';
 
 describe('RabbitMQ Message Routing Integration', () => {
   let rabbitMQContainer: RabbitMQTestContainer;
@@ -20,8 +29,8 @@ describe('RabbitMQ Message Routing Integration', () => {
     rabbitMQClient = new RabbitMQTestClient({
       connectionUri: rabbitMQContainer.getConnectionUri(),
       exchanges: [
-        { name: 'capsule.commands', type: 'direct' },
-        { name: 'capsule.events', type: 'topic' },
+        { name: EXCHANGES.COMMANDS, type: 'direct' },
+        { name: EXCHANGES.EVENTS, type: 'topic' },
         { name: 'test.exchange', type: 'direct' },
       ],
       queues: [
@@ -34,30 +43,34 @@ describe('RabbitMQ Message Routing Integration', () => {
       ],
       bindings: [
         {
-          exchange: 'capsule.commands',
+          exchange: EXCHANGES.COMMANDS,
           queue: 'auth_queue',
-          routingKey: 'auth.*',
+          routingKey: ROUTING_KEY_PATTERNS.AUTH_ALL,
         },
         {
-          exchange: 'capsule.commands',
+          exchange: EXCHANGES.COMMANDS,
           queue: 'billing_queue',
-          routingKey: 'billing.*',
+          routingKey: ROUTING_KEY_PATTERNS.BILLING_ALL,
         },
         {
-          exchange: 'capsule.commands',
+          exchange: EXCHANGES.COMMANDS,
           queue: 'deploy_queue',
-          routingKey: 'deploy.*',
+          routingKey: ROUTING_KEY_PATTERNS.DEPLOY_ALL,
         },
         {
-          exchange: 'capsule.commands',
+          exchange: EXCHANGES.COMMANDS,
           queue: 'monitor_queue',
-          routingKey: 'monitor.*',
+          routingKey: ROUTING_KEY_PATTERNS.MONITOR_ALL,
         },
-        { exchange: 'capsule.events', queue: 'event_queue', routingKey: '*.*' },
+        {
+          exchange: EXCHANGES.EVENTS,
+          queue: 'event_queue',
+          routingKey: ROUTING_KEY_PATTERNS.ALL_EVENTS,
+        },
         {
           exchange: 'test.exchange',
           queue: 'test_queue',
-          routingKey: 'test.message',
+          routingKey: 'test.message', // Keep as-is for test-specific routing
         },
       ],
     });
@@ -110,7 +123,7 @@ describe('RabbitMQ Message Routing Integration', () => {
       );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
-        routingKey: 'auth.health',
+        routingKey: AUTH_ROUTING_KEYS.HEALTH,
         exchange: 'capsule.commands',
       });
     });
@@ -138,7 +151,7 @@ describe('RabbitMQ Message Routing Integration', () => {
       );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
-        routingKey: 'billing.charge',
+        routingKey: BILLING_ROUTING_KEYS.CHARGE,
         exchange: 'capsule.commands',
       });
 
@@ -170,7 +183,7 @@ describe('RabbitMQ Message Routing Integration', () => {
       );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
-        routingKey: 'deploy.create',
+        routingKey: DEPLOY_ROUTING_KEYS.CREATE,
         exchange: 'capsule.commands',
       });
 
@@ -203,7 +216,7 @@ describe('RabbitMQ Message Routing Integration', () => {
       );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
-        routingKey: 'monitor.track',
+        routingKey: MONITOR_ROUTING_KEYS.TRACK,
         exchange: 'capsule.commands',
       });
 
@@ -256,7 +269,7 @@ describe('RabbitMQ Message Routing Integration', () => {
       );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
-        routingKey: 'user.created',
+        routingKey: EVENT_ROUTING_KEYS.USER_CREATED,
         exchange: 'capsule.events',
       });
 
@@ -289,7 +302,7 @@ describe('RabbitMQ Message Routing Integration', () => {
       );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
-        routingKey: 'payment.processed',
+        routingKey: EVENT_ROUTING_KEYS.PAYMENT_PROCESSED,
         exchange: 'capsule.events',
       });
 
@@ -320,7 +333,7 @@ describe('RabbitMQ Message Routing Integration', () => {
       );
       expect(messages).toHaveLength(1);
       expect(messages[0]).toMatchMessagePattern({
-        routingKey: 'deployment.started',
+        routingKey: EVENT_ROUTING_KEYS.DEPLOYMENT_STARTED,
         exchange: 'capsule.events',
       });
 
@@ -376,10 +389,10 @@ describe('RabbitMQ Message Routing Integration', () => {
       expect(deployMessages).toHaveLength(1);
       expect(monitorMessages).toHaveLength(1);
 
-      expect(authMessages[0].routingKey).toBe('auth.health');
-      expect(billingMessages[0].routingKey).toBe('billing.health');
-      expect(deployMessages[0].routingKey).toBe('deploy.health');
-      expect(monitorMessages[0].routingKey).toBe('monitor.health');
+      expect(authMessages[0].routingKey).toBe(AUTH_ROUTING_KEYS.HEALTH);
+      expect(billingMessages[0].routingKey).toBe(BILLING_ROUTING_KEYS.HEALTH);
+      expect(deployMessages[0].routingKey).toBe(DEPLOY_ROUTING_KEYS.HEALTH);
+      expect(monitorMessages[0].routingKey).toBe(MONITOR_ROUTING_KEYS.HEALTH);
     });
   });
 

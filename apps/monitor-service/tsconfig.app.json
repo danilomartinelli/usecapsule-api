@@ -21,10 +21,13 @@
       "path": "../../libs/configs/parameters/tsconfig.lib.json"
     },
     {
-      "path": "../../libs/shared/types/tsconfig.lib.json"
+      "path": "../../libs/shared/messaging/tsconfig.lib.json"
     },
     {
       "path": "../../libs/configs/rabbitmq/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/shared/types/tsconfig.lib.json"
     }
   ]
 }

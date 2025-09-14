@@ -1,42 +1,116 @@
 import { Injectable } from '@nestjs/common';
-import { AmqpConnection } from '@usecapsule/rabbitmq';
+import {
+  TimeoutAwareAmqpService,
+  CircuitBreakerAwareAmqpService,
+  CircuitBreakerHealthService,
+  CircuitBreakerState,
+} from '@usecapsule/rabbitmq';
 import type {
   AggregatedHealthResponse,
   HealthCheckResponse,
 } from '@usecapsule/types';
 import { HealthStatus } from '@usecapsule/types';
+import {
+  AUTH_ROUTING_KEYS,
+  BILLING_ROUTING_KEYS,
+  DEPLOY_ROUTING_KEYS,
+  MONITOR_ROUTING_KEYS,
+  ServiceName,
+  EXCHANGES,
+} from '@usecapsule/messaging';
 
 @Injectable()
 export class AppService {
-  constructor(private readonly amqpConnection: AmqpConnection) {}
+  constructor(
+    private readonly amqpService: TimeoutAwareAmqpService,
+    private readonly circuitBreakerAmqpService: CircuitBreakerAwareAmqpService,
+    private readonly circuitBreakerHealthService: CircuitBreakerHealthService,
+  ) {}
 
   /**
-   * Checks the health of all microservices by sending RabbitMQ RPC requests.
+   * Checks the health of all microservices with circuit breaker protection.
    *
-   * @returns Aggregated health status of all microservices
+   * This enhanced health check includes circuit breaker status and provides
+   * more detailed information about service health and fault tolerance state.
+   *
+   * @returns Aggregated health status of all microservices with circuit breaker information
    */
   async checkAllServicesHealth(): Promise<AggregatedHealthResponse> {
     // Services to health check with their routing keys
     const servicesToCheck = {
-      'auth.health': 'auth-service',
-      'billing.health': 'billing-service',
-      'deploy.health': 'deploy-service',
-      'monitor.health': 'monitor-service',
+      [AUTH_ROUTING_KEYS.HEALTH]: ServiceName.AUTH,
+      [BILLING_ROUTING_KEYS.HEALTH]: ServiceName.BILLING,
+      [DEPLOY_ROUTING_KEYS.HEALTH]: ServiceName.DEPLOY,
+      [MONITOR_ROUTING_KEYS.HEALTH]: ServiceName.MONITOR,
     };
+
+    // Get circuit breaker health status for context
+    const circuitBreakerHealth =
+      this.circuitBreakerHealthService.getAggregatedHealth();
 
     const healthChecks = await Promise.allSettled(
       Object.entries(servicesToCheck).map(async ([routingKey, serviceName]) => {
         try {
-          const response: HealthCheckResponse =
-            await this.amqpConnection.request({
-              exchange: 'capsule.commands',
-              routingKey,
-              payload: {},
-              timeout: 5000,
-            });
-          return { serviceName, health: response };
+          // Use circuit breaker aware AMQP service for enhanced fault tolerance
+          const response = await this.circuitBreakerAmqpService.healthCheck(
+            serviceName,
+            routingKey,
+          );
+
+          // Get circuit breaker status for this service
+          const circuitHealth =
+            this.circuitBreakerHealthService.getServiceHealth(serviceName);
+
+          // Enhance health response with circuit breaker information
+          const enhancedHealth: HealthCheckResponse = {
+            ...response.data,
+            metadata: {
+              ...response.data.metadata,
+              circuitBreaker: {
+                state: response.circuitState,
+                fromFallback: response.fromFallback,
+                executionTime: response.actualDuration,
+                timeout: response.timeout,
+                timedOut: response.timedOut,
+                ...(circuitHealth && {
+                  errorPercentage: circuitHealth.metrics.errorPercentage,
+                  requestCount: circuitHealth.metrics.requestCount,
+                  averageResponseTime:
+                    circuitHealth.metrics.averageResponseTime,
+                  lastStateChange: circuitHealth.metrics.lastStateChange,
+                }),
+              },
+            },
+          };
+
+          // Adjust health status based on circuit breaker state
+          if (
+            response.fromFallback &&
+            enhancedHealth.status === HealthStatus.HEALTHY
+          ) {
+            // If we got a healthy response from fallback, it's actually degraded
+            enhancedHealth.status = HealthStatus.DEGRADED;
+            enhancedHealth.metadata.reason =
+              'Circuit breaker fallback response';
+          } else if (response.circuitState === CircuitBreakerState.OPEN) {
+            // Circuit breaker is open, service is failing fast
+            enhancedHealth.status = HealthStatus.UNHEALTHY;
+            enhancedHealth.metadata.reason =
+              'Circuit breaker is OPEN - service failing fast';
+          } else if (response.circuitState === CircuitBreakerState.HALF_OPEN) {
+            // Circuit breaker is testing recovery
+            enhancedHealth.status = HealthStatus.DEGRADED;
+            enhancedHealth.metadata.reason =
+              'Circuit breaker is HALF_OPEN - testing recovery';
+          }
+
+          return { serviceName, health: enhancedHealth };
         } catch (error) {
-          // If service doesn't respond, mark as unhealthy
+          // Get circuit breaker status for error context
+          const circuitHealth =
+            this.circuitBreakerHealthService.getServiceHealth(serviceName);
+
+          // Enhanced error response with circuit breaker information
           return {
             serviceName,
             health: {
@@ -48,8 +122,21 @@ export class AppService {
                   error instanceof Error
                     ? error.message
                     : 'Service unreachable',
-                exchange: 'capsule.commands',
+                exchange: EXCHANGES.COMMANDS,
                 routingKey,
+                timeout: true,
+                circuitBreaker: {
+                  state: circuitHealth?.state || CircuitBreakerState.CLOSED,
+                  ...(circuitHealth && {
+                    errorPercentage: circuitHealth.metrics.errorPercentage,
+                    requestCount: circuitHealth.metrics.requestCount,
+                    lastError: circuitHealth.metrics.lastError,
+                  }),
+                },
+                // Include circuit breaker result if available
+                ...(error.circuitBreakerResult && {
+                  circuitBreakerResult: error.circuitBreakerResult,
+                }),
               },
             } as HealthCheckResponse,
           };
@@ -90,25 +177,120 @@ export class AppService {
       }
     });
 
-    // Determine overall system status based on service health distribution
+    // Determine overall system status based on service health distribution and circuit breaker state
     let overallStatus: HealthStatus;
     const totalServices = healthyCount + degradedCount + unhealthyCount;
 
-    if (unhealthyCount === 0 && degradedCount === 0) {
-      // All services are healthy
+    // Consider circuit breaker health in overall status
+    const openCircuitBreakers = Object.keys(
+      circuitBreakerHealth.services,
+    ).filter(
+      (service) =>
+        circuitBreakerHealth.services[service].state ===
+        CircuitBreakerState.OPEN,
+    ).length;
+
+    if (
+      unhealthyCount === 0 &&
+      degradedCount === 0 &&
+      openCircuitBreakers === 0
+    ) {
+      // All services are healthy and no circuit breakers are open
       overallStatus = HealthStatus.HEALTHY;
-    } else if (unhealthyCount >= totalServices / 2) {
-      // Majority or half of services are unhealthy
+    } else if (
+      unhealthyCount >= totalServices / 2 ||
+      openCircuitBreakers >= totalServices / 2
+    ) {
+      // Majority of services are unhealthy or many circuit breakers are open
       overallStatus = HealthStatus.UNHEALTHY;
     } else {
       // Some services have issues but not majority unhealthy
       overallStatus = HealthStatus.DEGRADED;
     }
 
+    // Enhanced response with circuit breaker information
     return {
       status: overallStatus,
       services,
       timestamp: new Date().toISOString(),
+      metadata: {
+        circuitBreakers: {
+          summary: circuitBreakerHealth.summary,
+          openCount: openCircuitBreakers,
+          totalCount: Object.keys(circuitBreakerHealth.services).length,
+        },
+        healthDistribution: {
+          healthy: healthyCount,
+          degraded: degradedCount,
+          unhealthy: unhealthyCount,
+          total: totalServices,
+        },
+      },
     };
+  }
+
+  /**
+   * Gets timeout configuration debug information.
+   *
+   * @returns Debug information about timeout configuration
+   */
+  getTimeoutDebugInfo(): Record<string, any> {
+    return this.amqpService.getTimeoutDebugInfo();
+  }
+
+  /**
+   * Gets circuit breaker debug information.
+   *
+   * @returns Debug information about circuit breaker configuration and state
+   */
+  getCircuitBreakerDebugInfo(): Record<string, any> {
+    return this.circuitBreakerAmqpService.getCircuitBreakerDebugInfo();
+  }
+
+  /**
+   * Gets aggregated circuit breaker health status.
+   *
+   * @returns Circuit breaker health information for all services
+   */
+  getCircuitBreakerHealth() {
+    return this.circuitBreakerHealthService.getAggregatedHealth();
+  }
+
+  /**
+   * Resets circuit breaker for a specific service.
+   *
+   * @param serviceName - Service name to reset
+   * @returns Reset operation result
+   */
+  resetServiceCircuitBreaker(serviceName: string): {
+    success: boolean;
+    message: string;
+  } {
+    try {
+      const resetCount =
+        this.circuitBreakerHealthService.resetServiceCircuitBreakers(
+          serviceName,
+        );
+      return {
+        success: true,
+        message: `Successfully reset ${resetCount} circuit breaker(s) for ${serviceName}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to reset circuit breakers for ${serviceName}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      };
+    }
+  }
+
+  /**
+   * Gets health recommendations based on current circuit breaker state.
+   *
+   * @returns Array of actionable health recommendations
+   */
+  getHealthRecommendations() {
+    return this.circuitBreakerHealthService.getHealthRecommendations();
   }
 }

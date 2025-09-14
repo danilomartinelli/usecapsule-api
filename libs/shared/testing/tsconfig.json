@@ -4,7 +4,7 @@
   "include": [],
   "references": [
     {
-      "path": "../../configs/rabbitmq"
+      "path": "../messaging"
     },
     {
       "path": "../types"
