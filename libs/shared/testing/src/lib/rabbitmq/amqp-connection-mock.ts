@@ -1,4 +1,7 @@
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import type { Connection } from 'amqplib';
+import type { ChannelWrapper } from 'amqp-connection-manager';
+import type { RabbitMQConfig } from '@golevelup/nestjs-rabbitmq';
 
 /**
  * Create a comprehensive mock for AmqpConnection
@@ -18,14 +21,39 @@ export function createAmqpConnectionMock(): jest.Mocked<AmqpConnection> {
 
     // Connection properties
     isConnected: true,
+    connection: {} as Connection,
+    managedChannel: {} as ChannelWrapper,
     managedConnection: {
       close: jest.fn(),
       createChannel: jest.fn(),
-    },
+      heartbeatIntervalInSeconds: 5,
+      reconnectTimeInSeconds: 5,
+      isConnected: jest.fn().mockReturnValue(true),
+      connection: undefined,
+      channelCount: 0,
+    } as unknown as jest.Mocked<{
+      close: () => Promise<void>;
+      createChannel: () => unknown;
+      heartbeatIntervalInSeconds: number;
+      reconnectTimeInSeconds: number;
+      isConnected: () => boolean;
+      connection: unknown;
+      channelCount: number;
+    }>,
+    configuration: {} as Required<RabbitMQConfig>,
+    channels: new Map(),
 
     // Other AmqpConnection methods that might be accessed
     createSubscriber: jest.fn(),
     init: jest.fn(),
+    close: jest.fn(),
+    createRpc: jest.fn(),
+    createSubscription: jest.fn(),
+    exchange: jest.fn(),
+    queue: jest.fn(),
+    requestReply: jest.fn(),
+    subscribe: jest.fn(),
+    rpc: jest.fn(),
 
     // Reset function for test cleanup
     resetMocks: () => {
@@ -34,7 +62,7 @@ export function createAmqpConnectionMock(): jest.Mocked<AmqpConnection> {
       addSetupMock.mockReset();
       channelMock.mockReset();
     },
-  } as any;
+  } as unknown as jest.Mocked<AmqpConnection> & { resetMocks: () => void };
 
   return mock;
 }
@@ -75,7 +103,7 @@ export class AmqpConnectionMockHelper {
   /**
    * Setup mock for specific routing key patterns
    */
-  mockForRoutingKey(routingKey: string, response: any) {
+  mockForRoutingKey(routingKey: string, response: unknown) {
     this.mock.request.mockImplementation((options) => {
       if (options.routingKey === routingKey) {
         return Promise.resolve(response);
@@ -92,7 +120,7 @@ export class AmqpConnectionMockHelper {
   expectRequestCalled(
     exchange: string,
     routingKey: string,
-    payload: any = {},
+    payload: unknown = {},
     timeout = 5000,
   ) {
     expect(this.mock.request).toHaveBeenCalledWith({
@@ -106,7 +134,7 @@ export class AmqpConnectionMockHelper {
   /**
    * Verify publish was called with expected parameters
    */
-  expectPublishCalled(exchange: string, routingKey: string, payload: any) {
+  expectPublishCalled(exchange: string, routingKey: string, payload: unknown) {
     expect(this.mock.publish).toHaveBeenCalledWith(
       exchange,
       routingKey,
@@ -141,7 +169,9 @@ export class AmqpConnectionMockHelper {
    */
   resetMocks() {
     if ('resetMocks' in this.mock) {
-      (this.mock as any).resetMocks();
+      (
+        this.mock as jest.Mocked<AmqpConnection> & { resetMocks: () => void }
+      ).resetMocks();
     } else {
       this.mock.request.mockReset();
       this.mock.publish.mockReset();

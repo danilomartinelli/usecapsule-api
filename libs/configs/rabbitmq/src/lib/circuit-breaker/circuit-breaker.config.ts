@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { ServiceName, TimeoutOperation } from '@usecapsule/parameters';
+import type { ServiceName } from '@usecapsule/parameters';
+import { TimeoutOperation } from '@usecapsule/parameters';
 import type {
   CircuitBreakerConfig,
   GlobalCircuitBreakerConfig,
@@ -70,7 +71,7 @@ export class CircuitBreakerConfigService {
   /**
    * Get complete configuration for debugging.
    */
-  getDebugInfo(): Record<string, any> {
+  getDebugInfo(): Record<string, unknown> {
     return {
       globalEnabled: this.config.enabled,
       defaults: this.config.defaults,
@@ -84,14 +85,11 @@ export class CircuitBreakerConfigService {
    * Build the complete circuit breaker configuration.
    */
   private buildConfiguration(): GlobalCircuitBreakerConfig {
-    const environment = this.configService.get('NODE_ENV', 'development');
-    const isProduction = environment === 'production';
-
     return {
       enabled:
         this.configService.get('CIRCUIT_BREAKER_ENABLED', 'true') === 'true',
-      defaults: this.buildDefaultConfig(isProduction),
-      services: this.buildServiceConfigs(isProduction),
+      defaults: this.buildDefaultConfig(),
+      services: this.buildServiceConfigs(),
       recoveryStrategies: this.buildRecoveryStrategies(),
       monitoring: {
         enabled:
@@ -116,7 +114,7 @@ export class CircuitBreakerConfigService {
   /**
    * Build default circuit breaker configuration.
    */
-  private buildDefaultConfig(isProduction: boolean): CircuitBreakerConfig {
+  private buildDefaultConfig(): CircuitBreakerConfig {
     const baseTimeout = this.configService.get(
       'RABBITMQ_DEFAULT_TIMEOUT',
       5000,
@@ -147,13 +145,21 @@ export class CircuitBreakerConfigService {
       enableMonitoring:
         this.configService.get('CIRCUIT_BREAKER_ENABLE_MONITORING', 'true') ===
         'true',
-      errorFilter: (error: any) => {
+      errorFilter: (error: unknown) => {
         // Don't count validation errors as circuit breaker failures
-        if (error?.name === 'ValidationError' || error?.statusCode === 400) {
+        if (
+          (error && typeof error === 'object' && 'name' in error && error.name === 'ValidationError') ||
+          (error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 400)
+        ) {
           return false;
         }
         // Don't count unauthorized errors
-        if (error?.statusCode === 401 || error?.statusCode === 403) {
+        if (
+          error &&
+          typeof error === 'object' &&
+          'statusCode' in error &&
+          (error.statusCode === 401 || error.statusCode === 403)
+        ) {
           return false;
         }
         return true;
@@ -164,9 +170,7 @@ export class CircuitBreakerConfigService {
   /**
    * Build service-specific circuit breaker configurations.
    */
-  private buildServiceConfigs(
-    isProduction: boolean,
-  ): Record<string, Partial<CircuitBreakerConfig>> {
+  private buildServiceConfigs(): Record<string, Partial<CircuitBreakerConfig>> {
     return {
       'auth-service': {
         timeout: this.configService.get('AUTH_SERVICE_TIMEOUT', 2000),

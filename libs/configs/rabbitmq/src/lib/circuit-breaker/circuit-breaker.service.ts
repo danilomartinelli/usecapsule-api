@@ -1,21 +1,21 @@
 import {
   Injectable,
   Logger,
-  OnModuleInit,
   OnModuleDestroy,
+  OnModuleInit,
 } from '@nestjs/common';
-import * as CircuitBreaker from 'opossum';
-import type { ServiceName, TimeoutOperation } from '@usecapsule/parameters';
+import type { ServiceName } from '@usecapsule/parameters';
+import { TimeoutOperation } from '@usecapsule/parameters';
+import CircuitBreaker from 'opossum';
 import { CircuitBreakerConfigService } from './circuit-breaker.config';
 import type {
-  CircuitBreakerState,
-  CircuitBreakerConfig,
-  CircuitBreakerMetrics,
   CircuitBreakerHealth,
+  CircuitBreakerMetrics,
   CircuitBreakerResult,
-  ServiceCircuitBreakerOptions,
   RecoveryStrategy,
+  ServiceCircuitBreakerOptions,
 } from './circuit-breaker.types';
+import { CircuitBreakerState } from './circuit-breaker.types';
 
 /**
  * Circuit breaker service that provides fault tolerance for RabbitMQ operations.
@@ -31,6 +31,7 @@ import type {
 export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CircuitBreakerService.name);
   private readonly circuitBreakers = new Map<string, CircuitBreaker>();
+  private readonly circuitBreakerConfigs = new Map<string, Record<string, unknown>>();
   private readonly metricsMap = new Map<string, CircuitBreakerMetrics>();
   private readonly recoveryTimers = new Map<string, NodeJS.Timeout>();
   private metricsInterval?: NodeJS.Timeout;
@@ -76,10 +77,10 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
    * @param options - Circuit breaker options
    * @returns Promise resolving to circuit breaker result
    */
-  async execute<T = any>(
-    fn: (...args: any[]) => Promise<T>,
+  async execute<T = unknown>(
+    fn: (...args: unknown[]) => Promise<T>,
     options: ServiceCircuitBreakerOptions,
-    ...args: any[]
+    ...args: unknown[]
   ): Promise<CircuitBreakerResult<T>> {
     const circuitBreakerKey = this.getCircuitBreakerKey(
       options.serviceName,
@@ -124,30 +125,32 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
       });
 
       return {
-        data,
+        data: data as T,
         success: true,
         executionTime,
-        circuitState: this.mapOssumStateToOurState(circuitBreaker.stats.state),
+        circuitState: this.mapOssumStateToOurState(
+          circuitBreaker.toJSON().state,
+        ),
         fromFallback: false,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      const fromFallback = error.code === 'OPOSSUM_FALLBACK_TRIGGERED';
+      const fromFallback = error && typeof error === 'object' && 'code' in error && error.code === 'OPOSSUM_FALLBACK_TRIGGERED';
 
       this.updateMetrics(circuitBreakerKey, {
         success: false,
         executionTime,
-        fromFallback,
+        fromFallback: Boolean(fromFallback),
         error: error instanceof Error ? error.message : 'Unknown error',
       });
 
       if (fromFallback) {
         return {
-          data: error.fallbackValue,
+          data: (error && typeof error === 'object' && 'fallbackValue' in error ? error.fallbackValue : undefined) as T,
           success: true, // Fallback is considered a success
           executionTime,
           circuitState: this.mapOssumStateToOurState(
-            circuitBreaker.stats.state,
+            circuitBreaker.toJSON().state,
           ),
           fromFallback: true,
         };
@@ -157,7 +160,9 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
         data: undefined as T,
         success: false,
         executionTime,
-        circuitState: this.mapOssumStateToOurState(circuitBreaker.stats.state),
+        circuitState: this.mapOssumStateToOurState(
+          circuitBreaker.toJSON().state,
+        ),
         fromFallback: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
@@ -248,19 +253,14 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
   /**
    * Get debug information about all circuit breakers.
    */
-  getDebugInfo(): Record<string, any> {
-    const circuitBreakers: Record<string, any> = {};
+  getDebugInfo(): Record<string, unknown> {
+    const circuitBreakers: Record<string, unknown> = {};
 
     for (const [key, breaker] of this.circuitBreakers.entries()) {
       circuitBreakers[key] = {
-        state: breaker.stats.state,
+        state: breaker.toJSON().state,
         stats: breaker.stats,
-        options: {
-          timeout: breaker.options.timeout,
-          errorThresholdPercentage: breaker.options.errorThresholdPercentage,
-          resetTimeout: breaker.options.resetTimeout,
-          volumeThreshold: breaker.options.volumeThreshold,
-        },
+        options: this.circuitBreakerConfigs.get(key) || {},
       };
     }
 
@@ -284,7 +284,7 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
     );
 
     if (this.circuitBreakers.has(key)) {
-      return this.circuitBreakers.get(key)!;
+      return this.circuitBreakers.get(key) as CircuitBreaker;
     }
 
     const config = this.configService.getServiceConfig(
@@ -301,12 +301,17 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
       rollingCountTimeout: mergedConfig.rollingCountTimeout,
       rollingCountBuckets: mergedConfig.rollingCountBuckets,
       errorFilter: mergedConfig.errorFilter,
-      fallback: mergedConfig.fallback,
     });
+
+    // Configure fallback if provided
+    if (mergedConfig.fallback) {
+      circuitBreaker.fallback(mergedConfig.fallback);
+    }
 
     this.setupCircuitBreakerListeners(circuitBreaker, key, options);
     this.circuitBreakers.set(key, circuitBreaker);
-    this.initializeMetrics(key, options.serviceName);
+    this.circuitBreakerConfigs.set(key, mergedConfig);
+    this.initializeMetrics(key);
 
     this.logger.log(`Created circuit breaker`, {
       key,
@@ -327,8 +332,8 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
    */
   private createAsyncFunction() {
     return async (
-      originalFn: (...args: any[]) => Promise<any>,
-      ...args: any[]
+      originalFn: (...args: unknown[]) => Promise<unknown>,
+      ...args: unknown[]
     ) => {
       return originalFn(...args);
     };
@@ -426,7 +431,7 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
 
         // Schedule next attempt if circuit breaker is still open
         const circuitBreaker = this.circuitBreakers.get(key);
-        if (circuitBreaker && circuitBreaker.stats.state === 'open') {
+        if (circuitBreaker && circuitBreaker.toJSON().state.open) {
           scheduleNext();
         }
       }, delay);
@@ -495,7 +500,21 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
   /**
    * Map Opossum state to our circuit breaker state.
    */
-  private mapOssumStateToOurState(opossumState: string): CircuitBreakerState {
+  private mapOssumStateToOurState(
+    opossumState: string | { open?: boolean; halfOpen?: boolean },
+  ): CircuitBreakerState {
+    // Handle both old string format and new State object format
+    if (typeof opossumState === 'object') {
+      if (opossumState.open) {
+        return CircuitBreakerState.OPEN;
+      }
+      if (opossumState.halfOpen) {
+        return CircuitBreakerState.HALF_OPEN;
+      }
+      return CircuitBreakerState.CLOSED;
+    }
+
+    // Legacy string format
     switch (opossumState) {
       case 'open':
         return CircuitBreakerState.OPEN;
@@ -510,10 +529,7 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
   /**
    * Initialize metrics for a circuit breaker.
    */
-  private initializeMetrics(
-    key: string,
-    serviceName: ServiceName | string,
-  ): void {
+  private initializeMetrics(key: string): void {
     this.metricsMap.set(key, {
       state: CircuitBreakerState.CLOSED,
       requestCount: 0,
@@ -615,13 +631,13 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
         if (metrics) {
           // Update state from circuit breaker
           metrics.state = this.mapOssumStateToOurState(
-            circuitBreaker.stats.state,
+            circuitBreaker.toJSON().state,
           );
 
           // Calculate time to reset for open circuit breakers
           if (metrics.state === CircuitBreakerState.OPEN) {
             const timeSinceStateChange = Date.now() - metrics.lastStateChange;
-            const resetTimeout = circuitBreaker.options.resetTimeout || 60000;
+            const resetTimeout = 60000; // Default reset timeout
             metrics.timeToReset = Math.max(
               0,
               resetTimeout - timeSinceStateChange,
@@ -641,8 +657,8 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
     this.healthCheckInterval = setInterval(() => {
       const allHealth = this.getAllHealth();
       const unhealthyServices = Object.entries(allHealth)
-        .filter(([_, health]) => health.status === 'unhealthy')
-        .map(([key, _]) => key);
+        .filter(([, health]) => health.status === 'unhealthy')
+        .map(([key]) => key);
 
       if (unhealthyServices.length > 0) {
         this.logger.warn(`Unhealthy circuit breakers detected`, {

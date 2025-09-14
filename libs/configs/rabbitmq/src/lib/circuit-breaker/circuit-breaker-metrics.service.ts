@@ -2,8 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CircuitBreakerService } from './circuit-breaker.service';
 import { CircuitBreakerConfigService } from './circuit-breaker.config';
-import type {
+import {
   CircuitBreakerState,
+} from './circuit-breaker.types';
+import type {
   CircuitBreakerMetrics,
   CircuitBreakerHealth,
 } from './circuit-breaker.types';
@@ -42,7 +44,7 @@ export interface CircuitBreakerAlert {
   severity: 'info' | 'warning' | 'error';
   service: string;
   message: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -198,7 +200,15 @@ export class CircuitBreakerMetricsService {
       history: Array<{ timestamp: string; errorRate: number }>;
     }
   > {
-    const trends: Record<string, any> = {};
+    const trends: Record<
+      string,
+      {
+        current: number;
+        trend: 'increasing' | 'decreasing' | 'stable';
+        change: number;
+        history: Array<{ timestamp: string; errorRate: number }>;
+      }
+    > = {};
     const now = Date.now();
     const startTime = now - timeWindow;
 

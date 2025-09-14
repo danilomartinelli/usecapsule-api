@@ -13,7 +13,7 @@ export interface TestingModuleConfig extends ModuleMetadata {
     serviceName?: string;
   };
   databaseConfig?: {
-    entities?: any[];
+    entities?: unknown[];
     migrations?: string[];
   };
 }
@@ -28,8 +28,6 @@ export interface TestEnvironment {
 
 export class TestingModuleBuilder {
   private config: TestingModuleConfig;
-  private rabbitMQContainer?: RabbitMQTestContainer;
-  private postgresContainer?: PostgreSQLTestContainer;
 
   constructor(config: TestingModuleConfig) {
     this.config = config;
@@ -55,7 +53,7 @@ export class TestingModuleBuilder {
 
       // Setup RabbitMQ module dynamically to avoid module boundary violation
       const { RabbitMQModule } = await import('@golevelup/nestjs-rabbitmq');
-      const rabbitMQModule = RabbitMQModule.forRoot(RabbitMQModule, {
+      const rabbitMQModule = RabbitMQModule.forRoot({
         uri: rabbitMQContainer.getConnectionUri(),
         exchanges: [
           {

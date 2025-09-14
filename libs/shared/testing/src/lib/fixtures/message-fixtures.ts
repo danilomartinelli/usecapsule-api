@@ -11,7 +11,7 @@ import {
 
 export interface MessageFixture {
   id: string;
-  content: any;
+  content: unknown;
   routingKey: string;
   exchange: string;
   timestamp: string;
@@ -20,13 +20,13 @@ export interface MessageFixture {
 }
 
 export interface RPCFixture extends MessageFixture {
-  expectedResponse: any;
+  expectedResponse: unknown;
   timeout?: number;
 }
 
 export class MessageFixtureFactory {
   static createHealthCheckMessage(serviceName: string): MessageFixture {
-    const routingKeyMap = {
+    const routingKeyMap: Record<string, string> = {
       auth: AUTH_ROUTING_KEYS.HEALTH,
       billing: BILLING_ROUTING_KEYS.HEALTH,
       deploy: DEPLOY_ROUTING_KEYS.HEALTH,
@@ -43,7 +43,7 @@ export class MessageFixtureFactory {
   }
 
   static createHealthCheckRPC(serviceName: string): RPCFixture {
-    const serviceNameMap = {
+    const serviceNameMap: Record<string, string> = {
       auth: ServiceName.AUTH,
       billing: ServiceName.BILLING,
       deploy: ServiceName.DEPLOY,
@@ -61,7 +61,12 @@ export class MessageFixtureFactory {
     };
   }
 
-  static createUserRegistrationMessage(userData: any): MessageFixture {
+  static createUserRegistrationMessage(userData: {
+    email?: string;
+    password?: string;
+    firstName?: string;
+    lastName?: string;
+  }): MessageFixture {
     return {
       id: uuidv4(),
       content: {
@@ -90,7 +95,12 @@ export class MessageFixtureFactory {
     };
   }
 
-  static createBillingChargeMessage(chargeData: any): MessageFixture {
+  static createBillingChargeMessage(chargeData: {
+    customerId?: string;
+    amount?: number;
+    currency?: string;
+    description?: string;
+  }): MessageFixture {
     return {
       id: uuidv4(),
       content: {
@@ -105,7 +115,12 @@ export class MessageFixtureFactory {
     };
   }
 
-  static createPaymentProcessedEvent(paymentData: any): MessageFixture {
+  static createPaymentProcessedEvent(paymentData: {
+    paymentId?: string;
+    customerId?: string;
+    amount?: number;
+    status?: string;
+  }): MessageFixture {
     return {
       id: uuidv4(),
       content: {
@@ -121,7 +136,12 @@ export class MessageFixtureFactory {
     };
   }
 
-  static createDeploymentMessage(deploymentData: any): MessageFixture {
+  static createDeploymentMessage(deploymentData: {
+    projectId?: string;
+    environment?: string;
+    imageTag?: string;
+    replicas?: number;
+  }): MessageFixture {
     return {
       id: uuidv4(),
       content: {
@@ -150,7 +170,12 @@ export class MessageFixtureFactory {
     };
   }
 
-  static createMonitoringMetricsMessage(metricsData: any): MessageFixture {
+  static createMonitoringMetricsMessage(metricsData: {
+    serviceId?: string;
+    cpu?: number;
+    memory?: number;
+    requests?: number;
+  }): MessageFixture {
     return {
       id: uuidv4(),
       content: {
@@ -168,7 +193,11 @@ export class MessageFixtureFactory {
     };
   }
 
-  static createErrorMessage(error: any): MessageFixture {
+  static createErrorMessage(error: {
+    message?: string;
+    stack?: string;
+    service?: string;
+  }): MessageFixture {
     return {
       id: uuidv4(),
       content: {

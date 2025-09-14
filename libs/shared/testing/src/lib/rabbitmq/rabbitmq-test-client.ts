@@ -1,4 +1,5 @@
-import { Connection, Channel, connect } from 'amqplib';
+import type { Channel, ChannelModel } from 'amqplib';
+import { connect } from 'amqplib';
 import * as uuid from 'uuid';
 
 export interface TestExchange {
@@ -40,15 +41,15 @@ export interface RabbitMQTestClientConfig {
 
 export interface MessageCapture {
   content: Buffer;
-  properties: any;
-  fields: any;
+  properties: unknown;
+  fields: unknown;
   timestamp: Date;
   routingKey: string;
   exchange: string;
 }
 
 export class RabbitMQTestClient {
-  private connection: Connection | null = null;
+  private connection: ChannelModel | null = null;
   private channel: Channel | null = null;
   private config: RabbitMQTestClientConfig;
   private messageCaptures: Map<string, MessageCapture[]> = new Map();
@@ -63,6 +64,9 @@ export class RabbitMQTestClient {
 
   async connect(): Promise<void> {
     this.connection = await connect(this.config.connectionUri);
+    if (!this.connection) {
+      throw new Error('Failed to establish RabbitMQ connection');
+    }
     this.channel = await this.connection.createChannel();
 
     // Setup test infrastructure
@@ -76,7 +80,7 @@ export class RabbitMQTestClient {
     for (const consumerTag of this.consumerTags) {
       try {
         await this.channel?.cancel(consumerTag);
-      } catch (error) {
+      } catch {
         // Ignore errors when cleaning up
       }
     }
@@ -85,8 +89,12 @@ export class RabbitMQTestClient {
     // Cleanup test infrastructure
     await this.cleanup();
 
-    await this.channel?.close();
-    await this.connection?.close();
+    if (this.channel) {
+      await this.channel.close();
+    }
+    if (this.connection) {
+      await this.connection.close();
+    }
     this.channel = null;
     this.connection = null;
   }
@@ -136,7 +144,7 @@ export class RabbitMQTestClient {
           const queueName = this.getTestName(queue.name);
           try {
             await this.channel.deleteQueue(queueName);
-          } catch (error) {
+          } catch {
             // Queue might not exist or might be in use
           }
         }
@@ -148,12 +156,12 @@ export class RabbitMQTestClient {
           const exchangeName = this.getTestName(exchange.name);
           try {
             await this.channel.deleteExchange(exchangeName);
-          } catch (error) {
+          } catch {
             // Exchange might not exist or might be in use
           }
         }
       }
-    } catch (error) {
+    } catch {
       // Ignore cleanup errors in tests
     }
   }
@@ -165,8 +173,8 @@ export class RabbitMQTestClient {
   async publishMessage(
     exchange: string,
     routingKey: string,
-    content: any,
-    options: any = {},
+    content: unknown,
+    options: Record<string, unknown> = {},
   ): Promise<void> {
     if (!this.channel) {
       throw new Error('Not connected. Call connect() first.');
@@ -175,7 +183,7 @@ export class RabbitMQTestClient {
     const exchangeName = this.getTestName(exchange);
     const messageContent = Buffer.from(JSON.stringify(content));
 
-    return this.channel.publish(exchangeName, routingKey, messageContent, {
+    this.channel.publish(exchangeName, routingKey, messageContent, {
       timestamp: Date.now(),
       messageId: uuid.v4(),
       ...options,
@@ -185,7 +193,7 @@ export class RabbitMQTestClient {
   async sendRPCMessage<T>(
     exchange: string,
     routingKey: string,
-    content: any,
+    content: unknown,
     timeout = 5000,
   ): Promise<T> {
     if (!this.channel) {
@@ -207,28 +215,39 @@ export class RabbitMQTestClient {
       }, timeout);
 
       // Consume response
-      this.channel!.consume(
-        replyQueue.queue,
-        (msg) => {
-          if (msg && msg.properties.correlationId === correlationId) {
-            clearTimeout(timeoutHandle);
-            try {
-              const response = JSON.parse(msg.content.toString());
-              resolve(response);
-            } catch (error) {
-              reject(new Error(`Invalid JSON response: ${error}`));
+      if (!this.channel) {
+        reject(new Error('Channel not available'));
+        return;
+      }
+      this.channel
+        .consume(
+          replyQueue.queue,
+          (msg) => {
+            if (msg && msg.properties.correlationId === correlationId) {
+              clearTimeout(timeoutHandle);
+              try {
+                const response = JSON.parse(msg.content.toString());
+                resolve(response);
+              } catch (parseError) {
+                reject(new Error(`Invalid JSON response: ${parseError}`));
+              }
+              if (this.channel) {
+                this.channel.ack(msg);
+              }
             }
-            this.channel!.ack(msg);
-          }
-        },
-        { noAck: false },
-      )
+          },
+          { noAck: false },
+        )
         .then((consumerTag) => {
           this.consumerTags.push(consumerTag.consumerTag);
 
           // Send request
           const messageContent = Buffer.from(JSON.stringify(content));
-          this.channel!.publish(exchangeName, routingKey, messageContent, {
+          if (!this.channel) {
+            reject(new Error('Channel not available'));
+            return;
+          }
+          this.channel.publish(exchangeName, routingKey, messageContent, {
             correlationId,
             replyTo: replyQueue.queue,
             timestamp: Date.now(),
@@ -267,8 +286,11 @@ export class RabbitMQTestClient {
             exchange: msg.fields.exchange,
           };
 
-          this.messageCaptures.get(key)!.push(capture);
-          this.channel!.ack(msg);
+          const messageArray = this.messageCaptures.get(key);
+          if (messageArray && this.channel) {
+            messageArray.push(capture);
+            this.channel.ack(msg);
+          }
         }
       },
       { noAck: false },

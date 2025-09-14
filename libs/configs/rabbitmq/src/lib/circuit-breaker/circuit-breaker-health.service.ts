@@ -1,19 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { HealthIndicatorResult } from '@nestjs/terminus';
 import { HealthIndicator } from '@nestjs/terminus';
 import { CircuitBreakerService } from './circuit-breaker.service';
 import { CircuitBreakerConfigService } from './circuit-breaker.config';
 import type {
-  CircuitBreakerState,
   CircuitBreakerHealth,
 } from './circuit-breaker.types';
+import { CircuitBreakerState } from './circuit-breaker.types';
+import type { TimeoutOperation } from '@usecapsule/parameters';
 
 /**
  * Enhanced health indicator result that includes circuit breaker information.
  */
-export interface CircuitBreakerHealthResult extends HealthIndicatorResult {
-  circuitBreakers?: {
-    [key: string]: {
+export interface CircuitBreakerHealthResult {
+  [key: string]: {
+    status: 'up' | 'down';
+    message?: string;
+    error?: string;
+    'circuit-breakers'?: Record<string, {
       status: string;
       state: CircuitBreakerState;
       metrics: {
@@ -22,6 +25,12 @@ export interface CircuitBreakerHealthResult extends HealthIndicatorResult {
         averageResponseTime: number;
         timeToReset?: number;
       };
+    }>;
+    summary?: {
+      total: number;
+      healthy: number;
+      degraded: number;
+      unhealthy: number;
     };
   };
 }
@@ -68,10 +77,13 @@ export class CircuitBreakerHealthService extends HealthIndicator {
     key = 'circuitBreakers',
   ): Promise<CircuitBreakerHealthResult> {
     if (!this.configService.isEnabled()) {
-      return this.getResult(key, true, {
-        message: 'Circuit breakers are disabled',
-        circuitBreakers: {},
-      });
+      return {
+        [key]: {
+          status: 'up' as const,
+          message: 'Circuit breakers are disabled',
+          'circuit-breakers': {},
+        },
+      };
     }
 
     try {
@@ -80,7 +92,19 @@ export class CircuitBreakerHealthService extends HealthIndicator {
 
       const isHealthy = healthSummary.summary.unhealthy === 0;
 
-      const circuitBreakersInfo: Record<string, any> = {};
+      const circuitBreakersInfo: Record<
+        string,
+        {
+          status: string;
+          state: CircuitBreakerState;
+          metrics: {
+            errorPercentage: number;
+            requestCount: number;
+            averageResponseTime: number;
+            timeToReset?: number;
+          };
+        }
+      > = {};
       for (const [serviceKey, health] of Object.entries(allHealth)) {
         circuitBreakersInfo[serviceKey] = {
           status: health.status,
@@ -97,22 +121,28 @@ export class CircuitBreakerHealthService extends HealthIndicator {
         };
       }
 
-      return this.getResult(key, isHealthy, {
-        summary: healthSummary.summary,
-        circuitBreakers: circuitBreakersInfo,
-        message: isHealthy
-          ? 'All circuit breakers are healthy'
-          : `${healthSummary.summary.unhealthy} circuit breaker(s) are unhealthy`,
-      });
+      return {
+        [key]: {
+          status: isHealthy ? ('up' as const) : ('down' as const),
+          summary: healthSummary.summary,
+          'circuit-breakers': circuitBreakersInfo,
+          message: isHealthy
+            ? 'All circuit breakers are healthy'
+            : `${healthSummary.summary.unhealthy} circuit breaker(s) are unhealthy`,
+        },
+      };
     } catch (error) {
       this.logger.error('Error checking circuit breaker health', {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
 
-      return this.getResult(key, false, {
-        message: 'Error checking circuit breaker health',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
+      return {
+        [key]: {
+          status: 'down' as const,
+          message: 'Error checking circuit breaker health',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
+      };
     }
   }
 
@@ -140,9 +170,9 @@ export class CircuitBreakerHealthService extends HealthIndicator {
    */
   getServiceHealth(
     serviceName: string,
-    operation?: string,
+    operation?: TimeoutOperation,
   ): CircuitBreakerHealth | null {
-    return this.circuitBreakerService.getHealth(serviceName, operation as any);
+    return this.circuitBreakerService.getHealth(serviceName, operation);
   }
 
   /**
@@ -152,7 +182,7 @@ export class CircuitBreakerHealthService extends HealthIndicator {
    * @param operation - Optional operation type
    * @returns True if healthy, false otherwise
    */
-  isServiceHealthy(serviceName: string, operation?: string): boolean {
+  isServiceHealthy(serviceName: string, operation?: TimeoutOperation): boolean {
     const health = this.getServiceHealth(serviceName, operation);
     return health ? health.status === 'healthy' : false;
   }
@@ -209,7 +239,7 @@ export class CircuitBreakerHealthService extends HealthIndicator {
       if (
         this.circuitBreakerService.resetCircuitBreaker(
           serviceName,
-          operation as any,
+          operation as TimeoutOperation,
         )
       ) {
         resetCount++;
@@ -242,7 +272,7 @@ export class CircuitBreakerHealthService extends HealthIndicator {
 
     const allHealth = this.circuitBreakerService.getAllHealth();
 
-    for (const [key, health] of Object.entries(allHealth)) {
+    for (const [, health] of Object.entries(allHealth)) {
       const serviceName = health.service;
 
       switch (health.state) {

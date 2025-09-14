@@ -73,7 +73,7 @@ export class HealthTestHelper {
   static createHealthResponse(
     service: string,
     status: HealthStatus,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): HealthCheckResponse {
     return {
       status,

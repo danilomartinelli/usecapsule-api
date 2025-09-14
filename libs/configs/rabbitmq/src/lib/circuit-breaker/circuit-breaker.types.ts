@@ -1,4 +1,5 @@
-import type { ServiceName, TimeoutOperation } from '@usecapsule/parameters';
+import type { ServiceName } from '@usecapsule/parameters';
+import { TimeoutOperation } from '@usecapsule/parameters';
 
 /**
  * Circuit breaker state enumeration
@@ -13,6 +14,8 @@ export enum CircuitBreakerState {
  * Circuit breaker configuration options
  */
 export interface CircuitBreakerConfig {
+  /** Enable or disable circuit breaker */
+  enabled?: boolean;
   /** Timeout in milliseconds for individual operations */
   timeout: number;
   /** Error threshold percentage (0-100) to trip the breaker */
@@ -28,9 +31,9 @@ export interface CircuitBreakerConfig {
   /** Enable performance monitoring */
   enableMonitoring: boolean;
   /** Custom fallback function */
-  fallback?: (...args: any[]) => any;
+  fallback?: (...args: unknown[]) => unknown;
   /** Custom error filter function */
-  errorFilter?: (error: any) => boolean;
+  errorFilter?: (error: unknown) => boolean;
 }
 
 /**
@@ -92,7 +95,7 @@ export interface ServiceCircuitBreakerOptions {
 /**
  * Result from circuit breaker protected operation
  */
-export interface CircuitBreakerResult<T = any> {
+export interface CircuitBreakerResult<T = unknown> {
   /** Result data */
   data: T;
   /** Whether the operation was successful */

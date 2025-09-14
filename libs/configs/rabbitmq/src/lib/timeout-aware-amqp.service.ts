@@ -15,11 +15,11 @@ import {
 export interface TimeoutAwareRequestOptions {
   exchange: string;
   routingKey: string;
-  payload?: any;
+  payload?: unknown;
   timeout?: number;
   serviceName?: ServiceName | string;
   operation?: TimeoutOperation;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -28,15 +28,15 @@ export interface TimeoutAwareRequestOptions {
 export interface TimeoutAwarePublishOptions {
   exchange: string;
   routingKey: string;
-  payload: any;
+  payload: unknown;
   serviceName?: ServiceName | string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
  * Response from timeout-aware operations with metadata.
  */
-export interface TimeoutAwareResponse<T = any> {
+export interface TimeoutAwareResponse<T = unknown> {
   data: T;
   timeout: number;
   actualDuration?: number;
@@ -96,7 +96,7 @@ export class TimeoutAwareAmqpService {
    * @param options - Request options
    * @returns Promise resolving to timeout-aware response
    */
-  async request<T = any>(
+  async request<T = unknown>(
     options: TimeoutAwareRequestOptions,
   ): Promise<TimeoutAwareResponse<T>> {
     const startTime = Date.now();
@@ -214,7 +214,7 @@ export class TimeoutAwareAmqpService {
    * @param routingKey - Health check routing key
    * @returns Promise resolving to health check response
    */
-  async healthCheck<T = any>(
+  async healthCheck<T = unknown>(
     serviceName: ServiceName | string,
     routingKey: string,
   ): Promise<TimeoutAwareResponse<T>> {
@@ -233,7 +233,7 @@ export class TimeoutAwareAmqpService {
    *
    * @returns Debug information about timeout configuration
    */
-  getTimeoutDebugInfo(): Record<string, any> {
+  getTimeoutDebugInfo(): Record<string, unknown> {
     return this.timeoutResolver.getDebugInfo();
   }
 
@@ -276,24 +276,23 @@ export class TimeoutAwareAmqpService {
     };
 
     // Extract timeout values from configuration service
-    const config: Partial<TimeoutConfig> = {};
+    const config: Record<string, unknown> = {};
 
     for (const key in defaults) {
       const value = this.configService.get(key);
       if (value !== undefined) {
         if (typeof defaults[key as keyof TimeoutConfig] === 'number') {
-          config[key as keyof TimeoutConfig] = Number(value) as any;
+          config[key] = Number(value);
         } else if (typeof defaults[key as keyof TimeoutConfig] === 'boolean') {
-          config[key as keyof TimeoutConfig] =
-            value === 'true' || value === (true as any);
+          config[key] = value === 'true' || value === true;
         } else {
-          config[key as keyof TimeoutConfig] = value as any;
+          config[key] = value;
         }
       }
     }
 
     // Merge with defaults
-    return { ...defaults, ...config };
+    return { ...defaults, ...config } as TimeoutConfig;
   }
 
   /**

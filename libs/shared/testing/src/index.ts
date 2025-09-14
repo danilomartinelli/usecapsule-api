@@ -21,5 +21,5 @@ export * from './lib/fixtures/http-fixtures';
 
 // Re-export commonly used testing libraries
 export { Test, TestingModule } from '@nestjs/testing';
-export { INestApplication } from '@nestjs/common';
-export * as request from 'supertest';
+export type { INestApplication } from '@nestjs/common';
+export { default as request } from 'supertest';

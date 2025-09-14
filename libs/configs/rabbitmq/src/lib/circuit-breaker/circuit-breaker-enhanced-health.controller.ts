@@ -11,10 +11,15 @@ import { CircuitBreakerMetricsService } from './circuit-breaker-metrics.service'
 import { CircuitBreakerService } from './circuit-breaker.service';
 import type {
   CircuitBreakerHealth,
+} from './circuit-breaker.types';
+import type { TimeoutOperation } from '@usecapsule/parameters';
+import type {
   AggregatedCircuitBreakerHealth,
+} from './circuit-breaker-health.service';
+import type {
   CircuitBreakerMetricsSnapshot,
   CircuitBreakerAlert,
-} from './circuit-breaker.types';
+} from './circuit-breaker-metrics.service';
 
 /**
  * Enhanced health check controller that provides comprehensive
@@ -80,7 +85,7 @@ export class CircuitBreakerEnhancedHealthController {
     @Param('serviceName') serviceName: string,
     @Query('operation') operation?: string,
   ): CircuitBreakerHealth | null {
-    return this.healthService.getServiceHealth(serviceName, operation);
+    return this.healthService.getServiceHealth(serviceName, operation as TimeoutOperation);
   }
 
   /**

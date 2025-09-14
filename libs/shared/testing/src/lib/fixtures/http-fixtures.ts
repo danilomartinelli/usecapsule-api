@@ -1,23 +1,17 @@
 import { HealthStatus } from '@usecapsule/types';
 import type { AggregatedHealthResponse } from '@usecapsule/types';
-import {
-  AUTH_ROUTING_KEYS,
-  BILLING_ROUTING_KEYS,
-  DEPLOY_ROUTING_KEYS,
-  ServiceName,
-} from '@usecapsule/messaging';
 
 export interface HttpRequestFixture {
   method: string;
   path: string;
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string>;
   query?: Record<string, string>;
 }
 
 export interface HttpResponseFixture {
   statusCode: number;
-  body: any;
+  body: unknown;
   headers?: Record<string, string>;
 }
 
@@ -100,8 +94,6 @@ export class HttpFixtureFactory {
           timestamp: new Date().toISOString(),
           metadata: {
             error: 'Service unreachable',
-            exchange: 'capsule.commands',
-            routingKey: BILLING_ROUTING_KEYS.HEALTH,
           },
         },
         'deploy-service': {
@@ -139,8 +131,6 @@ export class HttpFixtureFactory {
           timestamp: new Date().toISOString(),
           metadata: {
             error: 'Service unreachable',
-            exchange: 'capsule.commands',
-            routingKey: AUTH_ROUTING_KEYS.HEALTH,
           },
         },
         'billing-service': {
@@ -149,8 +139,6 @@ export class HttpFixtureFactory {
           timestamp: new Date().toISOString(),
           metadata: {
             error: 'Service unreachable',
-            exchange: 'capsule.commands',
-            routingKey: BILLING_ROUTING_KEYS.HEALTH,
           },
         },
         'deploy-service': {
@@ -159,8 +147,6 @@ export class HttpFixtureFactory {
           timestamp: new Date().toISOString(),
           metadata: {
             error: 'Service unreachable',
-            exchange: 'capsule.commands',
-            routingKey: DEPLOY_ROUTING_KEYS.HEALTH,
           },
         },
         'monitor-service': {
@@ -195,7 +181,12 @@ export class HttpFixtureFactory {
     };
   }
 
-  static createUserRegistrationRequest(userData?: any): HttpRequestFixture {
+  static createUserRegistrationRequest(userData?: {
+    email?: string;
+    password?: string;
+    firstName?: string;
+    lastName?: string;
+  }): HttpRequestFixture {
     return {
       method: 'POST',
       path: '/auth/register',
@@ -211,7 +202,10 @@ export class HttpFixtureFactory {
     };
   }
 
-  static createUserLoginRequest(credentials?: any): HttpRequestFixture {
+  static createUserLoginRequest(credentials?: {
+    email?: string;
+    password?: string;
+  }): HttpRequestFixture {
     return {
       method: 'POST',
       path: '/auth/login',
@@ -225,7 +219,13 @@ export class HttpFixtureFactory {
     };
   }
 
-  static createDeploymentRequest(deploymentData?: any): HttpRequestFixture {
+  static createDeploymentRequest(deploymentData?: {
+    projectId?: string;
+    environment?: string;
+    imageTag?: string;
+    replicas?: number;
+    token?: string;
+  }): HttpRequestFixture {
     return {
       method: 'POST',
       path: '/deploy',
@@ -242,7 +242,13 @@ export class HttpFixtureFactory {
     };
   }
 
-  static createBillingChargeRequest(chargeData?: any): HttpRequestFixture {
+  static createBillingChargeRequest(chargeData?: {
+    customerId?: string;
+    amount?: number;
+    currency?: string;
+    description?: string;
+    token?: string;
+  }): HttpRequestFixture {
     return {
       method: 'POST',
       path: '/billing/charges',
@@ -262,7 +268,7 @@ export class HttpFixtureFactory {
   static createErrorResponse(
     statusCode: number,
     message: string,
-    details?: any,
+    details?: unknown,
   ): HttpResponseFixture {
     return {
       statusCode,
@@ -271,7 +277,7 @@ export class HttpFixtureFactory {
         message,
         error: this.getErrorName(statusCode),
         timestamp: new Date().toISOString(),
-        ...(details && { details }),
+        ...(details ? { details } : {}),
       },
       headers: {
         'Content-Type': 'application/json',
@@ -310,10 +316,10 @@ export class HttpFixtureFactory {
     return errorNames[statusCode] || 'Unknown Error';
   }
 
-  static withCustomHeaders(
-    fixture: HttpRequestFixture | HttpResponseFixture,
+  static withCustomHeaders<T extends HttpRequestFixture | HttpResponseFixture>(
+    fixture: T,
     headers: Record<string, string>,
-  ): HttpRequestFixture | HttpResponseFixture {
+  ): T {
     return {
       ...fixture,
       headers: {

@@ -22,7 +22,7 @@ import type {
 /**
  * Enhanced response that includes circuit breaker information.
  */
-export interface CircuitBreakerAwareResponse<T = any>
+export interface CircuitBreakerAwareResponse<T = unknown>
   extends TimeoutAwareResponse<T> {
   /** Circuit breaker state during execution */
   circuitState: CircuitBreakerState;
@@ -49,7 +49,7 @@ export interface CircuitBreakerAwareResponse<T = any>
  * export class MyService {
  *   constructor(private amqpService: CircuitBreakerAwareAmqpService) {}
  *
- *   async callAuthService(payload: any) {
+ *   async callAuthService(payload: unknown) {
  *     return this.amqpService.request({
  *       exchange: 'capsule.commands',
  *       routingKey: 'auth.register',
@@ -84,7 +84,7 @@ export class CircuitBreakerAwareAmqpService {
    * @param options - Request options
    * @returns Promise resolving to circuit breaker aware response
    */
-  async request<T = any>(
+  async request<T = unknown>(
     options: TimeoutAwareRequestOptions,
   ): Promise<CircuitBreakerAwareResponse<T>> {
     const startTime = Date.now();
@@ -166,10 +166,15 @@ export class CircuitBreakerAwareAmqpService {
       const error = new Error(
         circuitBreakerResult.error || 'Circuit breaker operation failed',
       );
-      (error as any).circuitBreakerResult = circuitBreakerResult;
-      (error as any).serviceName = serviceName;
-      (error as any).routingKey = options.routingKey;
-      throw error;
+      const enhancedError = error as Error & {
+        circuitBreakerResult?: CircuitBreakerResult<T>;
+        serviceName?: string;
+        routingKey?: string;
+      };
+      enhancedError.circuitBreakerResult = circuitBreakerResult;
+      enhancedError.serviceName = serviceName;
+      enhancedError.routingKey = options.routingKey;
+      throw enhancedError;
     }
 
     return {
@@ -205,7 +210,7 @@ export class CircuitBreakerAwareAmqpService {
 
     // Create the actual AMQP publish operation
     const publishOperation = async (): Promise<void> => {
-      return this.amqpConnection.publish(
+      await this.amqpConnection.publish(
         options.exchange,
         options.routingKey,
         options.payload,
@@ -264,7 +269,7 @@ export class CircuitBreakerAwareAmqpService {
    * @param routingKey - Health check routing key
    * @returns Promise resolving to health check response
    */
-  async healthCheck<T = any>(
+  async healthCheck<T = unknown>(
     serviceName: ServiceName | string,
     routingKey: string,
   ): Promise<CircuitBreakerAwareResponse<T>> {
@@ -323,14 +328,14 @@ export class CircuitBreakerAwareAmqpService {
    *
    * @returns Debug information about timeout configuration
    */
-  getTimeoutDebugInfo(): Record<string, any> {
+  getTimeoutDebugInfo(): Record<string, unknown> {
     return this.timeoutResolver.getDebugInfo();
   }
 
   /**
    * Get circuit breaker debug information.
    */
-  getCircuitBreakerDebugInfo(): Record<string, any> {
+  getCircuitBreakerDebugInfo(): Record<string, unknown> {
     return this.circuitBreakerService.getDebugInfo();
   }
 
@@ -354,7 +359,7 @@ export class CircuitBreakerAwareAmqpService {
   private createFallbackForService(
     serviceName: ServiceName | string,
     options: TimeoutAwareRequestOptions,
-  ): ((...args: any[]) => any) | undefined {
+  ): ((...args: unknown[]) => unknown) | undefined {
     const service = String(serviceName);
 
     // Service-specific fallbacks
@@ -376,7 +381,7 @@ export class CircuitBreakerAwareAmqpService {
    * Create fallback for auth service operations.
    */
   private createAuthServiceFallback(options: TimeoutAwareRequestOptions) {
-    return (...args: any[]) => {
+    return () => {
       this.logger.warn(`Auth service fallback triggered`, {
         routingKey: options.routingKey,
       });
@@ -400,7 +405,7 @@ export class CircuitBreakerAwareAmqpService {
    * Create fallback for billing service operations.
    */
   private createBillingServiceFallback(options: TimeoutAwareRequestOptions) {
-    return (...args: any[]) => {
+    return () => {
       this.logger.warn(`Billing service fallback triggered`, {
         routingKey: options.routingKey,
       });
@@ -425,7 +430,7 @@ export class CircuitBreakerAwareAmqpService {
    * Create fallback for deploy service operations.
    */
   private createDeployServiceFallback(options: TimeoutAwareRequestOptions) {
-    return (...args: any[]) => {
+    return () => {
       this.logger.warn(`Deploy service fallback triggered`, {
         routingKey: options.routingKey,
       });
@@ -447,7 +452,7 @@ export class CircuitBreakerAwareAmqpService {
    * Create fallback for monitor service operations.
    */
   private createMonitorServiceFallback(options: TimeoutAwareRequestOptions) {
-    return (...args: any[]) => {
+    return () => {
       this.logger.warn(`Monitor service fallback triggered`, {
         routingKey: options.routingKey,
       });
@@ -470,7 +475,7 @@ export class CircuitBreakerAwareAmqpService {
    * Create default fallback for unknown services.
    */
   private createDefaultFallback(options: TimeoutAwareRequestOptions) {
-    return (...args: any[]) => {
+    return () => {
       this.logger.warn(`Default service fallback triggered`, {
         routingKey: options.routingKey,
       });
@@ -513,24 +518,23 @@ export class CircuitBreakerAwareAmqpService {
     };
 
     // Extract timeout values from configuration service
-    const config: Partial<TimeoutConfig> = {};
+    const config: Record<string, unknown> = {};
 
     for (const key in defaults) {
       const value = this.configService.get(key);
       if (value !== undefined) {
         if (typeof defaults[key as keyof TimeoutConfig] === 'number') {
-          config[key as keyof TimeoutConfig] = Number(value) as any;
+          config[key] = Number(value);
         } else if (typeof defaults[key as keyof TimeoutConfig] === 'boolean') {
-          config[key as keyof TimeoutConfig] =
-            value === 'true' || value === (true as any);
+          config[key] = value === 'true' || value === true;
         } else {
-          config[key as keyof TimeoutConfig] = value as any;
+          config[key] = value;
         }
       }
     }
 
     // Merge with defaults
-    return { ...defaults, ...config };
+    return { ...defaults, ...config } as TimeoutConfig;
   }
 
   /**
