@@ -17,7 +17,7 @@ on:
         type: string
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
   BASE_URL: ${{ github.event.inputs.base_url || 'http://localhost:3000' }}
   RUN_SOAK_TEST: ${{ github.event.inputs.run_soak_test || 'false' }}
 
@@ -56,7 +56,15 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          echo "Installing dependencies for performance testing..."
+          npm ci --legacy-peer-deps || {
+            echo "❌ Dependency installation failed"
+            echo "Node.js version: $(node --version)"
+            echo "NPM version: $(npm --version)"
+            exit 1
+          }
+          echo "✅ Dependencies installed successfully"
 
       - name: Build applications
         run: npm run build:all
@@ -72,7 +80,15 @@ jobs:
         id: health_check
         run: |
           echo "Waiting for API Gateway to be ready..."
-          timeout 120s bash -c 'until curl -f ${{ env.BASE_URL }}/health/ready; do sleep 2; done'
+          timeout 180s bash -c '
+            while ! curl -s -f ${{ env.BASE_URL }}/health/ready >/dev/null 2>&1; do
+              echo "API Gateway not ready yet, waiting..."
+              sleep 5
+            done
+          '
+          echo "✅ API Gateway is ready for performance testing"
+          # Verify the health endpoint
+          curl -s ${{ env.BASE_URL }}/health/ready | jq . || echo "Health endpoint response not JSON"
           echo "ready=true" >> $GITHUB_OUTPUT
 
       - name: Keep API Gateway running
@@ -105,8 +121,13 @@ jobs:
       - name: Wait for API Gateway
         run: |
           echo "Verifying API Gateway is accessible..."
-          timeout 60s bash -c 'until curl -f ${{ env.BASE_URL }}/health/ready; do sleep 2; done'
-          echo "API Gateway is ready"
+          timeout 120s bash -c '
+            while ! curl -s -f ${{ env.BASE_URL }}/health/ready >/dev/null 2>&1; do
+              echo "Waiting for API Gateway..."
+              sleep 5
+            done
+          '
+          echo "✅ API Gateway is ready for performance tests"
 
       - name: Run Performance Test Suite
         run: |

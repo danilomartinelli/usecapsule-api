@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
   RABBITMQ_URL: 'amqp://test:test@localhost:5672'
 
 jobs:
@@ -28,10 +28,18 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Run unit tests
-        run: npm run test:unit
+        run: |
+          echo "Running unit tests..."
+          npm run test:unit || {
+            echo "❌ Unit tests failed"
+            echo "Checking for common issues..."
+            npm list --depth=0 | grep -E '(jest|@types)' || echo "Jest packages not found"
+            exit 1
+          }
+          echo "✅ Unit tests passed"
 
       - name: Upload unit test results
         uses: actions/upload-artifact@v4
@@ -85,17 +93,31 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Wait for services
         run: |
           echo "Waiting for RabbitMQ..."
-          timeout 60s bash -c 'until curl -f http://localhost:15672/api/overview -u test:test; do sleep 2; done'
+          timeout 120s bash -c 'until curl -s -f http://localhost:15672/api/overview -u test:test >/dev/null 2>&1; do echo "Waiting for RabbitMQ..."; sleep 3; done'
+          echo "✅ RabbitMQ is ready"
+
           echo "Waiting for PostgreSQL..."
-          timeout 60s bash -c 'until pg_isready -h localhost -p 5432 -U test; do sleep 2; done'
+          timeout 120s bash -c 'until pg_isready -h localhost -p 5432 -U test >/dev/null 2>&1; do echo "Waiting for PostgreSQL..."; sleep 3; done'
+          echo "✅ PostgreSQL is ready"
 
       - name: Run integration tests
-        run: npm run test:integration
+        run: |
+          echo "Running integration tests..."
+          echo "Database URL: postgresql://test:test@localhost:5432/testdb"
+          echo "RabbitMQ URL: amqp://test:test@localhost:5672"
+          npm run test:integration || {
+            echo "❌ Integration tests failed"
+            echo "Checking service connectivity..."
+            curl -s http://localhost:15672/api/overview -u test:test | jq .rabbitmq_version || echo "RabbitMQ not accessible"
+            pg_isready -h localhost -p 5432 -U test || echo "PostgreSQL not ready"
+            exit 1
+          }
+          echo "✅ Integration tests passed"
         env:
           DATABASE_URL: 'postgresql://test:test@localhost:5432/testdb'
           RABBITMQ_URL: 'amqp://test:test@localhost:5672'
@@ -140,23 +162,51 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Build applications
         run: npm run build:all
 
       - name: Start API Gateway
         run: |
+          echo "Starting API Gateway..."
           npm run serve:gateway &
-          echo "API_GATEWAY_PID=$!" >> $GITHUB_ENV
+          API_GATEWAY_PID=$!
+          echo "API_GATEWAY_PID=$API_GATEWAY_PID" >> $GITHUB_ENV
+          echo "API Gateway started with PID: $API_GATEWAY_PID"
+        env:
+          RABBITMQ_URL: 'amqp://e2e:e2e@localhost:5672'
 
       - name: Wait for API Gateway
         run: |
           echo "Waiting for API Gateway to be ready..."
-          timeout 60s bash -c 'until curl -f http://localhost:3000/health/ready; do sleep 2; done'
+          timeout 180s bash -c '
+            while ! curl -s -f http://localhost:3000/health/ready >/dev/null 2>&1; do
+              echo "API Gateway not ready yet, waiting..."
+              sleep 5
+            done
+          '
+          echo "✅ API Gateway is ready"
+          # Verify the health endpoint returns expected data
+          curl -s http://localhost:3000/health/ready | jq . || echo "Health endpoint response not JSON"
 
       - name: Run E2E tests
-        run: npm run test:e2e
+        run: |
+          echo "Running E2E tests..."
+          echo "Base URL: http://localhost:3000"
+          echo "RabbitMQ URL: amqp://e2e:e2e@localhost:5672"
+          # Final health check before tests
+          curl -s http://localhost:3000/health/ready | jq . || {
+            echo "❌ API Gateway health check failed before E2E tests"
+            exit 1
+          }
+          npm run test:e2e || {
+            echo "❌ E2E tests failed"
+            echo "API Gateway logs (if available):"
+            ps aux | grep 'nx serve api-gateway' || echo "No API Gateway processes found"
+            exit 1
+          }
+          echo "✅ E2E tests passed"
         env:
           BASE_URL: 'http://localhost:3000'
           RABBITMQ_URL: 'amqp://e2e:e2e@localhost:5672'
@@ -197,7 +247,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Merge coverage reports
         run: |
@@ -244,7 +294,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Run linting
         run: npm run lint

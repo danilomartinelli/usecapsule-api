@@ -4,8 +4,8 @@ const { compilerOptions } = require('./tsconfig.base.json');
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  setupFiles: ['<rootDir>/../../test/setup-reflect-metadata.js'],
-  setupFilesAfterEnv: ['<rootDir>/../../test/setup-jest-matchers.ts'],
+  setupFiles: ['<rootDir>/test/setup-reflect-metadata.js'],
+  setupFilesAfterEnv: ['<rootDir>/test/setup-jest-matchers.ts'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   testRegex: '.*\\.spec\\.ts$',
   transform: {
@@ -14,7 +14,7 @@ module.exports = {
   transformIgnorePatterns: ['node_modules/(?!(uuid)/)'],
   // Module name mapping for workspace libraries
   moduleNameMapper: {
-    '^uuid$': require.resolve('uuid'),
+    '^uuid$': '<rootDir>/node_modules/uuid/dist/index.js',
     '^@usecapsule/types$': '<rootDir>/libs/shared/types/src/index.ts',
     '^@usecapsule/utils$': '<rootDir>/libs/shared/utils/src/index.ts',
     '^@usecapsule/rabbitmq$': '<rootDir>/libs/configs/rabbitmq/src/index.ts',
