@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppService } from './app.service';
-import { HealthTestHelper } from '@usecapsule/testing';
 import { HealthStatus } from '@usecapsule/types';
 
 describe('Auth Service - AppService', () => {

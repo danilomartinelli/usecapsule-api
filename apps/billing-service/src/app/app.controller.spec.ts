@@ -29,8 +29,8 @@ describe('Billing Service - AppController', () => {
 
     // Fix for NestJS DI issue with RabbitMQ decorators
     // The @RabbitRPC decorator interferes with constructor parameter injection
-    if (!(controller as any).appService) {
-      (controller as any).appService = appService;
+    if (!(controller as { appService?: AppService }).appService) {
+      (controller as { appService: AppService }).appService = appService;
     }
   });
 

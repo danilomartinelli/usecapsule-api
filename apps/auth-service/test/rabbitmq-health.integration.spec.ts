@@ -39,8 +39,8 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
     controller = module.get<AppController>(AppController);
     appService = module.get(AppService);
     // Fix for NestJS DI issue with RabbitMQ decorators
-    if (!(controller as any).appService) {
-      (controller as any).appService = appService;
+    if (!(controller as { appService?: AppService }).appService) {
+      (controller as { appService: AppService }).appService = appService;
     }
   });
 

@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppService } from './app.service';
 import { HealthStatus } from '@usecapsule/types';
-import type { HealthCheckResponse } from '@usecapsule/types';
 
 describe('Billing Service - AppService', () => {
   let service: AppService;

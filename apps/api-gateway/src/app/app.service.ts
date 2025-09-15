@@ -234,7 +234,7 @@ export class AppService {
    *
    * @returns Debug information about timeout configuration
    */
-  getTimeoutDebugInfo(): Record<string, any> {
+  getTimeoutDebugInfo(): Record<string, unknown> {
     return this.amqpService.getTimeoutDebugInfo();
   }
 
@@ -243,7 +243,7 @@ export class AppService {
    *
    * @returns Debug information about circuit breaker configuration and state
    */
-  getCircuitBreakerDebugInfo(): Record<string, any> {
+  getCircuitBreakerDebugInfo(): Record<string, unknown> {
     return this.circuitBreakerAmqpService.getCircuitBreakerDebugInfo();
   }
 
