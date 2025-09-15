@@ -15,6 +15,7 @@ export default {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/billing-service',
   moduleNameMapper: {
+    '^uuid$': '<rootDir>/../../node_modules/uuid/dist/index.js',
     '^@usecapsule/types$': '<rootDir>/../../libs/shared/types/src/index.ts',
     '^@usecapsule/utils$': '<rootDir>/../../libs/shared/utils/src/index.ts',
     '^@usecapsule/rabbitmq$':
