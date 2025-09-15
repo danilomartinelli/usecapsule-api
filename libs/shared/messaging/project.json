@@ -16,6 +16,16 @@
         "assets": ["libs/shared/messaging/*.md"],
         "rootDir": "libs/shared/messaging/src"
       }
+    },
+    "copy-declarations": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "mkdir -p libs/shared/messaging/dist",
+          "cp -r dist/libs/shared/messaging/* libs/shared/messaging/dist/ 2>/dev/null || true"
+        ],
+        "parallel": false
+      }
     }
   }
 }

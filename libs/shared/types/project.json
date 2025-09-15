@@ -17,6 +17,16 @@
         "assets": ["libs/shared/types/*.md"],
         "rootDir": "libs/shared/types/src"
       }
+    },
+    "copy-declarations": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "mkdir -p libs/shared/types/dist",
+          "cp -r dist/libs/shared/types/* libs/shared/types/dist/ 2>/dev/null || true"
+        ],
+        "parallel": false
+      }
     }
   }
 }
