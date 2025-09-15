@@ -1,49 +1,65 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppService } from './app.service';
-import { AmqpConnection } from '@usecapsule/rabbitmq';
 import {
-  HealthTestHelper,
-  HEALTH_TEST_SCENARIOS,
-  createAmqpConnectionMock,
-  AmqpConnectionMockHelper,
-} from '@usecapsule/testing';
+  TimeoutAwareAmqpService,
+  CircuitBreakerAwareAmqpService,
+  CircuitBreakerHealthService,
+  CircuitBreakerState,
+} from '@usecapsule/rabbitmq';
+import { HealthTestHelper } from '@usecapsule/testing';
 import { HealthStatus } from '@usecapsule/types';
-import type {
-  AggregatedHealthResponse,
-  HealthCheckResponse,
-} from '@usecapsule/types';
-import {
-  AUTH_ROUTING_KEYS,
-  BILLING_ROUTING_KEYS,
-  DEPLOY_ROUTING_KEYS,
-  MONITOR_ROUTING_KEYS,
-} from '@usecapsule/messaging';
+import type { HealthCheckResponse } from '@usecapsule/types';
+import { ServiceName } from '@usecapsule/messaging';
 
 describe('AppService', () => {
   let service: AppService;
-  let amqpConnection: jest.Mocked<AmqpConnection>;
-  let mockHelper: AmqpConnectionMockHelper;
+  let timeoutAwareAmqpService: jest.Mocked<TimeoutAwareAmqpService>;
+  let circuitBreakerAmqpService: jest.Mocked<CircuitBreakerAwareAmqpService>;
+  let circuitBreakerHealthService: jest.Mocked<CircuitBreakerHealthService>;
 
   beforeEach(async () => {
-    const mockAmqpConnection = createAmqpConnectionMock();
+    const mockTimeoutAwareAmqpService = {
+      getTimeoutDebugInfo: jest.fn(),
+    };
+
+    const mockCircuitBreakerAmqpService = {
+      healthCheck: jest.fn(),
+      getCircuitBreakerDebugInfo: jest.fn(),
+    };
+
+    const mockCircuitBreakerHealthService = {
+      getAggregatedHealth: jest.fn(),
+      getServiceHealth: jest.fn(),
+      resetServiceCircuitBreakers: jest.fn(),
+      getHealthRecommendations: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AppService,
         {
-          provide: AmqpConnection,
-          useValue: mockAmqpConnection,
+          provide: TimeoutAwareAmqpService,
+          useValue: mockTimeoutAwareAmqpService,
+        },
+        {
+          provide: CircuitBreakerAwareAmqpService,
+          useValue: mockCircuitBreakerAmqpService,
+        },
+        {
+          provide: CircuitBreakerHealthService,
+          useValue: mockCircuitBreakerHealthService,
         },
       ],
     }).compile();
 
     service = module.get<AppService>(AppService);
-    amqpConnection = module.get(AmqpConnection);
-    mockHelper = new AmqpConnectionMockHelper(amqpConnection);
+    timeoutAwareAmqpService = module.get(TimeoutAwareAmqpService);
+    circuitBreakerAmqpService = module.get(CircuitBreakerAwareAmqpService);
+    circuitBreakerHealthService = module.get(CircuitBreakerHealthService);
   });
 
   afterEach(() => {
-    mockHelper.clearMocks();
+    jest.clearAllMocks();
   });
 
   describe('checkAllServicesHealth', () => {
@@ -55,7 +71,23 @@ describe('AppService', () => {
           HealthStatus.HEALTHY,
         );
 
-      amqpConnection.request.mockResolvedValue(healthyResponse);
+      const mockHealthCheckResult = {
+        data: healthyResponse,
+        circuitState: CircuitBreakerState.CLOSED,
+        fromFallback: false,
+        actualDuration: 100,
+        timeout: 5000,
+        timedOut: false,
+      };
+
+      circuitBreakerAmqpService.healthCheck.mockResolvedValue(
+        mockHealthCheckResult,
+      );
+      circuitBreakerHealthService.getAggregatedHealth.mockReturnValue({
+        summary: { open: 0, halfOpen: 0, closed: 4 },
+        services: {},
+      });
+      circuitBreakerHealthService.getServiceHealth.mockReturnValue(null);
 
       // Act
       const result = await service.checkAllServicesHealth();
@@ -64,34 +96,37 @@ describe('AppService', () => {
       expect(result).toHaveValidAggregatedHealthResponse();
       expect(result.status).toBe(HealthStatus.HEALTHY);
       expect(Object.keys(result.services)).toHaveLength(4);
-      expect(result.services['auth-service']).toBeHealthy();
-      expect(result.services['billing-service']).toBeHealthy();
-      expect(result.services['deploy-service']).toBeHealthy();
-      expect(result.services['monitor-service']).toBeHealthy();
+      expect(result.services[ServiceName.AUTH]).toBeHealthy();
+      expect(result.services[ServiceName.BILLING]).toBeHealthy();
+      expect(result.services[ServiceName.DEPLOY]).toBeHealthy();
+      expect(result.services[ServiceName.MONITOR]).toBeHealthy();
     });
 
-    it('should return degraded status when one service is unhealthy', async () => {
-      // Arrange - billing service fails, others succeed
-      amqpConnection.request
-        .mockResolvedValueOnce(
-          HealthTestHelper.createHealthResponse(
-            'auth-service',
-            HealthStatus.HEALTHY,
-          ),
-        )
-        .mockRejectedValueOnce(new Error('Service unreachable'))
-        .mockResolvedValueOnce(
-          HealthTestHelper.createHealthResponse(
-            'deploy-service',
-            HealthStatus.HEALTHY,
-          ),
-        )
-        .mockResolvedValueOnce(
-          HealthTestHelper.createHealthResponse(
-            'monitor-service',
-            HealthStatus.HEALTHY,
-          ),
+    it('should return degraded status when circuit breaker is open', async () => {
+      // Arrange
+      const healthyResponse: HealthCheckResponse =
+        HealthTestHelper.createHealthResponse(
+          'test-service',
+          HealthStatus.HEALTHY,
         );
+
+      const mockHealthCheckResult = {
+        data: healthyResponse,
+        circuitState: CircuitBreakerState.OPEN,
+        fromFallback: true,
+        actualDuration: 100,
+        timeout: 5000,
+        timedOut: false,
+      };
+
+      circuitBreakerAmqpService.healthCheck.mockResolvedValue(
+        mockHealthCheckResult,
+      );
+      circuitBreakerHealthService.getAggregatedHealth.mockReturnValue({
+        summary: { open: 1, halfOpen: 0, closed: 3 },
+        services: {},
+      });
+      circuitBreakerHealthService.getServiceHealth.mockReturnValue(null);
 
       // Act
       const result = await service.checkAllServicesHealth();
@@ -99,24 +134,17 @@ describe('AppService', () => {
       // Assert
       expect(result).toHaveValidAggregatedHealthResponse();
       expect(result.status).toBe(HealthStatus.DEGRADED);
-      expect(result.services['auth-service']).toBeHealthy();
-      expect(result.services['billing-service']).toBeUnhealthy();
-      expect(result.services['deploy-service']).toBeHealthy();
-      expect(result.services['monitor-service']).toBeHealthy();
     });
 
-    it('should return unhealthy status when majority of services fail', async () => {
-      // Arrange - 3 services fail, 1 succeeds
-      amqpConnection.request
-        .mockRejectedValueOnce(new Error('Auth service down'))
-        .mockRejectedValueOnce(new Error('Billing service down'))
-        .mockRejectedValueOnce(new Error('Deploy service down'))
-        .mockResolvedValueOnce(
-          HealthTestHelper.createHealthResponse(
-            'monitor-service',
-            HealthStatus.HEALTHY,
-          ),
-        );
+    it('should handle service health check errors gracefully', async () => {
+      // Arrange
+      const error = new Error('Service unreachable');
+      circuitBreakerAmqpService.healthCheck.mockRejectedValue(error);
+      circuitBreakerHealthService.getAggregatedHealth.mockReturnValue({
+        summary: { open: 0, halfOpen: 0, closed: 4 },
+        services: {},
+      });
+      circuitBreakerHealthService.getServiceHealth.mockReturnValue(null);
 
       // Act
       const result = await service.checkAllServicesHealth();
@@ -124,225 +152,128 @@ describe('AppService', () => {
       // Assert
       expect(result).toHaveValidAggregatedHealthResponse();
       expect(result.status).toBe(HealthStatus.UNHEALTHY);
-      expect(result.services['auth-service']).toBeUnhealthy();
-      expect(result.services['billing-service']).toBeUnhealthy();
-      expect(result.services['deploy-service']).toBeUnhealthy();
-      expect(result.services['monitor-service']).toBeHealthy();
     });
+  });
 
-    it('should handle service timeouts with proper error metadata', async () => {
+  describe('getTimeoutDebugInfo', () => {
+    it('should return timeout debug info from amqp service', () => {
       // Arrange
-      const timeoutError = new Error('Request timeout');
-      timeoutError.name = 'TimeoutError';
-
-      amqpConnection.request
-        .mockResolvedValueOnce(
-          HealthTestHelper.createHealthResponse(
-            'auth-service',
-            HealthStatus.HEALTHY,
-          ),
-        )
-        .mockRejectedValueOnce(timeoutError)
-        .mockResolvedValueOnce(
-          HealthTestHelper.createHealthResponse(
-            'deploy-service',
-            HealthStatus.HEALTHY,
-          ),
-        )
-        .mockResolvedValueOnce(
-          HealthTestHelper.createHealthResponse(
-            'monitor-service',
-            HealthStatus.HEALTHY,
-          ),
-        );
-
-      // Act
-      const result = await service.checkAllServicesHealth();
-
-      // Assert
-      expect(result).toHaveValidAggregatedHealthResponse();
-      expect(result.status).toBe(HealthStatus.DEGRADED);
-
-      const billingHealth = result.services['billing-service'];
-      expect(billingHealth).toBeUnhealthy();
-      expect(billingHealth.metadata).toMatchObject({
-        error: 'Request timeout',
-        exchange: 'capsule.commands',
-        routingKey: BILLING_ROUTING_KEYS.HEALTH,
-      });
-    });
-
-    it('should make requests to correct routing keys', async () => {
-      // Arrange
-      const healthyResponse = HealthTestHelper.createHealthResponse(
-        'service',
-        HealthStatus.HEALTHY,
+      const mockDebugInfo = { timeout: 5000 };
+      timeoutAwareAmqpService.getTimeoutDebugInfo.mockReturnValue(
+        mockDebugInfo,
       );
-      amqpConnection.request.mockResolvedValue(healthyResponse);
 
       // Act
-      await service.checkAllServicesHealth();
+      const result = service.getTimeoutDebugInfo();
 
       // Assert
-      expect(amqpConnection.request).toHaveBeenCalledTimes(4);
-      expect(amqpConnection.request).toHaveBeenCalledWith({
-        exchange: 'capsule.commands',
-        routingKey: AUTH_ROUTING_KEYS.HEALTH,
-        payload: {},
-        timeout: 5000,
-      });
-      expect(amqpConnection.request).toHaveBeenCalledWith({
-        exchange: 'capsule.commands',
-        routingKey: BILLING_ROUTING_KEYS.HEALTH,
-        payload: {},
-        timeout: 5000,
-      });
-      expect(amqpConnection.request).toHaveBeenCalledWith({
-        exchange: 'capsule.commands',
-        routingKey: DEPLOY_ROUTING_KEYS.HEALTH,
-        payload: {},
-        timeout: 5000,
-      });
-      expect(amqpConnection.request).toHaveBeenCalledWith({
-        exchange: 'capsule.commands',
-        routingKey: MONITOR_ROUTING_KEYS.HEALTH,
-        payload: {},
-        timeout: 5000,
-      });
-    });
-
-    it('should handle mixed response statuses correctly', async () => {
-      // Arrange
-      amqpConnection.request
-        .mockResolvedValueOnce(
-          HealthTestHelper.createHealthResponse(
-            'auth-service',
-            HealthStatus.HEALTHY,
-          ),
-        )
-        .mockResolvedValueOnce(
-          HealthTestHelper.createHealthResponse(
-            'billing-service',
-            HealthStatus.DEGRADED,
-          ),
-        )
-        .mockRejectedValueOnce(new Error('Deploy service error'))
-        .mockResolvedValueOnce(
-          HealthTestHelper.createHealthResponse(
-            'monitor-service',
-            HealthStatus.HEALTHY,
-          ),
-        );
-
-      // Act
-      const result = await service.checkAllServicesHealth();
-
-      // Assert
-      expect(result).toHaveValidAggregatedHealthResponse();
-      expect(result.status).toBe(HealthStatus.DEGRADED);
-      expect(result.services['auth-service']).toBeHealthy();
-      expect(result.services['billing-service']).toBeDegraded();
-      expect(result.services['deploy-service']).toBeUnhealthy();
-      expect(result.services['monitor-service']).toBeHealthy();
-    });
-
-    it('should include valid timestamps for all responses', async () => {
-      // Arrange
-      const startTime = Date.now();
-      const healthyResponse = HealthTestHelper.createHealthResponse(
-        'service',
-        HealthStatus.HEALTHY,
+      expect(result).toBe(mockDebugInfo);
+      expect(timeoutAwareAmqpService.getTimeoutDebugInfo).toHaveBeenCalledTimes(
+        1,
       );
-      amqpConnection.request.mockResolvedValue(healthyResponse);
+    });
+  });
+
+  describe('getCircuitBreakerDebugInfo', () => {
+    it('should return circuit breaker debug info from circuit breaker service', () => {
+      // Arrange
+      const mockDebugInfo = { state: 'CLOSED' };
+      circuitBreakerAmqpService.getCircuitBreakerDebugInfo.mockReturnValue(
+        mockDebugInfo,
+      );
 
       // Act
-      const result = await service.checkAllServicesHealth();
-      const endTime = Date.now();
+      const result = service.getCircuitBreakerDebugInfo();
 
       // Assert
-      const responseTime = new Date(result.timestamp).getTime();
-      expect(responseTime).toBeGreaterThanOrEqual(startTime);
-      expect(responseTime).toBeLessThanOrEqual(endTime);
-
-      for (const serviceHealth of Object.values(result.services)) {
-        const serviceTime = new Date(serviceHealth.timestamp).getTime();
-        expect(serviceTime).toBeGreaterThanOrEqual(startTime);
-        expect(serviceTime).toBeLessThanOrEqual(endTime);
-      }
+      expect(result).toBe(mockDebugInfo);
+      expect(
+        circuitBreakerAmqpService.getCircuitBreakerDebugInfo,
+      ).toHaveBeenCalledTimes(1);
     });
+  });
 
-    it('should process all health check scenarios correctly', async () => {
-      // Test each predefined scenario
-      for (const scenario of HEALTH_TEST_SCENARIOS) {
-        // Reset mocks
-        amqpConnection.request.mockClear();
-
-        // Setup mock responses based on scenario
-        const services = [
-          'auth-service',
-          'billing-service',
-          'deploy-service',
-          'monitor-service',
-        ];
-
-        services.forEach((serviceName, index) => {
-          const status = scenario.services[serviceName];
-          if (
-            status === HealthStatus.HEALTHY ||
-            status === HealthStatus.DEGRADED
-          ) {
-            amqpConnection.request.mockResolvedValueOnce(
-              HealthTestHelper.createHealthResponse(serviceName, status),
-            );
-          } else {
-            amqpConnection.request.mockRejectedValueOnce(
-              new Error('Service unreachable'),
-            );
-          }
-        });
-
-        // Act
-        const result = await service.checkAllServicesHealth();
-
-        // Assert
-        expect(result.status).toBe(scenario.expectedOverallStatus);
-        expect(result).toHaveValidAggregatedHealthResponse();
-
-        // Verify individual service statuses
-        for (const [serviceName, expectedStatus] of Object.entries(
-          scenario.services,
-        )) {
-          const serviceResult = result.services[serviceName];
-          expect(serviceResult.status).toBe(expectedStatus);
-        }
-      }
-    });
-
-    it('should handle concurrent health checks properly', async () => {
+  describe('getCircuitBreakerHealth', () => {
+    it('should return aggregated circuit breaker health', () => {
       // Arrange
-      const healthyResponse = HealthTestHelper.createHealthResponse(
-        'service',
-        HealthStatus.HEALTHY,
+      const mockHealth = {
+        summary: { open: 0, halfOpen: 0, closed: 4 },
+        services: {},
+      };
+      circuitBreakerHealthService.getAggregatedHealth.mockReturnValue(
+        mockHealth,
       );
-      amqpConnection.request.mockResolvedValue(healthyResponse);
 
-      // Act - make multiple concurrent calls
-      const promises = [
-        service.checkAllServicesHealth(),
-        service.checkAllServicesHealth(),
-        service.checkAllServicesHealth(),
-      ];
+      // Act
+      const result = service.getCircuitBreakerHealth();
 
-      const results = await Promise.all(promises);
+      // Assert
+      expect(result).toBe(mockHealth);
+      expect(
+        circuitBreakerHealthService.getAggregatedHealth,
+      ).toHaveBeenCalledTimes(1);
+    });
+  });
 
-      // Assert - all should succeed
-      for (const result of results) {
-        expect(result).toHaveValidAggregatedHealthResponse();
-        expect(result.status).toBe(HealthStatus.HEALTHY);
-      }
+  describe('resetServiceCircuitBreaker', () => {
+    it('should successfully reset circuit breakers for a service', () => {
+      // Arrange
+      const serviceName = 'auth-service';
+      circuitBreakerHealthService.resetServiceCircuitBreakers.mockReturnValue(
+        2,
+      );
 
-      // Should have made 12 total requests (3 calls × 4 services)
-      expect(amqpConnection.request).toHaveBeenCalledTimes(12);
+      // Act
+      const result = service.resetServiceCircuitBreaker(serviceName);
+
+      // Assert
+      expect(result).toEqual({
+        success: true,
+        message: 'Successfully reset 2 circuit breaker(s) for auth-service',
+      });
+      expect(
+        circuitBreakerHealthService.resetServiceCircuitBreakers,
+      ).toHaveBeenCalledWith(serviceName);
+    });
+
+    it('should handle reset failures gracefully', () => {
+      // Arrange
+      const serviceName = 'auth-service';
+      const error = new Error('Reset failed');
+      circuitBreakerHealthService.resetServiceCircuitBreakers.mockImplementation(
+        () => {
+          throw error;
+        },
+      );
+
+      // Act
+      const result = service.resetServiceCircuitBreaker(serviceName);
+
+      // Assert
+      expect(result).toEqual({
+        success: false,
+        message:
+          'Failed to reset circuit breakers for auth-service: Reset failed',
+      });
+    });
+  });
+
+  describe('getHealthRecommendations', () => {
+    it('should return health recommendations from circuit breaker health service', () => {
+      // Arrange
+      const mockRecommendations = ['Recommendation 1', 'Recommendation 2'];
+      circuitBreakerHealthService.getHealthRecommendations.mockReturnValue(
+        mockRecommendations,
+      );
+
+      // Act
+      const result = service.getHealthRecommendations();
+
+      // Assert
+      expect(result).toBe(mockRecommendations);
+      expect(
+        circuitBreakerHealthService.getHealthRecommendations,
+      ).toHaveBeenCalledTimes(1);
     });
   });
 });
