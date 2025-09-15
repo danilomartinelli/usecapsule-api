@@ -8,6 +8,8 @@ import '@usecapsule/testing';
 process.env.NODE_ENV = 'test';
 process.env.SERVICE_NAME = 'api-gateway';
 process.env.PORT = '3001'; // Use different port for tests
+process.env.JWT_SECRET =
+  'test-jwt-secret-key-for-testing-purposes-only-32-characters-long';
 
 // Setup API Gateway specific test configuration
 beforeAll(async () => {
