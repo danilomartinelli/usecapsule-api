@@ -1,6 +1,7 @@
 export default {
   displayName: 'api-gateway',
   preset: '../../jest.preset.js',
+  setupFiles: ['<rootDir>/../../test/setup-reflect-metadata.js'],
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   transform: {
@@ -57,6 +58,7 @@ export default {
   setupFilesAfterEnv: [
     '<rootDir>/test/setup.ts',
     '<rootDir>/../../test/setup.ts',
+    '<rootDir>/../../test/setup-jest-matchers.ts',
   ],
   // Add globals for reflection metadata
   globals: {

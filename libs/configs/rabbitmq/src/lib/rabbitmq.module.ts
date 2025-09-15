@@ -1,4 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { RabbitMQModule as GolevelupRabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import type { TimeoutConfig } from '@usecapsule/parameters';
 import { TimeoutAwareAmqpService } from './timeout-aware-amqp.service';
@@ -47,6 +48,7 @@ export class RabbitMQModule {
     return {
       module: RabbitMQModule,
       imports: [
+        ConfigModule,
         CircuitBreakerModule,
         GolevelupRabbitMQModule.forRoot({
           exchanges: [
@@ -95,6 +97,7 @@ export class RabbitMQModule {
     return {
       module: RabbitMQModule,
       imports: [
+        ConfigModule,
         CircuitBreakerModule,
         GolevelupRabbitMQModule.forRoot({
           exchanges: [

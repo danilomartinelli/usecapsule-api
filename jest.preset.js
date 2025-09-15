@@ -1,11 +1,9 @@
-const { pathsToModuleNameMapper } = require('ts-jest');
-const { compilerOptions } = require('./tsconfig.base.json');
+// Jest preset configuration for workspace
 
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  setupFiles: ['<rootDir>/test/setup-reflect-metadata.js'],
-  setupFilesAfterEnv: ['<rootDir>/test/setup-jest-matchers.ts'],
+  // setupFilesAfterEnv will be defined in individual configs
   moduleFileExtensions: ['js', 'json', 'ts'],
   testRegex: '.*\\.spec\\.ts$',
   transform: {

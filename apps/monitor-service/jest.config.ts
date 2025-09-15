@@ -2,6 +2,7 @@
 export default {
   displayName: 'monitor-service',
   preset: '../../jest.preset.js',
+  setupFiles: ['<rootDir>/../../test/setup-reflect-metadata.js'],
   testEnvironment: 'node',
   transform: {
     '^.+\.[tj]s$': [
@@ -33,6 +34,7 @@ export default {
     '^@usecapsule/testing$': '<rootDir>/../../libs/shared/testing/src/index.ts',
     '^@usecapsule/ddd$': '<rootDir>/../../libs/shared/ddd/src/index.ts',
   },
+  setupFilesAfterEnv: ['<rootDir>/../../test/setup-jest-matchers.ts'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
