@@ -31,7 +31,10 @@ import { CircuitBreakerState } from './circuit-breaker.types';
 export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CircuitBreakerService.name);
   private readonly circuitBreakers = new Map<string, CircuitBreaker>();
-  private readonly circuitBreakerConfigs = new Map<string, Record<string, unknown>>();
+  private readonly circuitBreakerConfigs = new Map<
+    string,
+    Record<string, unknown>
+  >();
   private readonly metricsMap = new Map<string, CircuitBreakerMetrics>();
   private readonly recoveryTimers = new Map<string, NodeJS.Timeout>();
   private metricsInterval?: NodeJS.Timeout;
@@ -135,7 +138,11 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      const fromFallback = error && typeof error === 'object' && 'code' in error && error.code === 'OPOSSUM_FALLBACK_TRIGGERED';
+      const fromFallback =
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'OPOSSUM_FALLBACK_TRIGGERED';
 
       this.updateMetrics(circuitBreakerKey, {
         success: false,
@@ -146,7 +153,9 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
 
       if (fromFallback) {
         return {
-          data: (error && typeof error === 'object' && 'fallbackValue' in error ? error.fallbackValue : undefined) as T,
+          data: (error && typeof error === 'object' && 'fallbackValue' in error
+            ? error.fallbackValue
+            : undefined) as T,
           success: true, // Fallback is considered a success
           executionTime,
           circuitState: this.mapOssumStateToOurState(

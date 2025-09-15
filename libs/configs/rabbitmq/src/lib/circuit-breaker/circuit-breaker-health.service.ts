@@ -2,9 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HealthIndicator } from '@nestjs/terminus';
 import { CircuitBreakerService } from './circuit-breaker.service';
 import { CircuitBreakerConfigService } from './circuit-breaker.config';
-import type {
-  CircuitBreakerHealth,
-} from './circuit-breaker.types';
+import type { CircuitBreakerHealth } from './circuit-breaker.types';
 import { CircuitBreakerState } from './circuit-breaker.types';
 import type { TimeoutOperation } from '@usecapsule/parameters';
 
@@ -16,16 +14,19 @@ export interface CircuitBreakerHealthResult {
     status: 'up' | 'down';
     message?: string;
     error?: string;
-    'circuit-breakers'?: Record<string, {
-      status: string;
-      state: CircuitBreakerState;
-      metrics: {
-        errorPercentage: number;
-        requestCount: number;
-        averageResponseTime: number;
-        timeToReset?: number;
-      };
-    }>;
+    'circuit-breakers'?: Record<
+      string,
+      {
+        status: string;
+        state: CircuitBreakerState;
+        metrics: {
+          errorPercentage: number;
+          requestCount: number;
+          averageResponseTime: number;
+          timeToReset?: number;
+        };
+      }
+    >;
     summary?: {
       total: number;
       healthy: number;

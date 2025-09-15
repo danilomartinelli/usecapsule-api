@@ -148,8 +148,14 @@ export class CircuitBreakerConfigService {
       errorFilter: (error: unknown) => {
         // Don't count validation errors as circuit breaker failures
         if (
-          (error && typeof error === 'object' && 'name' in error && error.name === 'ValidationError') ||
-          (error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 400)
+          (error &&
+            typeof error === 'object' &&
+            'name' in error &&
+            error.name === 'ValidationError') ||
+          (error &&
+            typeof error === 'object' &&
+            'statusCode' in error &&
+            error.statusCode === 400)
         ) {
           return false;
         }

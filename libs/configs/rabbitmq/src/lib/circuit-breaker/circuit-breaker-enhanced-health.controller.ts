@@ -9,13 +9,9 @@ import {
 import { CircuitBreakerHealthService } from './circuit-breaker-health.service';
 import { CircuitBreakerMetricsService } from './circuit-breaker-metrics.service';
 import { CircuitBreakerService } from './circuit-breaker.service';
-import type {
-  CircuitBreakerHealth,
-} from './circuit-breaker.types';
+import type { CircuitBreakerHealth } from './circuit-breaker.types';
 import type { TimeoutOperation } from '@usecapsule/parameters';
-import type {
-  AggregatedCircuitBreakerHealth,
-} from './circuit-breaker-health.service';
+import type { AggregatedCircuitBreakerHealth } from './circuit-breaker-health.service';
 import type {
   CircuitBreakerMetricsSnapshot,
   CircuitBreakerAlert,
@@ -85,7 +81,10 @@ export class CircuitBreakerEnhancedHealthController {
     @Param('serviceName') serviceName: string,
     @Query('operation') operation?: string,
   ): CircuitBreakerHealth | null {
-    return this.healthService.getServiceHealth(serviceName, operation as TimeoutOperation);
+    return this.healthService.getServiceHealth(
+      serviceName,
+      operation as TimeoutOperation,
+    );
   }
 
   /**

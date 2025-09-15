@@ -2,9 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CircuitBreakerService } from './circuit-breaker.service';
 import { CircuitBreakerConfigService } from './circuit-breaker.config';
-import {
-  CircuitBreakerState,
-} from './circuit-breaker.types';
+import { CircuitBreakerState } from './circuit-breaker.types';
 import type {
   CircuitBreakerMetrics,
   CircuitBreakerHealth,
