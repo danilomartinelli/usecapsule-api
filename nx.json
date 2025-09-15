@@ -8,6 +8,11 @@
     "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"],
     "default": ["sharedGlobals"]
   },
+  "targetDefaults": {
+    "lint": {
+      "cache": false
+    }
+  },
   "plugins": [
     {
       "plugin": "@nx/js/typescript",
