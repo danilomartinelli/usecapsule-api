@@ -69,7 +69,7 @@ describe('Health Check Integration Tests', () => {
           serviceHealth.metadata?.error
         ) {
           expect(serviceHealth.metadata.error).toMatch(
-            /(timeout|unreachable)/i,
+            /(timeout|unreachable|timed out)/i,
           );
         }
       }
@@ -106,7 +106,7 @@ describe('Health Check Integration Tests', () => {
           serviceHealth.metadata?.error
         ) {
           expect(serviceHealth.metadata.error).toMatch(
-            /(timeout|unreachable)/i,
+            /(timeout|unreachable|timed out)/i,
           );
         }
       }

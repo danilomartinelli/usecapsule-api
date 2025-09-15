@@ -6,7 +6,9 @@ import {
 } from '@nestjs/common';
 import type { ServiceName } from '@usecapsule/parameters';
 import { TimeoutOperation } from '@usecapsule/parameters';
-import CircuitBreaker from 'opossum';
+import * as CircuitBreakerLib from 'opossum';
+const CircuitBreaker = CircuitBreakerLib.default || CircuitBreakerLib;
+type CircuitBreaker = any; // Workaround for CommonJS import issues
 import { CircuitBreakerConfigService } from './circuit-breaker.config';
 import type {
   CircuitBreakerHealth,
@@ -118,7 +120,7 @@ export class CircuitBreakerService implements OnModuleInit, OnModuleDestroy {
     const startTime = Date.now();
 
     try {
-      const data = await circuitBreaker.fire(...args);
+      const data = await circuitBreaker.fire(fn, ...args);
       const executionTime = Date.now() - startTime;
 
       this.updateMetrics(circuitBreakerKey, {
