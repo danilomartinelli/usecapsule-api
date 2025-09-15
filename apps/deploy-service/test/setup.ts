@@ -1,6 +1,9 @@
 // Service-specific test setup for deploy-service
 import 'reflect-metadata';
 
+// Import shared testing setup (includes Jest matchers and configuration)
+import '@usecapsule/testing';
+
 // Mock environment variables for deploy-service tests
 process.env.NODE_ENV = 'test';
 process.env.SERVICE_NAME = 'deploy-service';

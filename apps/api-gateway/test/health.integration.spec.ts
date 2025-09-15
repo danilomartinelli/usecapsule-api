@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+/// <reference path="../../../types/jest-matchers.d.ts" />
+
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app/app.module';
@@ -6,17 +7,21 @@ import {
   HealthTestHelper,
   HEALTH_TEST_SCENARIOS,
   TestingModuleBuilder,
-  RabbitMQTestContainer,
-  RabbitMQTestClient,
 } from '@usecapsule/testing';
+import type { HealthTestScenario } from '@usecapsule/testing';
 import { HealthStatus } from '@usecapsule/types';
-import type { AggregatedHealthResponse } from '@usecapsule/types';
+import type { AggregatedHealthResponse, HealthCheckResponse } from '@usecapsule/types';
+
+interface TestEnvironment {
+  module: {
+    createNestApplication(): INestApplication;
+  };
+  cleanup(): Promise<void>;
+}
 
 describe('Health Check Integration Tests', () => {
   let app: INestApplication;
-  let testEnvironment: any;
-  let rabbitMQContainer: RabbitMQTestContainer;
-  let rabbitMQClient: RabbitMQTestClient;
+  let testEnvironment: TestEnvironment;
 
   beforeAll(async () => {
     // Setup real RabbitMQ container for integration tests
@@ -26,8 +31,6 @@ describe('Health Check Integration Tests', () => {
     }).build();
 
     app = testEnvironment.module.createNestApplication();
-    rabbitMQContainer = testEnvironment.rabbitMQContainer;
-    rabbitMQClient = testEnvironment.rabbitMQClient;
 
     await app.init();
   });
@@ -60,15 +63,16 @@ describe('Health Check Integration Tests', () => {
       for (const [serviceName, serviceHealth] of Object.entries(
         response.body.services,
       )) {
-        expect(serviceHealth).toHaveValidHealthResponse();
-        expect(serviceHealth.service).toBe(serviceName);
+        const typedServiceHealth = serviceHealth as HealthCheckResponse;
+        expect(typedServiceHealth).toHaveValidHealthResponse();
+        expect(typedServiceHealth.service).toBe(serviceName);
 
         // If unhealthy, should have error metadata
         if (
-          serviceHealth.status === HealthStatus.UNHEALTHY &&
-          serviceHealth.metadata?.error
+          typedServiceHealth.status === HealthStatus.UNHEALTHY &&
+          typedServiceHealth.metadata?.error
         ) {
-          expect(serviceHealth.metadata.error).toMatch(
+          expect(typedServiceHealth.metadata.error).toMatch(
             /(timeout|unreachable|timed out)/i,
           );
         }
@@ -97,15 +101,16 @@ describe('Health Check Integration Tests', () => {
       expect(response.body).toHaveValidAggregatedHealthResponse();
 
       // Check that even if some services timeout, we get a valid response
-      for (const [serviceName, serviceHealth] of Object.entries(
+      for (const [, serviceHealth] of Object.entries(
         response.body.services,
       )) {
-        expect(serviceHealth).toHaveValidHealthResponse();
+        const typedServiceHealth = serviceHealth as HealthCheckResponse;
+        expect(typedServiceHealth).toHaveValidHealthResponse();
         if (
-          serviceHealth.status === HealthStatus.UNHEALTHY &&
-          serviceHealth.metadata?.error
+          typedServiceHealth.status === HealthStatus.UNHEALTHY &&
+          typedServiceHealth.metadata?.error
         ) {
-          expect(serviceHealth.metadata.error).toMatch(
+          expect(typedServiceHealth.metadata.error).toMatch(
             /(timeout|unreachable|timed out)/i,
           );
         }
@@ -147,7 +152,8 @@ describe('Health Check Integration Tests', () => {
 
       // Check service timestamps
       for (const serviceHealth of Object.values(response.body.services)) {
-        const serviceTime = new Date(serviceHealth.timestamp).getTime();
+        const typedServiceHealth = serviceHealth as HealthCheckResponse;
+        const serviceTime = new Date(typedServiceHealth.timestamp).getTime();
         expect(serviceTime).toBeGreaterThanOrEqual(startTime);
         expect(serviceTime).toBeLessThanOrEqual(endTime);
       }
@@ -177,20 +183,21 @@ describe('Health Check Integration Tests', () => {
       for (const [serviceName, serviceHealth] of Object.entries(
         response.body.services,
       )) {
-        expect(serviceHealth.metadata).toBeDefined();
+        const typedServiceHealth = serviceHealth as HealthCheckResponse;
+        expect(typedServiceHealth.metadata).toBeDefined();
 
-        if (serviceHealth.status === HealthStatus.UNHEALTHY) {
+        if (typedServiceHealth.status === HealthStatus.UNHEALTHY) {
           // Unhealthy services should have error information
-          expect(serviceHealth.metadata).toHaveProperty('error');
+          expect(typedServiceHealth.metadata).toHaveProperty('error');
 
-          if (serviceHealth.metadata.routingKey) {
-            expect(serviceHealth.metadata.routingKey).toBe(
+          if (typedServiceHealth.metadata?.routingKey) {
+            expect(typedServiceHealth.metadata.routingKey).toBe(
               `${serviceName.replace('-service', '')}.health`,
             );
           }
 
-          if (serviceHealth.metadata.exchange) {
-            expect(serviceHealth.metadata.exchange).toBe('capsule.commands');
+          if (typedServiceHealth.metadata?.exchange) {
+            expect(typedServiceHealth.metadata.exchange).toBe('capsule.commands');
           }
         }
       }
@@ -225,7 +232,7 @@ describe('Health Check Integration Tests', () => {
 
   describe('Health Check Scenarios', () => {
     // Test each predefined health scenario
-    HEALTH_TEST_SCENARIOS.forEach((scenario) => {
+    HEALTH_TEST_SCENARIOS.forEach((scenario: HealthTestScenario) => {
       it(`should handle ${scenario.name} scenario correctly`, async () => {
         // For integration tests, we would need to mock the RabbitMQ responses
         // This demonstrates the test structure for different scenarios

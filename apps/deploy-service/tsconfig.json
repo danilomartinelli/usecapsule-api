@@ -4,6 +4,9 @@
   "include": [],
   "references": [
     {
+      "path": "../../libs/shared/testing"
+    },
+    {
       "path": "../../libs/configs/parameters"
     },
     {

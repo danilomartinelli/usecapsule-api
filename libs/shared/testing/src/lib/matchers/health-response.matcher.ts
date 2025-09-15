@@ -6,6 +6,7 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toHaveValidHealthResponse(): R;
+      toHaveValidAggregatedHealthResponse(): R;
       toBeHealthy(): R;
       toBeUnhealthy(): R;
       toBeDegraded(): R;
@@ -147,4 +148,78 @@ function toBeDegraded(received: unknown): jest.CustomMatcherResult {
   }
 }
 
-export { toHaveValidHealthResponse, toBeHealthy, toBeUnhealthy, toBeDegraded };
+function toHaveValidAggregatedHealthResponse(
+  received: unknown,
+): jest.CustomMatcherResult {
+  const obj = received as Record<string, unknown>;
+
+  // Check basic structure
+  if (!received || typeof received !== 'object') {
+    return {
+      message: () => 'Expected an object',
+      pass: false,
+    };
+  }
+
+  const errors: string[] = [];
+
+  // Check required properties
+  if (!Object.prototype.hasOwnProperty.call(received, 'status')) {
+    errors.push('Missing "status" property');
+  } else if (!Object.values(HealthStatus).includes(obj['status'] as HealthStatus)) {
+    errors.push(
+      `Invalid status "${obj['status']}", must be one of: ${Object.values(HealthStatus).join(', ')}`,
+    );
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(received, 'timestamp')) {
+    errors.push('Missing "timestamp" property');
+  } else if (typeof obj['timestamp'] !== 'string') {
+    errors.push('Property "timestamp" must be a string');
+  } else if (isNaN(Date.parse(obj['timestamp'] as string))) {
+    errors.push('Property "timestamp" must be a valid ISO date string');
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(received, 'services')) {
+    errors.push('Missing "services" property');
+  } else if (
+    typeof obj['services'] !== 'object' ||
+    obj['services'] === null ||
+    Array.isArray(obj['services'])
+  ) {
+    errors.push('Property "services" must be an object');
+  } else {
+    // Validate each service in the services object
+    const services = obj['services'] as Record<string, unknown>;
+    for (const [serviceName, serviceHealth] of Object.entries(services)) {
+      const serviceResult = toHaveValidHealthResponse(serviceHealth);
+      if (!serviceResult.pass) {
+        errors.push(`Service "${serviceName}" has invalid health response`);
+      }
+    }
+  }
+
+  const pass = errors.length === 0;
+
+  if (pass) {
+    return {
+      message: () =>
+        `Expected ${JSON.stringify(received)} not to be a valid aggregated health response`,
+      pass: true,
+    };
+  } else {
+    return {
+      message: () =>
+        `Expected a valid aggregated health response but got:\n${JSON.stringify(received, null, 2)}\n\nErrors:\n${errors.map((e) => `  - ${e}`).join('\n')}`,
+      pass: false,
+    };
+  }
+}
+
+export {
+  toHaveValidHealthResponse,
+  toHaveValidAggregatedHealthResponse,
+  toBeHealthy,
+  toBeUnhealthy,
+  toBeDegraded
+};

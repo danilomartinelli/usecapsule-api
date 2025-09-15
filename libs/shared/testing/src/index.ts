@@ -19,6 +19,9 @@ export * from './lib/matchers/health-response.matcher';
 export * from './lib/fixtures/message-fixtures';
 export * from './lib/fixtures/http-fixtures';
 
+// Jest Setup and Configuration
+export * from './lib/setup/jest-matchers';
+
 // Re-export commonly used testing libraries
 export { Test, TestingModule } from '@nestjs/testing';
 export type { INestApplication } from '@nestjs/common';

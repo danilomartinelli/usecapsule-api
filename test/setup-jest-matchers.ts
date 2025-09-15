@@ -1,5 +1,6 @@
 import {
   toHaveValidHealthResponse,
+  toHaveValidAggregatedHealthResponse,
   toBeHealthy,
   toBeUnhealthy,
   toBeDegraded,
@@ -8,6 +9,7 @@ import {
 // Extend Jest with custom matchers
 expect.extend({
   toHaveValidHealthResponse,
+  toHaveValidAggregatedHealthResponse,
   toBeHealthy,
   toBeUnhealthy,
   toBeDegraded,
