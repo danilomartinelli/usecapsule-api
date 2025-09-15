@@ -9,7 +9,6 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 describe('Auth Service - RabbitMQ Health Integration', () => {
   let controller: AppController;
   let appService: jest.Mocked<AppService>;
-  let amqpConnection: jest.Mocked<AmqpConnection>;
 
   beforeEach(async () => {
     const mockAppService = {
@@ -39,8 +38,6 @@ describe('Auth Service - RabbitMQ Health Integration', () => {
 
     controller = module.get<AppController>(AppController);
     appService = module.get(AppService);
-    amqpConnection = module.get(AmqpConnection);
-
     // Fix for NestJS DI issue with RabbitMQ decorators
     if (!(controller as any).appService) {
       (controller as any).appService = appService;

@@ -8,6 +8,7 @@ import type { ServiceName } from '@usecapsule/parameters';
 import { TimeoutOperation } from '@usecapsule/parameters';
 import * as CircuitBreakerLib from 'opossum';
 const CircuitBreaker = CircuitBreakerLib.default || CircuitBreakerLib;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CircuitBreaker = any; // Workaround for CommonJS import issues
 import { CircuitBreakerConfigService } from './circuit-breaker.config';
 import type {

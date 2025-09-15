@@ -166,7 +166,9 @@ function toHaveValidAggregatedHealthResponse(
   // Check required properties
   if (!Object.prototype.hasOwnProperty.call(received, 'status')) {
     errors.push('Missing "status" property');
-  } else if (!Object.values(HealthStatus).includes(obj['status'] as HealthStatus)) {
+  } else if (
+    !Object.values(HealthStatus).includes(obj['status'] as HealthStatus)
+  ) {
     errors.push(
       `Invalid status "${obj['status']}", must be one of: ${Object.values(HealthStatus).join(', ')}`,
     );
@@ -221,5 +223,5 @@ export {
   toHaveValidAggregatedHealthResponse,
   toBeHealthy,
   toBeUnhealthy,
-  toBeDegraded
+  toBeDegraded,
 };

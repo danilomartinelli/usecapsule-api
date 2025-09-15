@@ -1,5 +1,3 @@
-/// <reference path="../../../types/jest-matchers.d.ts" />
-
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app/app.module';
@@ -10,7 +8,10 @@ import {
 } from '@usecapsule/testing';
 import type { HealthTestScenario } from '@usecapsule/testing';
 import { HealthStatus } from '@usecapsule/types';
-import type { AggregatedHealthResponse, HealthCheckResponse } from '@usecapsule/types';
+import type {
+  AggregatedHealthResponse,
+  HealthCheckResponse,
+} from '@usecapsule/types';
 
 interface TestEnvironment {
   module: {
@@ -101,9 +102,7 @@ describe('Health Check Integration Tests', () => {
       expect(response.body).toHaveValidAggregatedHealthResponse();
 
       // Check that even if some services timeout, we get a valid response
-      for (const [, serviceHealth] of Object.entries(
-        response.body.services,
-      )) {
+      for (const [, serviceHealth] of Object.entries(response.body.services)) {
         const typedServiceHealth = serviceHealth as HealthCheckResponse;
         expect(typedServiceHealth).toHaveValidHealthResponse();
         if (
@@ -197,7 +196,9 @@ describe('Health Check Integration Tests', () => {
           }
 
           if (typedServiceHealth.metadata?.exchange) {
-            expect(typedServiceHealth.metadata.exchange).toBe('capsule.commands');
+            expect(typedServiceHealth.metadata.exchange).toBe(
+              'capsule.commands',
+            );
           }
         }
       }
