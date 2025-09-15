@@ -4,7 +4,6 @@ export default {
   setupFiles: ['<rootDir>/../../../test/setup-reflect-metadata.js'],
   setupFilesAfterEnv: ['<rootDir>/../../../test/setup-jest-matchers.ts'],
   testEnvironment: 'node',
-  passWithNoTests: true,
   transform: {
     '^.+\\.[tj]s$': [
       'ts-jest',
