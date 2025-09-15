@@ -11,6 +11,8 @@ import { HealthStatus } from '@usecapsule/types';
 import type { HealthCheckResponse } from '@usecapsule/types';
 import { ServiceName } from '@usecapsule/messaging';
 
+// Cache-busting comment for fresh lint results
+
 describe('AppService', () => {
   let service: AppService;
   let timeoutAwareAmqpService: jest.Mocked<TimeoutAwareAmqpService>;
