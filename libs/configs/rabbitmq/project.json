@@ -16,6 +16,13 @@
         "assets": ["libs/configs/rabbitmq/*.md"],
         "rootDir": "libs/configs/rabbitmq/src"
       }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "libs/configs/rabbitmq"
+      }
     }
   }
 }

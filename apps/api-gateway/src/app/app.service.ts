@@ -52,20 +52,22 @@ export class AppService {
       Object.entries(servicesToCheck).map(async ([routingKey, serviceName]) => {
         try {
           // Use circuit breaker aware AMQP service for enhanced fault tolerance
-          const response = await this.circuitBreakerAmqpService.healthCheck(
-            serviceName,
-            routingKey,
-          );
+          const response =
+            await this.circuitBreakerAmqpService.healthCheck<HealthCheckResponse>(
+              serviceName,
+              routingKey,
+            );
 
           // Get circuit breaker status for this service
           const circuitHealth =
             this.circuitBreakerHealthService.getServiceHealth(serviceName);
 
           // Enhance health response with circuit breaker information
+          const baseMetadata = response.data.metadata || {};
           const enhancedHealth: HealthCheckResponse = {
             ...response.data,
             metadata: {
-              ...response.data.metadata,
+              ...(baseMetadata as HealthCheckResponse['metadata']),
               circuitBreaker: {
                 state: response.circuitState,
                 fromFallback: response.fromFallback,
@@ -80,8 +82,13 @@ export class AppService {
                   lastStateChange: circuitHealth.metrics.lastStateChange,
                 }),
               },
-            },
+            } as HealthCheckResponse['metadata'],
           };
+
+          // Ensure metadata object exists
+          if (!enhancedHealth.metadata) {
+            enhancedHealth.metadata = {};
+          }
 
           // Adjust health status based on circuit breaker state
           if (
@@ -90,18 +97,24 @@ export class AppService {
           ) {
             // If we got a healthy response from fallback, it's actually degraded
             enhancedHealth.status = HealthStatus.DEGRADED;
-            enhancedHealth.metadata.reason =
-              'Circuit breaker fallback response';
+            if (enhancedHealth.metadata) {
+              (enhancedHealth.metadata as any).reason =
+                'Circuit breaker fallback response';
+            }
           } else if (response.circuitState === CircuitBreakerState.OPEN) {
             // Circuit breaker is open, service is failing fast
             enhancedHealth.status = HealthStatus.UNHEALTHY;
-            enhancedHealth.metadata.reason =
-              'Circuit breaker is OPEN - service failing fast';
+            if (enhancedHealth.metadata) {
+              (enhancedHealth.metadata as any).reason =
+                'Circuit breaker is OPEN - service failing fast';
+            }
           } else if (response.circuitState === CircuitBreakerState.HALF_OPEN) {
             // Circuit breaker is testing recovery
             enhancedHealth.status = HealthStatus.DEGRADED;
-            enhancedHealth.metadata.reason =
-              'Circuit breaker is HALF_OPEN - testing recovery';
+            if (enhancedHealth.metadata) {
+              (enhancedHealth.metadata as any).reason =
+                'Circuit breaker is HALF_OPEN - testing recovery';
+            }
           }
 
           return { serviceName, health: enhancedHealth };
@@ -134,8 +147,8 @@ export class AppService {
                   }),
                 },
                 // Include circuit breaker result if available
-                ...(error.circuitBreakerResult && {
-                  circuitBreakerResult: error.circuitBreakerResult,
+                ...((error as any)?.circuitBreakerResult && {
+                  circuitBreakerResult: (error as any).circuitBreakerResult,
                 }),
               },
             } as HealthCheckResponse,
@@ -226,7 +239,7 @@ export class AppService {
           total: totalServices,
         },
       },
-    };
+    } as AggregatedHealthResponse;
   }
 
   /**

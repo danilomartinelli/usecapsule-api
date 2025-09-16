@@ -15,6 +15,8 @@ export interface HealthCheckResponse {
     version?: string;
     /** Error message */
     error?: string;
+    /** Reason for current status */
+    reason?: string;
     /** Memory usage information */
     memory?: {
       used: number;
@@ -53,6 +55,22 @@ export interface AggregatedHealthResponse {
   services: Record<string, HealthCheckResponse>;
   /** ISO timestamp when the aggregated check was performed */
   timestamp: string;
+  /** Optional additional metadata about aggregated health */
+  metadata?: {
+    /** Circuit breaker information */
+    circuitBreakers?: {
+      summary: string;
+      openCount: number;
+      totalCount: number;
+    };
+    /** Health distribution across services */
+    healthDistribution?: {
+      healthy: number;
+      degraded: number;
+      unhealthy: number;
+      total: number;
+    };
+  };
 }
 
 /**
