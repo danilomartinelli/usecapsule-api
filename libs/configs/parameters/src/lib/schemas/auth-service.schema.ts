@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { timeoutConfigSchema } from './timeout.schema';
 
 /**
  * Zod schema for Auth Service environment variables validation.
@@ -64,18 +65,6 @@ export const authServiceSchema = z
       .url()
       .startsWith('amqp')
       .describe('RabbitMQ connection URL for inter-service communication'),
-
-    /**
-     * RabbitMQ queue name for the Auth Service.
-     * The specific queue that this service will consume messages from.
-     *
-     * @default 'auth_queue'
-     */
-    RABBITMQ_QUEUE: z
-      .string()
-      .min(1)
-      .default('auth_queue')
-      .describe('RabbitMQ queue name for Auth Service messages'),
 
     /**
      * Database host for the Auth Service.
@@ -267,6 +256,8 @@ export const authServiceSchema = z
       .default(0)
       .describe('Redis database number to use'),
   })
+  // Merge with timeout configuration schema
+  .merge(timeoutConfigSchema)
   .strict(); // Reject undefined environment variables
 
 /**

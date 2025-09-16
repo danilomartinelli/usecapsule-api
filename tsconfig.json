@@ -47,6 +47,9 @@
     },
     {
       "path": "./libs/configs/parameters"
+    },
+    {
+      "path": "./libs/shared/testing"
     }
   ]
 }

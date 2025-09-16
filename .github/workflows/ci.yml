@@ -28,15 +28,35 @@ jobs:
       # Cache node_modules
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'npm'
 
-      - run: npm ci --legacy-peer-deps
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+          npm ci --legacy-peer-deps || {
+            echo "❌ Dependency installation failed"
+            echo "Checking npm and node versions:"
+            node --version
+            npm --version
+            exit 1
+          }
+          echo "✅ Dependencies installed successfully"
+
       - uses: nrwl/nx-set-shas@v4
 
       # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
       # - run: npx nx-cloud record -- echo Hello World
-      - run: npx nx affected -t lint test build
+      - name: Run affected tasks
+        run: |
+          echo "Running affected lint, test, and build tasks..."
+          npx nx affected -t lint test build || {
+            echo "❌ Some affected tasks failed"
+            echo "Checking Nx workspace status:"
+            npx nx report
+            exit 1
+          }
+          echo "✅ All affected tasks passed"
       # Nx Cloud recommends fixes for failures to help you get CI green faster. Learn more: https://nx.dev/ci/features/self-healing-ci
       - run: npx nx fix-ci
         if: always()

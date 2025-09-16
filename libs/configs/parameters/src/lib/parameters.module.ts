@@ -186,12 +186,12 @@ export const CONFIG_OPTIONS_TOKEN = 'CONFIG_OPTIONS';
  * ParametersModule.forService({
  *   serviceName: 'api-gateway',
  *   schema: apiGatewaySchema,
- *   configFactory: createApiGatewayConfig,
+ *   configFactory: createApiGatewaySchema,
  *   validationOptions: {
  *     allowUnknown: false,
  *     abortEarly: false,
  *   },
- *   logger: new Logger('ApiGatewayConfig'),
+ *   logger: new Logger('ApiGatewaySchema'),
  * })
  * ```
  *
@@ -364,9 +364,7 @@ export class ParametersModule {
    * @param schema - The schema to validate
    * @returns True if the schema is a valid Zod schema
    */
-  private static isZodSchema(
-    schema: ValidationSchema,
-  ): schema is z.ZodSchema {
+  private static isZodSchema(schema: ValidationSchema): schema is z.ZodSchema {
     return (
       typeof schema.parse === 'function' &&
       typeof schema.safeParse === 'function'

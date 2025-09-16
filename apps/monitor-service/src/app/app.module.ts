@@ -4,6 +4,7 @@ import {
   monitorServiceSchema,
   ParametersModule,
 } from '@usecapsule/parameters';
+import { RabbitMQModule } from '@usecapsule/rabbitmq';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -31,7 +32,7 @@ import { AppService } from './app.service';
  * @example
  * ```typescript
  * // In other services/controllers
- * constructor(private configService: ConfigService<MonitorServiceConfig>) {
+ * constructor(private configService: ConfigService<MonitorServiceSchema>) {
  *   const dbHost = this.configService.get('MONITOR_DB_HOST', { infer: true });
  *   const prometheusUrl = this.configService.get('PROMETHEUS_URL', { infer: true });
  *   const alertThreshold = this.configService.get('ALERT_CPU_THRESHOLD_PERCENT', { infer: true });
@@ -50,6 +51,13 @@ import { AppService } from './app.service';
         abortEarly: false,
         stripUnknown: true,
       },
+    }),
+    // Configure RabbitMQ for microservice
+    RabbitMQModule.forMicroservice({
+      uri:
+        process.env.RABBITMQ_URL ||
+        'amqp://usecapsule:usecapsule_dev_password@localhost:7010',
+      serviceName: 'monitor-service',
     }),
   ],
   controllers: [AppController],

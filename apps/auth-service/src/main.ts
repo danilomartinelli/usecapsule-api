@@ -1,16 +1,16 @@
 /**
  * Auth Service Bootstrap Module
  *
- * This module bootstraps the Auth Service microservice in the DDD architecture.
- * It creates a RabbitMQ-based microservice that communicates with the API Gateway
- * and other services via message queues.
+ * This module bootstraps the Auth Service using @golevelup/nestjs-rabbitmq.
+ * It creates a standard NestJS application that uses RabbitMQ for inter-service
+ * communication via exchange-based routing.
  *
  * Key features:
- * - Type-safe configuration management using ConfigService
- * - RabbitMQ transport for inter-service communication
+ * - @golevelup/nestjs-rabbitmq for unified exchange-based messaging
+ * - Declarative RabbitMQ configuration via RabbitMQModule
+ * - @RabbitRPC decorators for message handlers
  * - Comprehensive error handling and logging
  * - Graceful shutdown handling
- * - Production-ready service lifecycle management
  *
  * @example
  * ```bash
@@ -22,89 +22,43 @@
  * ```
  */
 
-import { INestMicroservice, Logger } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core'
-import { MicroserviceOptions, Transport } from '@nestjs/microservices'
+import { INestApplication, Logger } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 
-import type { AuthServiceSchema } from '@usecapsule/parameters';
-import { AppModule } from './app/app.module'
+import { AppModule } from './app/app.module';
 
 /**
- * Bootstrap function for the Auth Service microservice.
+ * Bootstrap function for the Auth Service.
  *
- * This function:
- * 1. Creates the NestJS application context (which loads and validates configuration)
- * 2. Retrieves validated configuration from ConfigService
- * 3. Configures RabbitMQ transport with proper connection settings
- * 4. Sets up error handling and graceful shutdown
- * 5. Starts the microservice listener
- *
- * The service will exit with code 1 if configuration validation fails
- * or if any critical errors occur during startup.
+ * Using @golevelup/nestjs-rabbitmq, this creates a standard NestJS application
+ * that automatically connects to RabbitMQ and registers message handlers.
+ * The RabbitMQModule handles all connection management internally.
  *
  * @throws {Error} When configuration is invalid or missing
  * @throws {Error} When RabbitMQ connection cannot be established
- * @throws {Error} When microservice fails to start
+ * @throws {Error} When application fails to start
  */
 async function bootstrap(): Promise<void> {
   const logger = new Logger('AuthServiceBootstrap');
 
   try {
-    logger.log('Starting Auth Service microservice...');
+    logger.log('Starting Auth Service with @golevelup/nestjs-rabbitmq...');
 
-    // First create the application context to initialize the ParametersModule
-    // This will load and validate the configuration
-    logger.log('Creating application context and loading configuration...');
-    const appContext = await NestFactory.createApplicationContext(AppModule);
-
-    // Get the validated configuration from ConfigService
-    const configService = appContext.get(ConfigService<AuthServiceSchema>);
-
-    // Build RabbitMQ configuration from validated config
-    const rabbitUrl = configService.get('RABBITMQ_URL', { infer: true });
-    const rabbitQueue = configService.get('RABBITMQ_QUEUE', { infer: true });
-
-    if (!rabbitUrl) {
-      throw new Error('RABBITMQ_URL is required but not configured');
-    }
-
-    const rabbitConfig = {
-      urls: [rabbitUrl],
-      queue: rabbitQueue,
-      queueOptions: {
-        durable: true,
-      },
-    };
-
-    logger.log(
-      `RabbitMQ config: ${rabbitConfig.urls[0]} -> ${rabbitConfig.queue}`,
-    );
-
-    // Close the application context as we only needed it for configuration
-    await appContext.close();
-
-    logger.log('Creating microservice with RabbitMQ transport...');
-    const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-      AppModule,
-      {
-        transport: Transport.RMQ,
-        options: rabbitConfig,
-      },
-    );
+    // Create standard NestJS application
+    const app = await NestFactory.create(AppModule);
 
     // Setup graceful shutdown handling
     setupGracefulShutdown(app, logger);
 
-    // Start the microservice
-    logger.log('Starting microservice listener...');
-    await app.listen();
-    logger.log(
-      `Auth Service microservice successfully started and listening on queue: ${rabbitConfig.queue}`,
-    );
+    // Start the application (RabbitMQ connection is handled by the module)
+    const port = process.env.AUTH_SERVICE_PORT || 3001;
+    await app.listen(port);
+
+    logger.log(`Auth Service started successfully on port ${port}`);
+    logger.log('RabbitMQ handlers registered and listening for messages');
   } catch (error) {
     logger.error(
-      'Failed to start Auth Service microservice:',
+      'Failed to start Auth Service:',
       error instanceof Error ? error.stack : error,
     );
     process.exit(1);
@@ -112,22 +66,22 @@ async function bootstrap(): Promise<void> {
 }
 
 /**
- * Sets up graceful shutdown handling for the microservice.
+ * Sets up graceful shutdown handling for the application.
  *
  * This function ensures that the service shuts down gracefully when receiving
  * termination signals, allowing ongoing requests to complete and cleaning up
  * resources properly.
  *
- * @param app - The NestJS microservice application instance
+ * @param app - The NestJS application instance
  * @param logger - Logger instance for shutdown messages
  */
-function setupGracefulShutdown(app: INestMicroservice, logger: Logger): void {
+function setupGracefulShutdown(app: INestApplication, logger: Logger): void {
   const shutdown = async (signal: string) => {
     logger.log(`Received ${signal}. Starting graceful shutdown...`);
 
     try {
       await app.close();
-      logger.log('Auth Service microservice shut down gracefully');
+      logger.log('Auth Service shut down gracefully');
       process.exit(0);
     } catch (error) {
       logger.error(

@@ -8,76 +8,92 @@ services:
       - '7010:5672'
       - '7020:15672'
     environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_USER: usecapsule
+      RABBITMQ_DEFAULT_PASS: usecapsule_dev_password
+      RABBITMQ_DEFAULT_VHOST: /
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - ./devtools/infra/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
-  auth-db:
-    container_name: auth_db_dev
-    image: postgres:15
-    environment:
-      POSTGRES_USER: auth_user
-      POSTGRES_PASSWORD: auth_pass
-      POSTGRES_DB: auth_service_db
-    ports:
-      - '7110:5432'
-    volumes:
-      - auth_db_data:/var/lib/postgresql/data
+  # auth-db:
+  #   container_name: auth_db_dev
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_USER: auth_user
+  #     POSTGRES_PASSWORD: auth_pass
+  #     POSTGRES_DB: auth_service_db
+  #   ports:
+  #     - '7110:5432'
+  #   volumes:
+  #     - auth_db_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ['CMD-SHELL', 'pg_isready -U auth_user -d auth_service_db']
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: unless-stopped
 
-  deploy-db:
-    container_name: deploy_db_dev
-    image: postgres:15
-    environment:
-      POSTGRES_USER: deploy_user
-      POSTGRES_PASSWORD: deploy_pass
-      POSTGRES_DB: deploy_service_db
-    ports:
-      - '7111:5432'
-    volumes:
-      - deploy_db_data:/var/lib/postgresql/data
+  # deploy-db:
+  #   container_name: deploy_db_dev
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_USER: deploy_user
+  #     POSTGRES_PASSWORD: deploy_pass
+  #     POSTGRES_DB: deploy_service_db
+  #   ports:
+  #     - '7111:5432'
+  #   volumes:
+  #     - deploy_db_data:/var/lib/postgresql/data
 
-  monitor-db:
-    container_name: monitor_db_dev
-    image: timescale/timescaledb:latest-pg15
-    environment:
-      POSTGRES_USER: monitor_user
-      POSTGRES_PASSWORD: monitor_pass
-      POSTGRES_DB: monitor_service_db
-    ports:
-      - '7112:5432'
-    volumes:
-      - monitor_db_data:/var/lib/postgresql/data
+  # monitor-db:
+  #   container_name: monitor_db_dev
+  #   image: timescale/timescaledb:latest-pg15
+  #   environment:
+  #     POSTGRES_USER: monitor_user
+  #     POSTGRES_PASSWORD: monitor_pass
+  #     POSTGRES_DB: monitor_service_db
+  #   ports:
+  #     - '7112:5432'
+  #   volumes:
+  #     - monitor_db_data:/var/lib/postgresql/data
 
-  billing-db:
-    container_name: billing_db_dev
-    image: postgres:15
-    environment:
-      POSTGRES_USER: billing_user
-      POSTGRES_PASSWORD: billing_pass
-      POSTGRES_DB: billing_service_db
-    ports:
-      - '7113:5432'
-    volumes:
-      - billing_db_data:/var/lib/postgresql/data
+  # billing-db:
+  #   container_name: billing_db_dev
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_USER: billing_user
+  #     POSTGRES_PASSWORD: billing_pass
+  #     POSTGRES_DB: billing_service_db
+  #   ports:
+  #     - '7113:5432'
+  #   volumes:
+  #     - billing_db_data:/var/lib/postgresql/data
 
-  redis:
-    container_name: redis_dev
-    image: redis:7-alpine
-    ports:
-      - '7120:6379'
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
+  # redis:
+  #   container_name: redis_dev
+  #   image: redis:7-alpine
+  #   ports:
+  #     - '7120:6379'
+  #   volumes:
+  #     - redis_data:/data
+  #   command: redis-server --appendonly yes
 
-  flyway:
-    container_name: flyway_dev
-    image: flyway/flyway:10
-    command: -url=jdbc:postgresql://auth-db:5432/auth_service_db -user=auth_user -password=auth_pass -connectRetries=60 migrate
-    volumes:
-      - ./apps/auth-service/src/database/migrations:/flyway/sql
-    depends_on:
-      - auth-db
+  # flyway:
+  #   container_name: flyway_dev
+  #   image: flyway/flyway:10
+  #   command: -url=jdbc:postgresql://auth-db:5432/auth_service_db -user=auth_user -password=auth_pass -connectRetries=60 migrate
+  #   volumes:
+  #     - ./apps/auth-service/src/database/migrations:/flyway/sql
+  #   depends_on:
+  #     auth-db:
+  #       condition: service_healthy
 
 volumes:
   rabbitmq_data:

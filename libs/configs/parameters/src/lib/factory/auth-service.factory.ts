@@ -1,4 +1,5 @@
 import type { AuthServiceSchema } from '../schemas/auth-service.schema';
+import { timeoutFactory } from './timeout.factory';
 
 /**
  * Configuration factory for the Auth Service.
@@ -18,11 +19,19 @@ import type { AuthServiceSchema } from '../schemas/auth-service.schema';
  * ```
  */
 export const authServiceFactory = (): AuthServiceSchema => ({
-  NODE_ENV: (process.env.NODE_ENV as 'test' | 'development' | 'production') || 'development',
-  APP_ENV: (process.env.APP_ENV as 'test' | 'local' | 'development' | 'staging' | 'production' | 'canary') || 'local',
+  NODE_ENV:
+    (process.env.NODE_ENV as 'test' | 'development' | 'production') ||
+    'development',
+  APP_ENV:
+    (process.env.APP_ENV as
+      | 'test'
+      | 'local'
+      | 'development'
+      | 'staging'
+      | 'production'
+      | 'canary') || 'local',
   SERVICE_NAME: 'auth-service' as const,
   RABBITMQ_URL: process.env.RABBITMQ_URL || '',
-  RABBITMQ_QUEUE: process.env.RABBITMQ_QUEUE || 'auth_queue',
   DB_HOST: process.env.DB_HOST || '',
   DB_PORT: Number.parseInt(process.env.DB_PORT || '5432', 10),
   DB_NAME: process.env.DB_NAME || '',
@@ -35,11 +44,13 @@ export const authServiceFactory = (): AuthServiceSchema => ({
   BCRYPT_ROUNDS: Number.parseInt(process.env.BCRYPT_ROUNDS || '10', 10),
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
-  LOG_LEVEL: (process.env.LOG_LEVEL as 'error' | 'warn' | 'info' | 'debug') || 'info',
+  LOG_LEVEL:
+    (process.env.LOG_LEVEL as 'error' | 'warn' | 'info' | 'debug') || 'info',
   REDIS_HOST: process.env.REDIS_HOST || 'localhost',
   REDIS_PORT: Number.parseInt(process.env.REDIS_PORT || '6379', 10),
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   REDIS_DB: Number.parseInt(process.env.REDIS_DB || '0', 10),
+  ...timeoutFactory(),
 });
 
 /**

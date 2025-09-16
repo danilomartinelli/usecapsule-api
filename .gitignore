@@ -36,3 +36,8 @@ tmp/
 temp/
 .cache/
 .nx/
+.cursor/
+.github/instructions/
+
+# Test output
+/test/performance/results
