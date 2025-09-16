@@ -33,11 +33,6 @@ nx build auth-service
 nx serve api-gateway
 nx serve auth-service --watch
 
-# Run tests
-nx test auth-service
-nx test auth-service --watch
-nx test auth-service --coverage
-
 # Lint code
 nx lint auth-service
 nx lint --all
@@ -56,16 +51,11 @@ npm install
 npm run dev                    # Start all services
 npm run serve:gateway         # Start API Gateway only
 
-# Testing
-npm run test                  # Run all tests
-npm run test:affected         # Test only changed code
-npm run test:e2e             # End-to-end tests
-npm run test:coverage        # Generate coverage report
-
-# Code quality
+# Code Quality
 npm run lint                 # Lint all projects
 npm run lint:affected        # Lint only changed code
 npm run format              # Format with Prettier
+
 ```
 
 ### Infrastructure Commands

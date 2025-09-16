@@ -72,11 +72,8 @@ Run the health check to ensure everything is working:
 # Check all services are healthy
 curl http://localhost:3000/health
 
-# Run the test suite
-npm run test
-
-# Run a specific service's tests
-nx test auth-service
+# Check service health
+curl http://localhost:3000/health/ready
 ```
 
 ## 📁 Project Structure
@@ -122,9 +119,8 @@ nx serve auth-service --watch
 # Build a specific application
 nx build auth-service
 
-# Run tests for a specific project
-nx test auth-service
-nx test-e2e auth-service-e2e
+# Lint a specific project
+nx lint auth-service
 
 # Generate new code
 nx g @nx/nest:module user --project=auth-service
@@ -135,7 +131,6 @@ nx graph
 
 # Run commands for all affected projects
 nx affected:build
-nx affected:test
 nx affected:lint
 ```
 
@@ -169,16 +164,6 @@ npm run dev:gateway         # Start only API Gateway
 npm run dev:services        # Start all microservices (no gateway)
 npm run build              # Build all projects
 npm run build:affected     # Build only changed projects
-```
-
-#### Testing
-
-```bash
-npm run test               # Run all unit tests
-npm run test:affected      # Test only changed code
-npm run test:e2e          # Run end-to-end tests
-npm run test:integration  # Run integration tests
-npm run test:coverage     # Generate coverage report
 ```
 
 #### Code Quality
@@ -256,33 +241,25 @@ Capsule follows Domain-Driven Design with Hexagonal Architecture patterns:
 
 For deep dives into our architecture patterns, refer to [CLAUDE.md](./CLAUDE.md).
 
-## 🧪 Testing Strategy
+## 🔍 Code Quality
 
-We maintain high code quality through comprehensive testing at multiple levels:
+We maintain high code quality through comprehensive linting and formatting:
 
-### Running Tests
+### Code Analysis
 
 ```bash
-# Unit tests (fast, no dependencies)
-nx test auth-service --watch
+# Lint code for style and errors
+nx lint auth-service --watch
 
-# Integration tests (with test databases)
-nx test auth-service --testPathPattern=integration
+# Format code with Prettier
+nx format:write
 
-# E2E tests (full system)
-nx e2e api-gateway-e2e
+# Type checking
+nx typecheck auth-service
 
-# Test coverage
-nx test auth-service --coverage
+# Check all affected projects
+nx affected:lint
 ```
-
-### Writing Tests
-
-Tests are colocated with the code they test:
-
-- `*.spec.ts` - Unit tests next to source files
-- `*.integration.spec.ts` - Integration tests in the same folder
-- `e2e/*.e2e-spec.ts` - End-to-end tests in dedicated e2e projects
 
 ## 🔄 CI/CD Pipeline
 
@@ -291,19 +268,18 @@ Our GitHub Actions pipeline ensures code quality and automates deployments:
 ```yaml
 # On every push
 - Lint affected code
-- Run affected unit tests
 - Build affected projects
+- Type checking
 
 # On PR to main
-- Run full test suite
-- Integration tests with real databases
-- E2E tests
+- Full lint and format check
+- Build all projects
 - Security scanning
 
 # On merge to main
 - Run Flyway migrations
 - Deploy to staging
-- Run smoke tests
+- Health checks
 - Deploy to production (manual approval)
 ```
 
@@ -347,7 +323,7 @@ We welcome contributions! Please follow these guidelines:
 1. **Fork and Clone**: Fork the repository and clone your fork
 2. **Branch**: Create a feature branch from `main`
 3. **Develop**: Make your changes following our architecture patterns
-4. **Test**: Ensure all tests pass and add new ones for your changes
+4. **Lint**: Ensure code passes linting and format checks
 5. **Document**: Update documentation if you're changing architecture
 6. **PR**: Submit a pull request with a clear description
 
@@ -361,7 +337,7 @@ We welcome contributions! Please follow these guidelines:
 ### Pull Request Guidelines
 
 - PRs should be focused and not too large
-- Include tests for new functionality
+- Include documentation for new functionality
 - Update documentation as needed
 - Ensure CI passes before requesting review
 - Link to any relevant issues

@@ -38,6 +38,3 @@ temp/
 .nx/
 .cursor/
 .github/instructions/
-
-# Test output
-/test/performance/results
