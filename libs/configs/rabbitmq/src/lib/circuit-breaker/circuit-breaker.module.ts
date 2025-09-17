@@ -1,10 +1,11 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { CircuitBreakerService } from './circuit-breaker.service';
-import { CircuitBreakerConfigService } from './circuit-breaker.config';
+
 import { CircuitBreakerHealthService } from './circuit-breaker-health.service';
 import { CircuitBreakerMetricsService } from './circuit-breaker-metrics.service';
+import { CircuitBreakerConfigService } from './circuit-breaker.config';
+import { CircuitBreakerService } from './circuit-breaker.service';
 
 /**
  * Circuit breaker module that provides fault tolerance for microservices.

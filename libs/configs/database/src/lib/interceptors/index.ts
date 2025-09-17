@@ -1,4 +1,4 @@
-import { Interceptor } from 'slonik';
+import type { Interceptor } from 'slonik';
 
 import { loggingInterceptor } from './logging.interceptor';
 

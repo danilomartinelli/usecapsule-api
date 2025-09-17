@@ -1,7 +1,8 @@
-import { createPool, DatabasePool } from 'slonik';
+import type { DatabasePool } from 'slonik';
+import { createPool } from 'slonik';
 
 import { createInterceptors } from './interceptors';
-import { DatabaseModuleOptions } from './interfaces';
+import type { DatabaseModuleOptions } from './interfaces';
 import { createTypeParsers } from './type-parsers';
 
 /**
@@ -31,16 +32,16 @@ interface ConnectionConfig {
 
 /**
  * Creates a configured Slonik database pool with optimized settings.
- * 
+ *
  * This factory function initializes a database connection pool with:
  * - Custom type parsers for PostgreSQL data types
  * - Environment-specific logging interceptors
  * - Configurable connection, pool, and timeout settings
  * - SSL support when enabled
- * 
+ *
  * @param options - Database module configuration options
  * @returns Promise that resolves to a configured DatabasePool instance
- * 
+ *
  * @example
  * ```typescript
  * const pool = await createDatabasePool({
@@ -53,7 +54,7 @@ interface ConnectionConfig {
  *   maximumPoolSize: 20
  * });
  * ```
- * 
+ *
  * @throws {Error} When connection parameters are invalid or connection fails
  */
 export async function createDatabasePool(
@@ -67,32 +68,38 @@ export async function createDatabasePool(
 
 /**
  * Creates the Slonik pool configuration object with default fallbacks.
- * 
+ *
  * @param options - Database module options
  * @returns Configured pool settings object
  */
 function createPoolConfiguration(options: DatabaseModuleOptions) {
   return {
-    maximumPoolSize: options.maximumPoolSize ?? DEFAULT_POOL_CONFIG.maximumPoolSize,
-    minimumPoolSize: options.minimumPoolSize ?? DEFAULT_POOL_CONFIG.minimumPoolSize,
-    connectionTimeout: options.connectionTimeout ?? DEFAULT_POOL_CONFIG.connectionTimeout,
+    maximumPoolSize:
+      options.maximumPoolSize ?? DEFAULT_POOL_CONFIG.maximumPoolSize,
+    minimumPoolSize:
+      options.minimumPoolSize ?? DEFAULT_POOL_CONFIG.minimumPoolSize,
+    connectionTimeout:
+      options.connectionTimeout ?? DEFAULT_POOL_CONFIG.connectionTimeout,
     idleTimeout: options.idleTimeout ?? DEFAULT_POOL_CONFIG.idleTimeout,
-    statementTimeout: options.statementTimeout ?? DEFAULT_POOL_CONFIG.statementTimeout,
-    interceptors: createInterceptors(options.environment ?? DEFAULT_POOL_CONFIG.environment),
+    statementTimeout:
+      options.statementTimeout ?? DEFAULT_POOL_CONFIG.statementTimeout,
+    interceptors: createInterceptors(
+      options.environment ?? DEFAULT_POOL_CONFIG.environment,
+    ),
     typeParsers: createTypeParsers(),
   };
 }
 
 /**
  * Constructs a PostgreSQL connection string from database options.
- * 
+ *
  * Builds a properly formatted connection string with optional SSL support.
  * The connection string follows the format:
  * `postgresql://username:password@host:port/database[?ssl=require]`
- * 
+ *
  * @param options - Connection configuration parameters
  * @returns Formatted PostgreSQL connection string
- * 
+ *
  * @example
  * ```typescript
  * const connStr = buildConnectionString({
@@ -108,8 +115,8 @@ function createPoolConfiguration(options: DatabaseModuleOptions) {
  */
 function buildConnectionString(options: ConnectionConfig): string {
   const { username, password, host, port, database, ssl } = options;
-  
+
   const baseUrl = `postgresql://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${host}:${port}/${database}`;
-  
+
   return ssl ? `${baseUrl}?ssl=require` : baseUrl;
 }

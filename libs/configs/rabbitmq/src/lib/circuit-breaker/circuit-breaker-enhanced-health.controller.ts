@@ -6,16 +6,17 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { CircuitBreakerHealthService } from './circuit-breaker-health.service';
-import { CircuitBreakerMetricsService } from './circuit-breaker-metrics.service';
-import { CircuitBreakerService } from './circuit-breaker.service';
-import type { CircuitBreakerHealth } from './circuit-breaker.types';
 import type { TimeoutOperation } from '@usecapsule/parameters';
+
+import type { CircuitBreakerHealthService } from './circuit-breaker-health.service';
 import type { AggregatedCircuitBreakerHealth } from './circuit-breaker-health.service';
+import type { CircuitBreakerMetricsService } from './circuit-breaker-metrics.service';
 import type {
   CircuitBreakerMetricsSnapshot,
   CircuitBreakerAlert,
 } from './circuit-breaker-metrics.service';
+import type { CircuitBreakerService } from './circuit-breaker.service';
+import type { CircuitBreakerHealth } from './circuit-breaker.types';
 
 /**
  * Enhanced health check controller that provides comprehensive

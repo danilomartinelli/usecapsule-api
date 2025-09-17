@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HealthIndicator } from '@nestjs/terminus';
-import { CircuitBreakerService } from './circuit-breaker.service';
-import { CircuitBreakerConfigService } from './circuit-breaker.config';
+import type { TimeoutOperation } from '@usecapsule/parameters';
+
+import type { CircuitBreakerConfigService } from './circuit-breaker.config';
+import type { CircuitBreakerService } from './circuit-breaker.service';
 import type { CircuitBreakerHealth } from './circuit-breaker.types';
 import { CircuitBreakerState } from './circuit-breaker.types';
-import type { TimeoutOperation } from '@usecapsule/parameters';
 
 /**
  * Enhanced health indicator result that includes circuit breaker information.

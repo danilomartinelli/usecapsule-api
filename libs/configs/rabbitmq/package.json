@@ -23,6 +23,7 @@
     "@nestjs/event-emitter": "^2.0.4",
     "opossum": "^8.1.4",
     "@usecapsule/parameters": "0.0.1",
+    "@usecapsule/messaging": "0.0.1",
     "@nestjs/swagger": "11.2.0"
   },
   "devDependencies": {

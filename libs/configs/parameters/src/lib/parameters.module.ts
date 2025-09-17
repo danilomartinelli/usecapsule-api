@@ -1,10 +1,8 @@
-import { DynamicModule, Global, Logger, Module } from '@nestjs/common';
-import {
-  ConfigModule,
-  ConfigModuleOptions,
-  ConfigService,
-} from '@nestjs/config';
-import { z } from 'zod';
+import type { DynamicModule } from '@nestjs/common';
+import { Global, Logger, Module } from '@nestjs/common';
+import type { ConfigModuleOptions } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import type { z } from 'zod';
 
 import { EnvLoader } from './env-loader';
 

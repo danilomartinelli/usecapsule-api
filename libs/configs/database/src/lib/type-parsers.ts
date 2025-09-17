@@ -1,11 +1,11 @@
-import { DriverTypeParser } from 'slonik';
+import type { DriverTypeParser } from 'slonik';
 
 /**
  * PostgreSQL type name constants for type safety and reusability
  */
 const PG_TYPES = {
   UUID: 'uuid',
-  JSON: 'json', 
+  JSON: 'json',
   JSONB: 'jsonb',
   DATE: 'date',
   TIMESTAMP: 'timestamp',
@@ -30,7 +30,7 @@ interface TypeParserConfig<T = unknown> {
 
 /**
  * Safe JSON parser that handles parsing errors gracefully
- * 
+ *
  * @param value - JSON string to parse
  * @returns Parsed JSON object or the original string if parsing fails
  */
@@ -48,7 +48,7 @@ const safeJsonParser: ParserFunction<unknown> = (value: string): unknown => {
 
 /**
  * Safe date parser that handles invalid dates gracefully
- * 
+ *
  * @param value - Date string to parse
  * @returns Parsed Date object or null if parsing fails
  */
@@ -59,7 +59,7 @@ const safeDateParser: ParserFunction<Date | null> = (value: string) => {
 
 /**
  * Safe numeric parser that handles invalid numbers gracefully
- * 
+ *
  * @param value - Numeric string to parse
  * @returns Parsed number or NaN if parsing fails
  */
@@ -70,7 +70,7 @@ const safeNumericParser: ParserFunction<number> = (value: string) => {
 
 /**
  * Safe BigInt parser that handles invalid BigInt values gracefully
- * 
+ *
  * @param value - BigInt string to parse
  * @returns Parsed BigInt or 0n if parsing fails
  */
@@ -88,7 +88,7 @@ const safeBigIntParser: ParserFunction<bigint> = (value: string): bigint => {
 
 /**
  * Identity parser that returns the value as-is
- * 
+ *
  * @param value - Value to return unchanged
  * @returns The original value
  */
@@ -138,41 +138,43 @@ const TYPE_PARSER_CONFIGS: readonly TypeParserConfig[] = [
 
 /**
  * Creates type parsers for PostgreSQL data types used with Slonik.
- * 
+ *
  * These parsers automatically convert PostgreSQL values to appropriate JavaScript types:
  * - `uuid`: String (no conversion)
  * - `json`/`jsonb`: Parsed JSON objects with error handling
  * - `date`/`timestamp`/`timestamptz`: Date objects with validation
  * - `int8`: BigInt values with error handling
  * - `numeric`/`decimal`: Floating-point numbers with error handling
- * 
+ *
  * All parsers include error handling to prevent application crashes from
  * malformed data, logging warnings and providing sensible fallback values.
- * 
+ *
  * @returns Array of configured DriverTypeParser instances
- * 
+ *
  * @example
  * ```typescript
  * import { createPool } from 'slonik';
  * import { createTypeParsers } from './type-parsers';
- * 
+ *
  * const pool = createPool(connectionString, {
  *   typeParsers: createTypeParsers(),
  * });
- * 
+ *
  * // UUID values will be returned as strings
  * // JSON values will be parsed to objects
  * // Dates will be converted to Date instances
  * // BigInt values will be converted to BigInt type
  * ```
- * 
+ *
  * @see {@link https://github.com/gajus/slonik#type-parsers} Slonik type parsers documentation
  */
 export function createTypeParsers(): DriverTypeParser[] {
-  return TYPE_PARSER_CONFIGS.map((config): DriverTypeParser => ({
-    name: config.name,
-    parse: config.parse,
-  }));
+  return TYPE_PARSER_CONFIGS.map(
+    (config): DriverTypeParser => ({
+      name: config.name,
+      parse: config.parse,
+    }),
+  );
 }
 
 /**

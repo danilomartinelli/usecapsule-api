@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { Interceptor, QueryContext } from 'slonik';
+import type { Interceptor, QueryContext } from 'slonik';
 
 /**
  * Connection context information for logging

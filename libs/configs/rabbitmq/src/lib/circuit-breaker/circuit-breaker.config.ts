@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import type { ServiceName } from '@usecapsule/parameters';
+import type { ConfigService } from '@nestjs/config';
+import type { ServiceName } from '@usecapsule/messaging';
 import { TimeoutOperation } from '@usecapsule/parameters';
+
 import type {
   CircuitBreakerConfig,
   GlobalCircuitBreakerConfig,

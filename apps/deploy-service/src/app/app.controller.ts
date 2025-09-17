@@ -1,9 +1,9 @@
 import { Controller } from '@nestjs/common';
+import { EXCHANGES, DEPLOY_ROUTING_KEYS } from '@usecapsule/messaging';
 import { RabbitRPC } from '@usecapsule/rabbitmq';
 import type { HealthCheckResponse } from '@usecapsule/types';
-import { EXCHANGES, DEPLOY_ROUTING_KEYS } from '@usecapsule/messaging';
 
-import { AppService } from './app.service';
+import type { AppService } from './app.service';
 
 @Controller()
 export class AppController {

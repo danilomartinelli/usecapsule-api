@@ -1,12 +1,12 @@
+import type { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
+import type { ServiceName } from '@usecapsule/messaging';
+import type { TimeoutResolver } from '@usecapsule/parameters';
 import {
-  TimeoutResolver,
   TimeoutOperation,
   createTimeoutResolver,
   type TimeoutConfig,
-  type ServiceName,
 } from '@usecapsule/parameters';
 
 /**

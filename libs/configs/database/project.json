@@ -3,25 +3,17 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/configs/database/src",
   "projectType": "library",
-  "tags": [
-    "scope:config",
-    "type:lib",
-    "layer:infrastructure"
-  ],
+  "tags": ["scope:config", "type:lib", "layer:infrastructure"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/configs/database",
         "tsConfig": "libs/configs/database/tsconfig.lib.json",
         "packageJson": "libs/configs/database/package.json",
         "main": "libs/configs/database/src/index.ts",
-        "assets": [
-          "libs/configs/database/*.md"
-        ]
+        "assets": ["libs/configs/database/*.md"]
       }
     }
   }

@@ -1,15 +1,12 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
-import type { ServiceName } from '@usecapsule/parameters';
-import { TimeoutOperation } from '@usecapsule/parameters';
+import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type { ServiceName } from '@usecapsule/messaging';
+import type { TimeoutOperation } from '@usecapsule/parameters';
 import * as CircuitBreakerLib from 'opossum';
+
 const CircuitBreaker = CircuitBreakerLib.default || CircuitBreakerLib;
 type CircuitBreaker = any; // eslint-disable-line @typescript-eslint/no-explicit-any
-import { CircuitBreakerConfigService } from './circuit-breaker.config';
+import type { CircuitBreakerConfigService } from './circuit-breaker.config';
 import type {
   CircuitBreakerHealth,
   CircuitBreakerMetrics,

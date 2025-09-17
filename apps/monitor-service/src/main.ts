@@ -25,8 +25,10 @@
  * ```
  */
 
-import { Logger, INestApplication } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+
 import { AppModule } from './app/app.module';
 
 /**

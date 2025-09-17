@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Param } from '@nestjs/common';
 import type { AggregatedHealthResponse } from '@usecapsule/types';
-import { AppService } from './app.service';
+
+import type { AppService } from './app.service';
 
 @Controller()
 export class AppController {

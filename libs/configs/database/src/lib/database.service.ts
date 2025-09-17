@@ -1,12 +1,13 @@
-import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import {
+import type { OnModuleDestroy } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import type {
   DatabasePool,
   DatabaseTransactionConnection,
   QueryResult,
   QuerySqlToken,
-  sql,
 } from 'slonik';
-import { z } from 'zod';
+import { sql } from 'slonik';
+import type { z } from 'zod';
 
 import { DATABASE_POOL } from './database.constants';
 

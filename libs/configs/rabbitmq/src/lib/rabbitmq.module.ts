@@ -1,10 +1,12 @@
-import { DynamicModule, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { RabbitMQModule as GolevelupRabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import type { DynamicModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import type { TimeoutConfig } from '@usecapsule/parameters';
-import { TimeoutAwareAmqpService } from './timeout-aware-amqp.service';
-import { CircuitBreakerAwareAmqpService } from './circuit-breaker-aware-amqp.service';
+
 import { CircuitBreakerModule } from './circuit-breaker/circuit-breaker.module';
+import { CircuitBreakerAwareAmqpService } from './circuit-breaker-aware-amqp.service';
+import { TimeoutAwareAmqpService } from './timeout-aware-amqp.service';
 
 /**
  * RabbitMQ module using @golevelup/nestjs-rabbitmq for proper exchange-based routing.

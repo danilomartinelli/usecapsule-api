@@ -1,16 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import {
-  TimeoutAwareAmqpService,
-  CircuitBreakerAwareAmqpService,
-  CircuitBreakerHealthService,
-  CircuitBreakerState,
-} from '@usecapsule/rabbitmq';
-import type {
-  AggregatedHealthResponse,
-  HealthCheckResponse,
-} from '@usecapsule/types';
-import { HealthStatus } from '@usecapsule/types';
-import {
   AUTH_ROUTING_KEYS,
   BILLING_ROUTING_KEYS,
   DEPLOY_ROUTING_KEYS,
@@ -18,6 +7,18 @@ import {
   ServiceName,
   EXCHANGES,
 } from '@usecapsule/messaging';
+import type {
+  TimeoutAwareAmqpService,
+  CircuitBreakerAwareAmqpService,
+  CircuitBreakerHealthService,
+  CircuitBreakerResult,
+} from '@usecapsule/rabbitmq';
+import { CircuitBreakerState } from '@usecapsule/rabbitmq';
+import type {
+  AggregatedHealthResponse,
+  HealthCheckResponse,
+} from '@usecapsule/types';
+import { HealthStatus } from '@usecapsule/types';
 
 @Injectable()
 export class AppService {
@@ -98,21 +99,21 @@ export class AppService {
             // If we got a healthy response from fallback, it's actually degraded
             enhancedHealth.status = HealthStatus.DEGRADED;
             if (enhancedHealth.metadata) {
-              (enhancedHealth.metadata as any).reason =
+              enhancedHealth.metadata.reason =
                 'Circuit breaker fallback response';
             }
           } else if (response.circuitState === CircuitBreakerState.OPEN) {
             // Circuit breaker is open, service is failing fast
             enhancedHealth.status = HealthStatus.UNHEALTHY;
             if (enhancedHealth.metadata) {
-              (enhancedHealth.metadata as any).reason =
+              enhancedHealth.metadata.reason =
                 'Circuit breaker is OPEN - service failing fast';
             }
           } else if (response.circuitState === CircuitBreakerState.HALF_OPEN) {
             // Circuit breaker is testing recovery
             enhancedHealth.status = HealthStatus.DEGRADED;
             if (enhancedHealth.metadata) {
-              (enhancedHealth.metadata as any).reason =
+              enhancedHealth.metadata.reason =
                 'Circuit breaker is HALF_OPEN - testing recovery';
             }
           }
@@ -147,8 +148,8 @@ export class AppService {
                   }),
                 },
                 // Include circuit breaker result if available
-                ...((error as any)?.circuitBreakerResult && {
-                  circuitBreakerResult: (error as any).circuitBreakerResult,
+                ...((error as Error & { circuitBreakerResult?: CircuitBreakerResult })?.circuitBreakerResult && {
+                  circuitBreakerResult: (error as Error & { circuitBreakerResult?: CircuitBreakerResult }).circuitBreakerResult,
                 }),
               },
             } as HealthCheckResponse,

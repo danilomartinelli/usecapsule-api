@@ -3,25 +3,17 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/ddd/src",
   "projectType": "library",
-  "tags": [
-    "scope:shared",
-    "type:lib",
-    "layer:domain"
-  ],
+  "tags": ["scope:shared", "type:lib", "layer:domain"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/ddd",
         "tsConfig": "libs/shared/ddd/tsconfig.lib.json",
         "packageJson": "libs/shared/ddd/package.json",
         "main": "libs/shared/ddd/src/index.ts",
-        "assets": [
-          "libs/shared/ddd/*.md"
-        ]
+        "assets": ["libs/shared/ddd/*.md"]
       }
     }
   }

@@ -1,5 +1,5 @@
-import { Type } from '@nestjs/common';
-import { ModuleMetadata } from '@nestjs/common/interfaces';
+import type { Type } from '@nestjs/common';
+import type { ModuleMetadata } from '@nestjs/common/interfaces';
 
 export interface DatabaseModuleOptions {
   host: string;

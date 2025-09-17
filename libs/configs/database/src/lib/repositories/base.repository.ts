@@ -1,6 +1,8 @@
 import { Inject } from '@nestjs/common';
-import { DatabasePool, QuerySqlToken, sql } from 'slonik';
+import type { DatabasePool, QuerySqlToken } from 'slonik';
+import { sql } from 'slonik';
 import { z } from 'zod';
+
 import { DATABASE_POOL } from '../database.constants';
 
 /**

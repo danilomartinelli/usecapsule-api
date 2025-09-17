@@ -20,6 +20,9 @@
   "include": ["src/**/*.ts"],
   "references": [
     {
+      "path": "../../shared/messaging/tsconfig.lib.json"
+    },
+    {
       "path": "../parameters/tsconfig.lib.json"
     }
   ]

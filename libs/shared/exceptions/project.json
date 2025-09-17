@@ -3,25 +3,17 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/exceptions/src",
   "projectType": "library",
-  "tags": [
-    "scope:shared",
-    "type:lib",
-    "layer:domain"
-  ],
+  "tags": ["scope:shared", "type:lib", "layer:domain"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/exceptions",
         "tsConfig": "libs/shared/exceptions/tsconfig.lib.json",
         "packageJson": "libs/shared/exceptions/package.json",
         "main": "libs/shared/exceptions/src/index.ts",
-        "assets": [
-          "libs/shared/exceptions/*.md"
-        ]
+        "assets": ["libs/shared/exceptions/*.md"]
       }
     }
   }

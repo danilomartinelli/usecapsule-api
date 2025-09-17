@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { Injectable, Logger } from '@nestjs/common';
+import * as dotenv from 'dotenv';
 
 /**
  * Configuration loader for NestJS microservices.

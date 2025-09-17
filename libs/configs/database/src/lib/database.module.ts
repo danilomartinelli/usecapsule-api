@@ -1,9 +1,10 @@
-import { DynamicModule, Module, Provider } from '@nestjs/common';
+import type { DynamicModule, Provider } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
 import { createDatabasePool } from './database-pool.factory';
 import { DATABASE_OPTIONS, DATABASE_POOL } from './database.constants';
 import { DatabaseService } from './database.service';
-import {
+import type {
   DatabaseModuleAsyncOptions,
   DatabaseModuleOptions,
 } from './interfaces';
@@ -18,16 +19,16 @@ interface ModuleExports {
 
 /**
  * Database module providing database connection and service functionality.
- * 
+ *
  * This module supports both synchronous and asynchronous configuration:
  * - `forRoot()` - Direct configuration with immediate options
  * - `forRootAsync()` - Factory-based configuration for dynamic options
- * 
+ *
  * The module provides:
  * - DatabaseService for typed database operations
  * - Direct access to the database pool via DATABASE_POOL token
  * - Proper lifecycle management and cleanup
- * 
+ *
  * @example
  * ```typescript
  * // Synchronous configuration
@@ -38,7 +39,7 @@ interface ModuleExports {
  *   username: 'user',
  *   password: 'password'
  * })
- * 
+ *
  * // Asynchronous configuration
  * DatabaseModule.forRootAsync({
  *   imports: [ConfigModule],
@@ -65,10 +66,10 @@ export class DatabaseModule {
 
   /**
    * Configures the database module with static options.
-   * 
+   *
    * Use this method when database configuration is known at compile time
    * and doesn't depend on other services or environment variables.
-   * 
+   *
    * @param options - Database configuration options
    * @returns Configured dynamic module
    */
@@ -86,10 +87,10 @@ export class DatabaseModule {
 
   /**
    * Configures the database module with factory-based async options.
-   * 
+   *
    * Use this method when database configuration depends on other services,
    * environment variables, or needs to be computed at runtime.
-   * 
+   *
    * @param options - Async configuration options with factory function
    * @returns Configured dynamic module
    */
@@ -107,7 +108,7 @@ export class DatabaseModule {
 
   /**
    * Creates the base dynamic module configuration.
-   * 
+   *
    * @param config - Module configuration
    * @returns Dynamic module configuration object
    */
@@ -125,7 +126,7 @@ export class DatabaseModule {
 
   /**
    * Creates the complete provider array for the module.
-   * 
+   *
    * @param config - Provider configuration
    * @returns Array of providers
    */
@@ -133,20 +134,18 @@ export class DatabaseModule {
     optionsProvider: Provider;
     poolProvider: Provider;
   }): Provider[] {
-    return [
-      config.optionsProvider,
-      config.poolProvider,
-      DatabaseService,
-    ];
+    return [config.optionsProvider, config.poolProvider, DatabaseService];
   }
 
   /**
    * Creates the database options provider for synchronous configuration.
-   * 
+   *
    * @param options - Database options
    * @returns Options provider configuration
    */
-  private static createOptionsProvider(options: DatabaseModuleOptions): Provider {
+  private static createOptionsProvider(
+    options: DatabaseModuleOptions,
+  ): Provider {
     return {
       provide: DATABASE_OPTIONS,
       useValue: options,
@@ -155,7 +154,7 @@ export class DatabaseModule {
 
   /**
    * Creates the database options provider for asynchronous configuration.
-   * 
+   *
    * @param options - Async options configuration
    * @returns Async options provider configuration
    */
@@ -171,26 +170,28 @@ export class DatabaseModule {
 
   /**
    * Creates the database pool provider for synchronous configuration.
-   * 
+   *
    * @returns Synchronous pool provider configuration
    */
   private static createPoolProvider(): Provider {
     return {
       provide: DATABASE_POOL,
-      useFactory: (options: DatabaseModuleOptions) => createDatabasePool(options),
+      useFactory: (options: DatabaseModuleOptions) =>
+        createDatabasePool(options),
       inject: [DATABASE_OPTIONS],
     };
   }
 
   /**
    * Creates the database pool provider for asynchronous configuration.
-   * 
+   *
    * @returns Asynchronous pool provider configuration
    */
   private static createAsyncPoolProvider(): Provider {
     return {
       provide: DATABASE_POOL,
-      useFactory: async (options: DatabaseModuleOptions) => createDatabasePool(options),
+      useFactory: async (options: DatabaseModuleOptions) =>
+        createDatabasePool(options),
       inject: [DATABASE_OPTIONS],
     };
   }

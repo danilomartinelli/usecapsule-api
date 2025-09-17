@@ -1,5 +1,5 @@
-import type { ServiceName } from '@usecapsule/parameters';
-import { TimeoutOperation } from '@usecapsule/parameters';
+import type { ServiceName } from '@usecapsule/messaging';
+import type { TimeoutOperation } from '@usecapsule/parameters';
 
 /**
  * Circuit breaker state enumeration

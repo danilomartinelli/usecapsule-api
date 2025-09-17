@@ -18,7 +18,7 @@
     "target": "es2022",
     "customConditions": ["@usecapsule/source"],
     "paths": {
-      "@usecapsule/database": ["./libs/shared/database/src/index.ts"],
+      "@usecapsule/database": ["./libs/configs/database/src/index.ts"],
       "@usecapsule/ddd": ["./libs/shared/ddd/src/index.ts"],
       "@usecapsule/decorators": ["./libs/shared/decorators/src/index.ts"],
       "@usecapsule/exceptions": ["./libs/shared/exceptions/src/index.ts"],
