@@ -22,59 +22,81 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  # auth-db:
-  #   container_name: auth_db_dev
-  #   image: postgres:15
-  #   environment:
-  #     POSTGRES_USER: auth_user
-  #     POSTGRES_PASSWORD: auth_pass
-  #     POSTGRES_DB: auth_service_db
-  #   ports:
-  #     - '7110:5432'
-  #   volumes:
-  #     - auth_db_data:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test: ['CMD-SHELL', 'pg_isready -U auth_user -d auth_service_db']
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #   restart: unless-stopped
+  auth-db:
+    container_name: auth_db_dev
+    image: postgres:15
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+      POSTGRES_DB: auth_service_db
+    ports:
+      - '7110:5432'
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+      - ./devtools/infra/postgres/init-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U auth_user -d auth_service_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
-  # deploy-db:
-  #   container_name: deploy_db_dev
-  #   image: postgres:15
-  #   environment:
-  #     POSTGRES_USER: deploy_user
-  #     POSTGRES_PASSWORD: deploy_pass
-  #     POSTGRES_DB: deploy_service_db
-  #   ports:
-  #     - '7111:5432'
-  #   volumes:
-  #     - deploy_db_data:/var/lib/postgresql/data
+  deploy-db:
+    container_name: deploy_db_dev
+    image: postgres:15
+    environment:
+      POSTGRES_USER: deploy_user
+      POSTGRES_PASSWORD: deploy_pass
+      POSTGRES_DB: deploy_service_db
+    ports:
+      - '7111:5432'
+    volumes:
+      - deploy_db_data:/var/lib/postgresql/data
+      - ./devtools/infra/postgres/init-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U deploy_user -d deploy_service_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
-  # monitor-db:
-  #   container_name: monitor_db_dev
-  #   image: timescale/timescaledb:latest-pg15
-  #   environment:
-  #     POSTGRES_USER: monitor_user
-  #     POSTGRES_PASSWORD: monitor_pass
-  #     POSTGRES_DB: monitor_service_db
-  #   ports:
-  #     - '7112:5432'
-  #   volumes:
-  #     - monitor_db_data:/var/lib/postgresql/data
+  monitor-db:
+    container_name: monitor_db_dev
+    image: timescale/timescaledb:latest-pg15
+    environment:
+      POSTGRES_USER: monitor_user
+      POSTGRES_PASSWORD: monitor_pass
+      POSTGRES_DB: monitor_service_db
+    ports:
+      - '7112:5432'
+    volumes:
+      - monitor_db_data:/var/lib/postgresql/data
+      - ./devtools/infra/postgres/init-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U monitor_user -d monitor_service_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
-  # billing-db:
-  #   container_name: billing_db_dev
-  #   image: postgres:15
-  #   environment:
-  #     POSTGRES_USER: billing_user
-  #     POSTGRES_PASSWORD: billing_pass
-  #     POSTGRES_DB: billing_service_db
-  #   ports:
-  #     - '7113:5432'
-  #   volumes:
-  #     - billing_db_data:/var/lib/postgresql/data
+  billing-db:
+    container_name: billing_db_dev
+    image: postgres:15
+    environment:
+      POSTGRES_USER: billing_user
+      POSTGRES_PASSWORD: billing_pass
+      POSTGRES_DB: billing_service_db
+    ports:
+      - '7113:5432'
+    volumes:
+      - billing_db_data:/var/lib/postgresql/data
+      - ./devtools/infra/postgres/init-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U billing_user -d billing_service_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   # redis:
   #   container_name: redis_dev
@@ -85,15 +107,65 @@ services:
   #     - redis_data:/data
   #   command: redis-server --appendonly yes
 
-  # flyway:
-  #   container_name: flyway_dev
-  #   image: flyway/flyway:10
-  #   command: -url=jdbc:postgresql://auth-db:5432/auth_service_db -user=auth_user -password=auth_pass -connectRetries=60 migrate
-  #   volumes:
-  #     - ./apps/auth-service/src/database/migrations:/flyway/sql
-  #   depends_on:
-  #     auth-db:
-  #       condition: service_healthy
+  flyway-auth:
+    container_name: flyway_auth_dev
+    image: flyway/flyway:10
+    profiles: ['migration']
+    volumes:
+      - ./apps/auth-service/database/migrations:/flyway/sql
+      - ./apps/auth-service/database/flyway.conf:/flyway/conf/flyway.conf
+    environment:
+      FLYWAY_URL: jdbc:postgresql://auth-db:5432/auth_service_db
+      FLYWAY_USER: auth_user
+      FLYWAY_PASSWORD: auth_pass
+    depends_on:
+      auth-db:
+        condition: service_healthy
+
+  flyway-billing:
+    container_name: flyway_billing_dev
+    image: flyway/flyway:10
+    profiles: ['migration']
+    volumes:
+      - ./apps/billing-service/database/migrations:/flyway/sql
+      - ./apps/billing-service/database/flyway.conf:/flyway/conf/flyway.conf
+    environment:
+      FLYWAY_URL: jdbc:postgresql://billing-db:5432/billing_service_db
+      FLYWAY_USER: billing_user
+      FLYWAY_PASSWORD: billing_pass
+    depends_on:
+      billing-db:
+        condition: service_healthy
+
+  flyway-deploy:
+    container_name: flyway_deploy_dev
+    image: flyway/flyway:10
+    profiles: ['migration']
+    volumes:
+      - ./apps/deploy-service/database/migrations:/flyway/sql
+      - ./apps/deploy-service/database/flyway.conf:/flyway/conf/flyway.conf
+    environment:
+      FLYWAY_URL: jdbc:postgresql://deploy-db:5432/deploy_service_db
+      FLYWAY_USER: deploy_user
+      FLYWAY_PASSWORD: deploy_pass
+    depends_on:
+      deploy-db:
+        condition: service_healthy
+
+  flyway-monitor:
+    container_name: flyway_monitor_dev
+    image: flyway/flyway:10
+    profiles: ['migration']
+    volumes:
+      - ./apps/monitor-service/database/migrations:/flyway/sql
+      - ./apps/monitor-service/database/flyway.conf:/flyway/conf/flyway.conf
+    environment:
+      FLYWAY_URL: jdbc:postgresql://monitor-db:5432/monitor_service_db
+      FLYWAY_USER: monitor_user
+      FLYWAY_PASSWORD: monitor_pass
+    depends_on:
+      monitor-db:
+        condition: service_healthy
 
 volumes:
   rabbitmq_data:
