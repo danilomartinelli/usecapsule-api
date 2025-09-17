@@ -88,8 +88,10 @@
     "@nestjs/core": "^11.1.6",
     "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/platform-express": "^11.1.6",
+    "@types/ioredis": "^4.28.10",
     "@types/opossum": "^8.1.9",
     "dotenv": "^17.2.2",
+    "ioredis": "^5.7.0",
     "opossum": "^9.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"

@@ -1,5 +1,5 @@
 {
-  "name": "@usecapsule/types",
+  "name": "@usecapsule/redis",
   "version": "0.0.1",
   "private": true,
   "main": "./dist/index.js",
@@ -15,7 +15,12 @@
     }
   },
   "dependencies": {
+    "@nestjs/common": "^11.1.6",
+    "ioredis": "^5.3.2",
     "tslib": "^2.3.0",
-    "zod": "^3.25.76"
+    "zod": "4.1.8"
+  },
+  "devDependencies": {
+    "@types/redis": "^4.0.11"
   }
 }
