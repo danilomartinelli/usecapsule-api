@@ -1,0 +1,133 @@
+{
+	"meta": {
+		"generatedAt": "2025-09-18T03:31:05.967Z",
+		"tasksAnalyzed": 15,
+		"totalTasks": 15,
+		"analysisCount": 15,
+		"thresholdScore": 5,
+		"projectName": "Capsule",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Implement Framework Detection Engine Core",
+			"complexityScore": 8,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Break down framework detection into specific detector modules: Create abstract base detector class, implement file-based pattern detectors for each framework (package.json, config files, directory structure), build AST parsing service for JavaScript/TypeScript projects, integrate with existing ProjectSchema, add confidence scoring algorithm, implement fallback detection mechanisms, and create comprehensive test suite with real repository examples.",
+			"reasoning": "High complexity due to need for multiple framework detectors, AST parsing integration, confidence scoring algorithms, and integration with existing schemas. The codebase has basic framework enums but no detection logic, requiring substantial new development."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Build Dockerfile Generation Engine",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Develop template-based Dockerfile generation system: Create Handlebars template engine integration, build framework-specific Dockerfile templates with multi-stage builds, implement security best practices (non-root users, minimal attack surface), add layer caching optimization strategies, integrate with existing BuildConfigSchema, and create validation system using Hadolint for security scanning.",
+			"reasoning": "Moderate-high complexity requiring template engine integration, security considerations, and optimization strategies. Dependencies on framework detection results and integration with existing build configuration schemas."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Develop Kubernetes Manifest Generator",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Build comprehensive Kubernetes manifest generation: Create YAML generation service using js-yaml library, implement Deployment/Service/Ingress/ConfigMap resource generators, add resource sizing based on framework profiling, build HPA and probe configuration, implement security context and best practices, integrate with existing DeploymentSchema, and add kubectl validation pipeline.",
+			"reasoning": "High complexity due to Kubernetes API complexity, resource management calculations, security configurations, and integration with existing deployment schemas. The codebase has Kubernetes configuration but no manifest generation logic."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Implement Monorepo Architecture Support",
+			"complexityScore": 9,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Build advanced monorepo support leveraging existing Nx infrastructure: Extend framework detection to parse Nx workspace.json and project.json configurations, implement dependency graph analysis using @nx/devkit (already available), create affected project detection service, build parallel deployment orchestration, implement project-specific deployment configurations, integrate with existing project-service relationships, and create comprehensive test suite with large Nx repositories.",
+			"reasoning": "Very high complexity due to dependency graph analysis, affected project detection algorithms, and parallel deployment coordination. The codebase is already an Nx monorepo which provides foundation but requires substantial extension for customer repository analysis."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Create Resource Allocation Intelligence",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Develop ML-powered resource allocation system: Build resource profiling service with historical data analysis, implement TensorFlow.js model for resource prediction, create framework-specific baseline profiles, develop dynamic HPA configuration generation, integrate with existing ProjectSchema for profile storage, implement optimization tracking and versioning, and create performance benchmarking suite.",
+			"reasoning": "High complexity requiring machine learning implementation, historical data analysis, and performance optimization algorithms. Dependencies on framework detection and Kubernetes manifest generation."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Build Infrastructure Export Engine",
+			"complexityScore": 9,
+			"recommendedSubtasks": 10,
+			"expansionPrompt": "Create comprehensive zero lock-in export system: Build multi-format export service (Terraform HCL, Kubernetes YAML, Docker Compose), implement CDK for Terraform integration for cloud providers, create encrypted secrets handling with age encryption, build validation and migration testing suites, implement documentation generation, create export queue system using existing RabbitMQ infrastructure, and develop end-to-end migration workflows.",
+			"reasoning": "Very high complexity due to multiple IaC format support, cloud provider abstractions, security requirements for secret handling, and comprehensive validation systems. Critical for zero lock-in promise."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Implement Blue-Green Deployment Strategy",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Build sophisticated deployment orchestration: Implement blue-green deployment logic using Kubernetes labels and services, create health check and smoke test framework, build automated rollback triggers with failure detection, integrate Istio for traffic splitting and canary deployments, implement real-time WebSocket status updates, and extend existing DeploymentSchema with blue-green metadata.",
+			"reasoning": "Moderate-high complexity requiring Kubernetes orchestration, traffic management, health checking systems, and real-time communication. Dependencies on Kubernetes manifest generation."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Create Real-time Deployment Dashboard",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Develop comprehensive web dashboard: Build React 18+ dashboard with Next.js 14+ App Router, implement WebSocket integration using Socket.io for real-time updates, create deployment progress visualization components, build log streaming interface with Chart.js integration, and implement project management features with existing API integration.",
+			"reasoning": "Moderate complexity as primarily frontend development with existing backend APIs. Well-defined scope with modern React ecosystem and WebSocket integration."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Implement OpenTelemetry Auto-instrumentation",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Build automatic instrumentation system: Create auto-instrumentation service using OpenTelemetry SDKs for multiple languages, implement injection mechanisms during Docker build process, configure telemetry data collection to Prometheus/VictoriaMetrics/Loki/Tempo, build Grafana dashboard templates and alerting rules, integrate with project metadata storage, and ensure compliance with data privacy requirements.",
+			"reasoning": "High complexity due to multi-language SDK integration, Docker build process modification, comprehensive observability stack configuration, and privacy compliance requirements. The codebase has empty observability module requiring full implementation."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Build Cost Tracking and Optimization System",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Develop comprehensive cost management system: Build cost tracking service with cloud provider API integrations (AWS/GCP/Azure), implement cost allocation using Kubernetes metrics and resource tags, create ML forecasting model using TensorFlow.js, develop optimization recommendations engine, integrate TimescaleDB for time-series cost data storage, and build cost analytics dashboard with alerting.",
+			"reasoning": "High complexity requiring cloud provider API integrations, ML forecasting implementation, time-series database management, and optimization algorithms. Dependencies on resource allocation and observability systems."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Develop CI/CD Pipeline Generation",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Create automated pipeline generation system: Build template-based pipeline generators for GitHub Actions, GitLab CI, and Jenkins, implement security scanning integration (Trivy, CodeQL), create multi-environment deployment workflows with approval processes, integrate with framework detection results, extend infrastructure export functionality, and develop pipeline validation and testing framework.",
+			"reasoning": "Moderate-high complexity due to multiple CI/CD platform support, security scanning integration, and workflow orchestration. Dependencies on framework detection and infrastructure export systems."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Implement Enterprise SSO and Audit Logging",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Build enterprise authentication and compliance system: Extend existing auth-service with SAML 2.0 SSO using passport-saml, implement comprehensive audit logging for all operations, create SOC2 compliance reporting with automated evidence collection, build RBAC system with granular permissions, implement secure audit log storage with encryption, and create compliance dashboard and reporting tools.",
+			"reasoning": "Moderate-high complexity requiring authentication protocol implementation, compliance frameworks, security best practices, and integration with existing auth-service. Well-defined scope with established patterns."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Create Multi-Region Deployment Support",
+			"complexityScore": 9,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Build multi-region orchestration system: Implement region-aware deployment orchestration for multiple cloud providers, create geographic data residency controls for GDPR compliance, build automated failover mechanisms with health monitoring, implement region-aware load balancing and CDN integration, extend deployment schemas with region preferences, create cross-region networking setup, and develop region-specific cost optimization.",
+			"reasoning": "Very high complexity due to multi-cloud orchestration, compliance requirements, networking complexity, and failover automation. Dependencies on blue-green deployment and cost tracking systems."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Build Migration Toolkit and Validation Suite",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Develop comprehensive migration and validation system: Create automated infrastructure validation using terratest, kubectl, and docker-compose, build migration assistance service with guided workflows, implement cost estimation tools for self-hosted infrastructure, create performance benchmarking for exported systems, develop documentation generation for migration processes, and build end-to-end migration testing framework.",
+			"reasoning": "High complexity requiring comprehensive validation frameworks, cost analysis systems, performance benchmarking, and user experience design. Critical dependencies on infrastructure export engine."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Implement Advanced Alerting and Anomaly Detection",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Build intelligent alerting and anomaly detection: Develop alerting engine using Prometheus AlertManager with ML-based anomaly detection, implement noise reduction algorithms to prevent alert fatigue, create contextual alerting with deployment correlation, build notification channels for multiple platforms (Slack, Discord, PagerDuty), integrate with existing monitor-service database, and create alert configuration management interface.",
+			"reasoning": "Moderate-high complexity requiring ML implementation, alert correlation algorithms, notification integrations, and noise reduction logic. Dependencies on OpenTelemetry instrumentation and monitoring infrastructure."
+		}
+	]
+}

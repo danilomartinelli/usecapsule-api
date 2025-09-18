@@ -31,7 +31,8 @@
     "responseLanguage": "English",
     "enableCodebaseAnalysis": true,
     "defaultTag": "main",
-    "azureOpenaiBaseURL": "https://your-endpoint.openai.azure.com/"
+    "azureOpenaiBaseURL": "https://your-endpoint.openai.azure.com/",
+    "userId": "1234567890"
   },
   "claudeCode": {}
 }
