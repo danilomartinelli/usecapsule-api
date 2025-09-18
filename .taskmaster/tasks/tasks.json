@@ -679,7 +679,8 @@
         "testStrategy": "Performance tests ensuring dashboard loads within 2 seconds. Real-time update tests with WebSocket connection stability. Cross-browser compatibility testing. Accessibility testing meeting WCAG 2.1 AA standards. Mobile responsiveness testing.",
         "priority": "high",
         "dependencies": [
-          7
+          7,
+          "16"
         ],
         "status": "pending",
         "subtasks": [
@@ -1009,7 +1010,9 @@
         "details": "Extend existing auth-service with SAML 2.0 SSO using passport-saml library. Implement comprehensive audit logging for all user actions, deployment operations, and system events. Create compliance reporting system for SOC2 Type II requirements with automated evidence collection. Add role-based access control (RBAC) with granular permissions for enterprise teams. Store audit logs in secure, immutable storage with encryption at rest.",
         "testStrategy": "SSO integration tests with popular identity providers (Okta, Azure AD, Auth0). Audit log completeness tests ensuring all actions are tracked. Compliance tests meeting SOC2 control requirements. Security penetration testing for authentication flows.",
         "priority": "medium",
-        "dependencies": [],
+        "dependencies": [
+          "16"
+        ],
         "status": "pending",
         "subtasks": [
           {
@@ -1355,11 +1358,144 @@
             "testStrategy": ""
           }
         ]
+      },
+      {
+        "id": 16,
+        "title": "Implement Core Authentication Boilerplate",
+        "description": "Build foundational authentication system with user registration, login, password reset, and role-based access control (RBAC) for secure platform access",
+        "details": "",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up authentication domain models and database tables",
+            "description": "Create User, UserRole, AuthSession, and related entity tables based on existing auth.schemas.ts, implementing the full user authentication data model with proper relationships and constraints",
+            "dependencies": [],
+            "details": "Implement Flyway migrations in apps/auth-service/database/migrations/ to create users, user_roles, auth_sessions, email_verification_tokens, password_reset_tokens, two_factor_auth, oauth_providers, api_keys, and auth_audit_logs tables. Use the existing auth.schemas.ts as the schema reference. Include proper indexes for email, session tokens, and foreign key relationships. Set up triggers for updated_at timestamps and audit logging.",
+            "status": "pending",
+            "testStrategy": "Database schema validation tests, foreign key constraint tests, and index performance verification"
+          },
+          {
+            "id": 2,
+            "title": "Implement password hashing and JWT token services",
+            "description": "Create secure password hashing using bcrypt and JWT token generation/validation services for authentication tokens and refresh tokens",
+            "dependencies": [
+              "16.1"
+            ],
+            "details": "Create auth-service/src/modules/auth/services/password.service.ts for bcrypt password hashing/verification. Implement auth-service/src/modules/auth/services/jwt.service.ts for access token and refresh token generation/validation using @nestjs/jwt. Configure JWT secrets, expiration times, and token payload structure. Include token blacklisting mechanism using Redis for logout functionality.",
+            "status": "pending",
+            "testStrategy": "Unit tests for password hashing security, JWT token validation, and token expiration handling"
+          },
+          {
+            "id": 3,
+            "title": "Create user registration command handler with email verification",
+            "description": "Implement user registration business logic with email uniqueness validation, password strength requirements, and email verification token generation",
+            "dependencies": [
+              "16.1",
+              "16.2"
+            ],
+            "details": "Create auth-service/src/modules/auth/commands/register-user/ with RegisterUserCommand, RegisterUserCommandHandler, and RegisterUserDto. Implement email uniqueness validation, password strength validation (min 8 chars, special chars, numbers). Generate email verification tokens and store in database. Emit user.registration.initiated event via RabbitMQ for email service integration. Follow DDD patterns with proper domain validation.",
+            "status": "pending",
+            "testStrategy": "Command handler tests, email uniqueness validation, password strength validation, and event emission verification"
+          },
+          {
+            "id": 4,
+            "title": "Create user login command handler with session management",
+            "description": "Implement login authentication with credential validation, failed attempt tracking, account locking, and session creation",
+            "dependencies": [
+              "16.1",
+              "16.2"
+            ],
+            "details": "Create auth-service/src/modules/auth/commands/login-user/ with LoginUserCommand, LoginUserCommandHandler, and LoginUserDto. Implement credential validation using password service, failed login attempt tracking (max 5 attempts), automatic account locking after failures. Create auth sessions with device tracking, IP address logging. Return JWT tokens and session information. Audit all login attempts in auth_audit_logs table.",
+            "status": "pending",
+            "testStrategy": "Authentication flow tests, account locking validation, session creation verification, and audit log testing"
+          },
+          {
+            "id": 5,
+            "title": "Implement password reset functionality with secure tokens",
+            "description": "Create password reset request and confirmation handlers with time-limited secure tokens and email notification integration",
+            "dependencies": [
+              "16.1",
+              "16.2"
+            ],
+            "details": "Create auth-service/src/modules/auth/commands/reset-password/ with RequestPasswordResetCommand and ConfirmPasswordResetCommand handlers. Generate cryptographically secure reset tokens with 1-hour expiration. Store tokens in password_reset_tokens table with IP tracking. Implement token validation, single-use enforcement, and new password setting. Emit password.reset.requested and password.reset.completed events for email notifications.",
+            "status": "pending",
+            "testStrategy": "Token generation security tests, expiration validation, single-use token enforcement, and event emission verification"
+          },
+          {
+            "id": 6,
+            "title": "Create role-based access control (RBAC) system",
+            "description": "Implement user role management with USER, ADMIN, SUPERADMIN roles, role assignment/revocation, and permission checking services",
+            "dependencies": [
+              "16.1"
+            ],
+            "details": "Create auth-service/src/modules/roles/ with Role entity, RoleService, and permission checking logic. Implement role assignment/revocation commands with expiration support. Create role-based guards and decorators for endpoint protection. Support hierarchical permissions where SUPERADMIN > ADMIN > USER. Include role history tracking and audit logging. Create role-checking middleware for RabbitMQ message handlers.",
+            "status": "pending",
+            "testStrategy": "Role assignment tests, permission hierarchy validation, guard functionality testing, and role expiration handling"
+          },
+          {
+            "id": 7,
+            "title": "Implement email verification and account activation",
+            "description": "Create email verification token validation and account activation handlers with token expiration and resend functionality",
+            "dependencies": [
+              "16.1",
+              "16.3"
+            ],
+            "details": "Create auth-service/src/modules/auth/commands/verify-email/ with VerifyEmailCommand and ResendVerificationCommand handlers. Implement email verification token validation with 24-hour expiration. Update user.emailVerified status and emailVerifiedAt timestamp. Support verification token resending with rate limiting. Emit email.verified events for downstream services. Include verification status in JWT token claims.",
+            "status": "pending",
+            "testStrategy": "Email verification flow tests, token expiration validation, rate limiting verification, and account activation confirmation"
+          },
+          {
+            "id": 8,
+            "title": "Create session management and logout functionality",
+            "description": "Implement session tracking, validation, refresh, and secure logout with token blacklisting and multi-device session management",
+            "dependencies": [
+              "16.1",
+              "16.2",
+              "16.4"
+            ],
+            "details": "Create auth-service/src/modules/auth/commands/session-management/ with session validation, refresh, and logout handlers. Implement JWT token blacklisting using Redis with expiration. Support multi-device session tracking with device fingerprinting. Create session activity tracking and automatic cleanup of expired sessions. Include logout from all devices functionality and suspicious session detection.",
+            "status": "pending",
+            "testStrategy": "Session lifecycle tests, token blacklisting validation, multi-device session management, and automatic cleanup verification"
+          },
+          {
+            "id": 9,
+            "title": "Set up RabbitMQ message handlers for authentication operations",
+            "description": "Create RabbitMQ RPC handlers for all authentication operations using the existing routing key patterns and exchange configuration",
+            "dependencies": [
+              "16.3",
+              "16.4",
+              "16.5",
+              "16.6",
+              "16.7",
+              "16.8"
+            ],
+            "details": "Create auth-service/src/modules/auth/message-handlers/ with @RabbitRPC decorators for auth.register, auth.login, auth.logout, auth.reset-password, auth.verify-email, auth.check-permissions routing keys. Use EXCHANGES.COMMANDS and AUTH_ROUTING_KEYS constants from @usecapsule/messaging. Implement proper error handling, timeout management, and response formatting. Include health check handler and service status reporting.",
+            "status": "pending",
+            "testStrategy": "RabbitMQ message flow tests, error handling validation, timeout behavior testing, and integration with API Gateway"
+          },
+          {
+            "id": 10,
+            "title": "Implement comprehensive authentication middleware and guards",
+            "description": "Create JWT authentication guards, role-based authorization guards, and rate limiting middleware for API protection",
+            "dependencies": [
+              "16.2",
+              "16.6",
+              "16.8"
+            ],
+            "details": "Create auth-service/src/modules/auth/guards/ with JwtAuthGuard, RolesGuard, and RateLimitGuard. Implement JWT token extraction from Authorization headers, token validation, and user context injection. Create role-based authorization with @Roles decorator support. Implement rate limiting using Redis for login attempts and password reset requests. Include IP-based blocking and suspicious activity detection.",
+            "status": "pending",
+            "testStrategy": "Guard functionality tests, JWT validation testing, role authorization verification, rate limiting effectiveness, and security middleware integration"
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-09-18T03:27:07.647Z",
-      "updated": "2025-09-18T03:27:07.647Z",
+      "updated": "2025-09-18T11:58:58.641Z",
       "description": "Tasks for master context"
     }
   }

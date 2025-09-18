@@ -1,6 +1,6 @@
 # Tasks
 
-> 🎯 **Taskmaster Export** - 2025-09-18 11:22:37 UTC
+> 🎯 **Taskmaster Export** - 2025-09-18 12:03:00 UTC
 > 📋 Export: with subtasks • Status filter: none
 > 🔗 Powered by [Task Master](https://task-master.dev?utm_source=github-readme&utm_medium=readme-export&utm_campaign=usecapsule-api&utm_content=task-export-link)
 
@@ -9,14 +9,14 @@
 | Task Progress     | ░░░░░░░░░░░░░░░░░░░░ 0% |
 | Done | 0 |
 | In Progress | 0 |
-| Pending | 15 |
+| Pending | 16 |
 | Deferred | 0 |
 | Cancelled | 0 |
 |-|-|
 | Subtask Progress | ░░░░░░░░░░░░░░░░░░░░ 0% |
 | Completed | 0 |
 | In Progress | 0 |
-| Pending | 104 |
+| Pending | 114 |
 
 | ID | Title | Status | Priority | Dependencies | Complexity |
 | :- | :-    | :-     | :-       | :-           | :-         |
@@ -79,7 +79,7 @@
 | 7.4 | Integrate Istio Traffic Management | ○&nbsp;pending | -            | 7.1 | N/A |
 | 7.5 | Build Real-time WebSocket Status Updates | ○&nbsp;pending | -            | 7.1 | N/A |
 | 7.6 | Extend DeploymentSchema with Blue-Green Metadata | ○&nbsp;pending | -            | 7.2, 7.3, 7.4, 7.5 | N/A |
-| 8 | Create Real-time Deployment Dashboard | ○&nbsp;pending | high | 7 | ● 6 |
+| 8 | Create Real-time Deployment Dashboard | ○&nbsp;pending | high | 7, 16 | ● 6 |
 | 8.1 | Set up Next.js 14 dashboard foundation with TypeScript | ○&nbsp;pending | -            | None | N/A |
 | 8.2 | Implement Socket.io WebSocket integration for real-time updates | ○&nbsp;pending | -            | 8.1 | N/A |
 | 8.3 | Build deployment progress visualization components | ○&nbsp;pending | -            | 8.1 | N/A |
@@ -108,7 +108,7 @@
 | 11.4 | Implement Jenkins Pipeline Generator | ○&nbsp;pending | -            | 11.1 | N/A |
 | 11.5 | Integrate Framework Detection and Security Scanning | ○&nbsp;pending | -            | 11.2, 11.3, 11.4 | N/A |
 | 11.6 | Build Pipeline Validation and Export Integration | ○&nbsp;pending | -            | 11.5 | N/A |
-| 12 | Implement Enterprise SSO and Audit Logging | ○&nbsp;pending | medium | None | ● 7 |
+| 12 | Implement Enterprise SSO and Audit Logging | ○&nbsp;pending | medium | 16 | ● 7 |
 | 12.1 | Extend auth-service with SAML 2.0 SSO integration | ○&nbsp;pending | -            | None | N/A |
 | 12.2 | Implement Role-Based Access Control (RBAC) system | ○&nbsp;pending | -            | 12.1 | N/A |
 | 12.3 | Build comprehensive audit logging infrastructure | ○&nbsp;pending | -            | 12.2 | N/A |
@@ -139,5 +139,16 @@
 | 15.4 | Create Multi-Platform Notification Channels | ○&nbsp;pending | -            | None | N/A |
 | 15.5 | Build Contextual Alerting with Deployment Correlation | ○&nbsp;pending | -            | 15.2, 15.3 | N/A |
 | 15.6 | Implement Alert Configuration Management Interface | ○&nbsp;pending | -            | 15.4, 15.5 | N/A |
+| 16 | Implement Core Authentication Boilerplate | ○&nbsp;pending | high | None | N/A |
+| 16.1 | Set up authentication domain models and database tables | ○&nbsp;pending | -            | None | N/A |
+| 16.2 | Implement password hashing and JWT token services | ○&nbsp;pending | -            | 16.1 | N/A |
+| 16.3 | Create user registration command handler with email verification | ○&nbsp;pending | -            | 16.1, 16.2 | N/A |
+| 16.4 | Create user login command handler with session management | ○&nbsp;pending | -            | 16.1, 16.2 | N/A |
+| 16.5 | Implement password reset functionality with secure tokens | ○&nbsp;pending | -            | 16.1, 16.2 | N/A |
+| 16.6 | Create role-based access control (RBAC) system | ○&nbsp;pending | -            | 16.1 | N/A |
+| 16.7 | Implement email verification and account activation | ○&nbsp;pending | -            | 16.1, 16.3 | N/A |
+| 16.8 | Create session management and logout functionality | ○&nbsp;pending | -            | 16.1, 16.2, 16.4 | N/A |
+| 16.9 | Set up RabbitMQ message handlers for authentication operations | ○&nbsp;pending | -            | 16.3, 16.4, 16.5, 16.6, 16.7, 16.8 | N/A |
+| 16.10 | Implement comprehensive authentication middleware and guards | ○&nbsp;pending | -            | 16.2, 16.6, 16.8 | N/A |
 
 > 📋 **End of Taskmaster Export** - Tasks are synced from your project using the `sync-readme` command.
