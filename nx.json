@@ -1,25 +1,17 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "nxCloudId": "68bf3f3f8a802a011382406f",
-  "sync": {
-    "applyChanges": true
-  },
+  "nxCloudId": "68cbedac5110a1fd9b8a1c30",
+  "sync": { "applyChanges": true },
   "namedInputs": {
     "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"],
     "default": ["sharedGlobals"]
   },
-  "targetDefaults": {
-    "lint": {
-      "cache": false
-    }
-  },
+  "targetDefaults": { "lint": { "cache": false } },
   "plugins": [
     {
       "plugin": "@nx/js/typescript",
       "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        },
+        "typecheck": { "targetName": "typecheck" },
         "build": {
           "targetName": "build",
           "configName": "tsconfig.lib.json",
@@ -39,11 +31,6 @@
         "serveStaticTargetName": "serve-static"
       }
     },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    }
+    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } }
   ]
 }
