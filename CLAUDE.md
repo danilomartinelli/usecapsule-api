@@ -91,7 +91,6 @@ npm run db:reset:all        # Drop and recreate databases
 
 - Use Nx generators for consistent code structure
 - Follow NestJS conventions and decorators
-- Write tests at unit, integration, and e2e levels
 - Keep services focused on single business capabilities
 
 ## Nx Development Guidelines
@@ -119,7 +118,7 @@ When generating new code:
 
 ### Task Management
 
-For running tests, builds, lint, and other tasks:
+For running builds, lint, and other tasks:
 
 1. Check current tasks with `nx_current_running_tasks_details`
 2. Get task output with `nx_current_running_task_output`
@@ -720,14 +719,6 @@ When adding a new bounded context:
      }
    }
    ```
-
-### Testing Guidelines
-
-- Unit tests: `*.spec.ts` files next to source code
-- Integration tests: `*.integration.spec.ts` with test databases
-- E2E tests: In dedicated e2e projects
-- Each service uses isolated test databases
-- Run `npm run test:affected` to test only changed code
 
 ## Appendix
 
