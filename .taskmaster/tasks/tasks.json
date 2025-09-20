@@ -1358,14 +1358,23 @@
             "testStrategy": ""
           }
         ]
-      },
+      }
+    ],
+    "metadata": {
+      "created": "2025-09-18T03:27:07.647Z",
+      "updated": "2025-09-18T12:52:17.405Z",
+      "description": "Tasks for master context"
+    }
+  },
+  "feature-auth-core-implementation": {
+    "tasks": [
       {
         "id": 16,
         "title": "Implement Core Authentication Boilerplate",
         "description": "Build foundational authentication system with user registration, login, password reset, and role-based access control (RBAC) for secure platform access",
         "details": "",
         "testStrategy": "",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [],
         "priority": "high",
         "subtasks": [
@@ -1490,13 +1499,23 @@
             "status": "pending",
             "testStrategy": "Guard functionality tests, JWT validation testing, role authorization verification, rate limiting effectiveness, and security middleware integration"
           }
-        ]
+        ],
+        "tag": "feature-auth-core-implementation",
+        "metadata": {
+          "moveHistory": [
+            {
+              "fromTag": "master",
+              "toTag": "feature-auth-core-implementation",
+              "timestamp": "2025-09-19T10:42:09.512Z"
+            }
+          ]
+        }
       }
     ],
     "metadata": {
-      "created": "2025-09-18T03:27:07.647Z",
-      "updated": "2025-09-18T12:52:17.405Z",
-      "description": "Tasks for master context"
+      "created": "2025-09-19T10:41:56.067Z",
+      "updated": "2025-09-20T20:25:44.431Z",
+      "description": "Tag dedicated to implementing core authentication system - Task 16 and related auth features"
     }
   }
 }
