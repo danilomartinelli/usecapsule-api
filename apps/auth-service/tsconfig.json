@@ -7,13 +7,13 @@
       "path": "../../libs/configs/parameters"
     },
     {
-      "path": "../../libs/shared/messaging"
+      "path": "../../libs/shared/types"
     },
     {
       "path": "../../libs/configs/rabbitmq"
     },
     {
-      "path": "../../libs/shared/types"
+      "path": "../../libs/shared/messaging"
     },
     {
       "path": "./tsconfig.app.json"
