@@ -97,7 +97,7 @@ Each service uses Flyway for database migrations with:
 
 ### Migration File Structure
 
-```
+```text
 apps/
 ├── auth-service/migrations/
 │   ├── flyway.conf
