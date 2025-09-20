@@ -87,7 +87,9 @@ async function bootstrap(): Promise<void> {
   const logger = new Logger('NotificationServiceBootstrap');
 
   try {
-    logger.log('Starting Notification Service with @golevelup/nestjs-rabbitmq...');
+    logger.log(
+      'Starting Notification Service with @golevelup/nestjs-rabbitmq...',
+    );
 
     // Create standard NestJS application
     const app = await NestFactory.create(AppModule);
@@ -284,7 +286,9 @@ export class AppController {
     exchange: EXCHANGES.COMMANDS,
     routingKey: NOTIFICATION_ROUTING_KEYS.SEND_EMAIL,
   })
-  async sendEmail(@RabbitPayload() emailRequest: SendEmailRequest): Promise<SendEmailResponse> {
+  async sendEmail(
+    @RabbitPayload() emailRequest: SendEmailRequest,
+  ): Promise<SendEmailResponse> {
     return this.appService.sendEmail(emailRequest);
   }
 }
@@ -356,12 +360,16 @@ services:
       POSTGRES_PASSWORD: notification_pass
       POSTGRES_DB: notification_service_db
     ports:
-      - '7140:5432'  # Use next available port
+      - '7140:5432' # Use next available port
     volumes:
       - notification_db_data:/var/lib/postgresql/data
       - ./devtools/infra/postgres/init-scripts:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U notification_user -d notification_service_db']
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U notification_user -d notification_service_db',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -479,7 +487,7 @@ export class AppService {
           type: 'email',
           subject: request.subject,
           sentAt: new Date().toISOString(),
-        }
+        },
       );
 
       return {
@@ -498,7 +506,7 @@ export class AppService {
           subject: request.subject,
           error: error.message,
           timestamp: new Date().toISOString(),
-        }
+        },
       );
 
       throw error;
@@ -543,7 +551,9 @@ export class AppController {
     exchange: EXCHANGES.EVENTS,
     routingKey: EVENT_ROUTING_KEYS.PAYMENT_PROCESSED,
   })
-  async onPaymentProcessed(@RabbitPayload() event: PaymentProcessedEvent): Promise<void> {
+  async onPaymentProcessed(
+    @RabbitPayload() event: PaymentProcessedEvent,
+  ): Promise<void> {
     this.logger.log(`Sending payment receipt for payment: ${event.paymentId}`);
 
     await this.appService.sendPaymentReceipt(event);
@@ -594,7 +604,12 @@ Create domain entities following DDD principles:
 
 ```typescript
 // apps/notification-service/src/modules/email/domain/email.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from 'typeorm';
 
 export enum EmailStatus {
   PENDING = 'pending',
@@ -649,7 +664,9 @@ export class Email {
   }
 
   canRetry(): boolean {
-    return this.status === EmailStatus.FAILED || this.status === EmailStatus.PENDING;
+    return (
+      this.status === EmailStatus.FAILED || this.status === EmailStatus.PENDING
+    );
   }
 }
 ```
@@ -667,7 +684,11 @@ export interface EmailRepository {
   findById(id: string): Promise<Email | null>;
   findByUserId(userId: string): Promise<Email[]>;
   findPendingEmails(): Promise<Email[]>;
-  markAsProcessed(id: string, status: EmailStatus, errorMessage?: string): Promise<void>;
+  markAsProcessed(
+    id: string,
+    status: EmailStatus,
+    errorMessage?: string,
+  ): Promise<void>;
 }
 ```
 
@@ -738,7 +759,7 @@ describe('AppService', () => {
           userId: request.userId,
           type: 'email',
           subject: request.subject,
-        })
+        }),
       );
     });
   });
@@ -813,7 +834,9 @@ export class NotificationsService {
     });
   }
 
-  async getNotificationStatus(notificationId: string): Promise<NotificationStatusResponse> {
+  async getNotificationStatus(
+    notificationId: string,
+  ): Promise<NotificationStatusResponse> {
     return this.amqpConnection.request({
       exchange: EXCHANGES.COMMANDS,
       routingKey: NOTIFICATION_ROUTING_KEYS.GET_STATUS,
@@ -842,14 +865,18 @@ export class NotificationsController {
   @Post('email')
   @ApiOperation({ summary: 'Send email notification' })
   @ApiResponse({ status: 200, description: 'Email sent successfully' })
-  async sendEmail(@Body() emailRequest: SendEmailRequest): Promise<SendEmailResponse> {
+  async sendEmail(
+    @Body() emailRequest: SendEmailRequest,
+  ): Promise<SendEmailResponse> {
     return this.notificationsService.sendEmail(emailRequest);
   }
 
   @Get(':id/status')
   @ApiOperation({ summary: 'Get notification status' })
   @ApiResponse({ status: 200, description: 'Notification status retrieved' })
-  async getStatus(@Param('id') id: string): Promise<NotificationStatusResponse> {
+  async getStatus(
+    @Param('id') id: string,
+  ): Promise<NotificationStatusResponse> {
     return this.notificationsService.getNotificationStatus(id);
   }
 }
@@ -926,7 +953,9 @@ export class AppService {
       const result = await this.emailProvider.send(request);
 
       const duration = Date.now() - startTime;
-      this.logger.log(`Email sent successfully in ${duration}ms: ${result.messageId}`);
+      this.logger.log(
+        `Email sent successfully in ${duration}ms: ${result.messageId}`,
+      );
 
       // Emit metrics
       this.metricsService.incrementCounter('emails_sent_total');
@@ -935,7 +964,9 @@ export class AppService {
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`Email send failed after ${duration}ms: ${error.message}`);
+      this.logger.error(
+        `Email send failed after ${duration}ms: ${error.message}`,
+      );
 
       this.metricsService.incrementCounter('emails_failed_total');
 
@@ -978,10 +1009,12 @@ export const notificationServiceSchema = z.object({
   REDIS_URL: z.string().optional(),
 });
 
-export type NotificationServiceConfig = z.infer<typeof notificationServiceSchema>;
+export type NotificationServiceConfig = z.infer<
+  typeof notificationServiceSchema
+>;
 
 export const notificationServiceFactory = (
-  config: NotificationServiceConfig
+  config: NotificationServiceConfig,
 ): NotificationServiceConfig => config;
 ```
 
@@ -1019,7 +1052,7 @@ export class NotificationException extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly statusCode: number = 500
+    public readonly statusCode: number = 500,
   ) {
     super(message);
     this.name = 'NotificationException';
@@ -1027,13 +1060,19 @@ export class NotificationException extends Error {
 }
 
 export class EmailDeliveryException extends NotificationException {
-  constructor(message: string, public readonly emailAddress: string) {
+  constructor(
+    message: string,
+    public readonly emailAddress: string,
+  ) {
     super(message, 'EMAIL_DELIVERY_FAILED', 422);
   }
 }
 
 export class RateLimitExceededException extends NotificationException {
-  constructor(public readonly userId: string, public readonly resetTime: Date) {
+  constructor(
+    public readonly userId: string,
+    public readonly resetTime: Date,
+  ) {
     super('Rate limit exceeded', 'RATE_LIMIT_EXCEEDED', 429);
   }
 }

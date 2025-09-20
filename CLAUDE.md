@@ -269,19 +269,19 @@ healthCheck(@RabbitPayload() payload?: any): HealthCheckResponse {
 
 ```typescript
 // Service Commands: {service}.{action}
-'auth.register'     // User registration
-'billing.charge'    // Process payment
-'deploy.create'     // Create deployment
-'monitor.alert'     // Send alert
+'auth.register'; // User registration
+'billing.charge'; // Process payment
+'deploy.create'; // Create deployment
+'monitor.alert'; // Send alert
 
 // Domain Events: {entity}.{event}
-'user.created'      // User was created
-'payment.processed' // Payment completed
-'deployment.failed' // Deployment failed
+'user.created'; // User was created
+'payment.processed'; // Payment completed
+'deployment.failed'; // Deployment failed
 
 // Health Checks: {service}.health
-'auth.health'       // Auth service health
-'billing.health'    // Billing service health
+'auth.health'; // Auth service health
+'billing.health'; // Billing service health
 ```
 
 ## 🚨 Troubleshooting (Claude Code Quick Reference)

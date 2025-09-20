@@ -20,6 +20,28 @@ import type {
 } from '@usecapsule/types';
 import { HealthStatus } from '@usecapsule/types';
 
+// Extended metadata interface for circuit breaker health responses
+interface ExtendedHealthMetadata extends Record<string, unknown> {
+  reason?: string;
+  error?: string;
+  exchange?: string;
+  routingKey?: string;
+  timeout?: boolean;
+  circuitBreaker?: {
+    state: CircuitBreakerState;
+    fromFallback?: boolean;
+    executionTime?: number;
+    timeout?: number;
+    timedOut?: boolean;
+    errorPercentage?: number;
+    requestCount?: number;
+    averageResponseTime?: number;
+    lastStateChange?: number;
+    lastError?: string;
+  };
+  circuitBreakerResult?: CircuitBreakerResult;
+}
+
 @Injectable()
 export class AppService {
   constructor(
@@ -65,25 +87,26 @@ export class AppService {
 
           // Enhance health response with circuit breaker information
           const baseMetadata = response.data.metadata || {};
+          const enhancedMetadata: ExtendedHealthMetadata = {
+            ...(baseMetadata as ExtendedHealthMetadata),
+            circuitBreaker: {
+              state: response.circuitState,
+              fromFallback: response.fromFallback,
+              executionTime: response.actualDuration,
+              timeout: response.timeout,
+              timedOut: response.timedOut,
+              ...(circuitHealth && {
+                errorPercentage: circuitHealth.metrics.errorPercentage,
+                requestCount: circuitHealth.metrics.requestCount,
+                averageResponseTime: circuitHealth.metrics.averageResponseTime,
+                lastStateChange: circuitHealth.metrics.lastStateChange,
+              }),
+            },
+          };
+
           const enhancedHealth: HealthCheckResponse = {
             ...response.data,
-            metadata: {
-              ...(baseMetadata as HealthCheckResponse['metadata']),
-              circuitBreaker: {
-                state: response.circuitState,
-                fromFallback: response.fromFallback,
-                executionTime: response.actualDuration,
-                timeout: response.timeout,
-                timedOut: response.timedOut,
-                ...(circuitHealth && {
-                  errorPercentage: circuitHealth.metrics.errorPercentage,
-                  requestCount: circuitHealth.metrics.requestCount,
-                  averageResponseTime:
-                    circuitHealth.metrics.averageResponseTime,
-                  lastStateChange: circuitHealth.metrics.lastStateChange,
-                }),
-              },
-            } as HealthCheckResponse['metadata'],
+            metadata: enhancedMetadata,
           };
 
           // Ensure metadata object exists
@@ -98,24 +121,18 @@ export class AppService {
           ) {
             // If we got a healthy response from fallback, it's actually degraded
             enhancedHealth.status = HealthStatus.DEGRADED;
-            if (enhancedHealth.metadata) {
-              enhancedHealth.metadata.reason =
-                'Circuit breaker fallback response';
-            }
+            const metadata = enhancedHealth.metadata as ExtendedHealthMetadata;
+            metadata.reason = 'Circuit breaker fallback response';
           } else if (response.circuitState === CircuitBreakerState.OPEN) {
             // Circuit breaker is open, service is failing fast
             enhancedHealth.status = HealthStatus.UNHEALTHY;
-            if (enhancedHealth.metadata) {
-              enhancedHealth.metadata.reason =
-                'Circuit breaker is OPEN - service failing fast';
-            }
+            const metadata = enhancedHealth.metadata as ExtendedHealthMetadata;
+            metadata.reason = 'Circuit breaker is OPEN - service failing fast';
           } else if (response.circuitState === CircuitBreakerState.HALF_OPEN) {
             // Circuit breaker is testing recovery
             enhancedHealth.status = HealthStatus.DEGRADED;
-            if (enhancedHealth.metadata) {
-              enhancedHealth.metadata.reason =
-                'Circuit breaker is HALF_OPEN - testing recovery';
-            }
+            const metadata = enhancedHealth.metadata as ExtendedHealthMetadata;
+            metadata.reason = 'Circuit breaker is HALF_OPEN - testing recovery';
           }
 
           return { serviceName, health: enhancedHealth };
@@ -125,34 +142,39 @@ export class AppService {
             this.circuitBreakerHealthService.getServiceHealth(serviceName);
 
           // Enhanced error response with circuit breaker information
+          const errorMetadata: ExtendedHealthMetadata = {
+            error:
+              error instanceof Error ? error.message : 'Service unreachable',
+            exchange: EXCHANGES.COMMANDS,
+            routingKey,
+            timeout: true,
+            circuitBreaker: {
+              state: circuitHealth?.state || CircuitBreakerState.CLOSED,
+              ...(circuitHealth && {
+                errorPercentage: circuitHealth.metrics.errorPercentage,
+                requestCount: circuitHealth.metrics.requestCount,
+                lastError: circuitHealth.metrics.lastError,
+              }),
+            },
+          };
+
+          // Include circuit breaker result if available
+          const errorWithResult = error as Error & {
+            circuitBreakerResult?: CircuitBreakerResult;
+          };
+          if (errorWithResult?.circuitBreakerResult) {
+            errorMetadata.circuitBreakerResult =
+              errorWithResult.circuitBreakerResult;
+          }
+
           return {
             serviceName,
             health: {
               status: HealthStatus.UNHEALTHY,
               service: serviceName,
               timestamp: new Date().toISOString(),
-              metadata: {
-                error:
-                  error instanceof Error
-                    ? error.message
-                    : 'Service unreachable',
-                exchange: EXCHANGES.COMMANDS,
-                routingKey,
-                timeout: true,
-                circuitBreaker: {
-                  state: circuitHealth?.state || CircuitBreakerState.CLOSED,
-                  ...(circuitHealth && {
-                    errorPercentage: circuitHealth.metrics.errorPercentage,
-                    requestCount: circuitHealth.metrics.requestCount,
-                    lastError: circuitHealth.metrics.lastError,
-                  }),
-                },
-                // Include circuit breaker result if available
-                ...((error as Error & { circuitBreakerResult?: CircuitBreakerResult })?.circuitBreakerResult && {
-                  circuitBreakerResult: (error as Error & { circuitBreakerResult?: CircuitBreakerResult }).circuitBreakerResult,
-                }),
-              },
-            } as HealthCheckResponse,
+              metadata: errorMetadata,
+            },
           };
         }
       }),

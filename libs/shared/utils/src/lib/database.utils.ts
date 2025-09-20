@@ -42,7 +42,7 @@ type PaginationParams = {
 export function createPaginatedQuery<T extends z.ZodTypeAny>(
   baseQuery: QuerySqlToken<T>,
   _pagination: PaginationParams,
-): any {
+): QuerySqlToken<T> {
   // For now, just return the base query - pagination should be handled by the caller
   // This avoids complex Slonik type issues with the newer version
   return baseQuery;
@@ -156,7 +156,7 @@ export function createIdFilterString(
     return `${columnName} = '${ids[0].replace(/'/g, "''")}'`;
   }
 
-  const escapedIds = ids.map(id => `'${id.replace(/'/g, "''")}'`).join(', ');
+  const escapedIds = ids.map((id) => `'${id.replace(/'/g, "''")}'`).join(', ');
   return `${columnName} IN (${escapedIds})`;
 }
 
