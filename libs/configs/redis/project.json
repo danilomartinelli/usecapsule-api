@@ -13,7 +13,8 @@
         "tsConfig": "libs/configs/redis/tsconfig.lib.json",
         "packageJson": "libs/configs/redis/package.json",
         "main": "libs/configs/redis/src/index.ts",
-        "assets": ["libs/configs/redis/*.md"]
+        "assets": ["libs/configs/redis/*.md"],
+        "rootDir": "libs/configs/redis/src"
       }
     }
   }

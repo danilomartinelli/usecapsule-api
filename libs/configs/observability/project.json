@@ -13,7 +13,8 @@
         "tsConfig": "libs/configs/observability/tsconfig.lib.json",
         "packageJson": "libs/configs/observability/package.json",
         "main": "libs/configs/observability/src/index.ts",
-        "assets": ["libs/configs/observability/*.md"]
+        "assets": ["libs/configs/observability/*.md"],
+        "rootDir": "libs/configs/observability/src"
       }
     }
   }
