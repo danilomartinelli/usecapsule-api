@@ -304,7 +304,7 @@ export const CACHEABLE_METADATA_KEY = Symbol('cacheable_metadata');
  * Class decorator that applies default caching configuration to all methods.
  */
 export function Cacheable(options: CacheableOptions = {}): ClassDecorator {
-  return (target: new (...args: unknown[]) => unknown) => {
+  return (target: any) => {
     const defaultOptions: Required<CacheableOptions> = {
       prefix: target.name.toLowerCase(),
       ttl: 300,

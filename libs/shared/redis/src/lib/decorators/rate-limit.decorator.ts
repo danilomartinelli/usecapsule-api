@@ -202,7 +202,7 @@ export const RATE_LIMITED_METADATA_KEY = Symbol('rate_limited_metadata');
 export function RateLimited(
   scenarios: RateLimitScenarios | RateLimitOptions,
 ): ClassDecorator {
-  return (target: new (...args: unknown[]) => unknown) => {
+  return (target: any) => {
     // If it's a single RateLimitOptions object, treat it as default
     const finalScenarios: RateLimitScenarios =
       'windowSize' in scenarios
