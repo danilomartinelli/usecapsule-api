@@ -8,6 +8,7 @@ import { RabbitMQModule } from '@usecapsule/rabbitmq';
 
 import { AuthModule } from '../modules/auth/auth.module';
 import { RolesModule } from '../modules/roles/roles.module';
+import { UserManagementModule } from '../modules/user-management/user-management.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -56,9 +57,10 @@ import { AppService } from './app.service';
         'amqp://usecapsule:usecapsule_dev_password@localhost:7010',
       serviceName: 'auth-service',
     }),
-    // Auth and Roles modules
+    // Auth, Roles and User Management modules
     AuthModule,
     RolesModule,
+    UserManagementModule,
   ],
   controllers: [AppController],
   providers: [AppService],

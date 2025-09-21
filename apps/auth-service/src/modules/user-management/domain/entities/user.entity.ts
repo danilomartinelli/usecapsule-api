@@ -177,6 +177,10 @@ export class User extends SoftDeletableEntity {
     this._emailVerified = true;
     this._emailVerifiedAt = new Date();
     this.touch();
+
+    // TEMP: Email verification completion notification
+    // TODO: Publish event to mailer-service for welcome email
+    // Exchange: capsule.events, Routing Key: user.email-verified
   }
 
   /**
@@ -188,6 +192,11 @@ export class User extends SoftDeletableEntity {
       this._emailVerified = false;
       this._emailVerifiedAt = undefined;
       this.touch();
+
+      // TEMP: Email change verification notification
+      // TODO: Send email verification to new email address
+      // Command to mailer-service: 'mailer.send.verification'
+      // Exchange: capsule.commands
     }
   }
 
