@@ -21,6 +21,10 @@ This is the primary guidance file for Claude Code development on the Capsule Pla
 - **Exchange-Based Routing**: Use @golevelup/nestjs-rabbitmq with exchanges
 - **No Direct Service HTTP**: Services never call each other via HTTP
 
+### Testing Policy
+
+Currently, we **DO NOT** implement unit tests, integration tests, or e2e tests in this project. Please skip any testing-related suggestions or implementations.
+
 ## Project Structure
 
 ```text
@@ -456,3 +460,4 @@ This platform prioritizes:
 ---
 
 **For Claude Code**: This file provides essential context. Always use Nx MCP tools for current documentation and avoid assumptions based on knowledge cutoff dates. Refer to detailed documentation in `docs/` directory for complete implementation guidance.
+- Always run `npx nx affected -t lint typecheck build --skip-nx-cache` after changes.

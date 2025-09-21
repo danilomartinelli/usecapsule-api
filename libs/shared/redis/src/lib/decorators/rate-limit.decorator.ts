@@ -202,6 +202,7 @@ export const RATE_LIMITED_METADATA_KEY = Symbol('rate_limited_metadata');
 export function RateLimited(
   scenarios: RateLimitScenarios | RateLimitOptions,
 ): ClassDecorator {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (target: any) => {
     // If it's a single RateLimitOptions object, treat it as default
     const finalScenarios: RateLimitScenarios =

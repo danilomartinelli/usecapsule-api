@@ -304,6 +304,7 @@ export const CACHEABLE_METADATA_KEY = Symbol('cacheable_metadata');
  * Class decorator that applies default caching configuration to all methods.
  */
 export function Cacheable(options: CacheableOptions = {}): ClassDecorator {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (target: any) => {
     const defaultOptions: Required<CacheableOptions> = {
       prefix: target.name.toLowerCase(),

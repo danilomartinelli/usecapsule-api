@@ -21,10 +21,19 @@
       "path": "../../libs/shared/ddd/tsconfig.lib.json"
     },
     {
+      "path": "../../libs/configs/redis/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/configs/parameters/tsconfig.lib.json"
     },
     {
+      "path": "../../libs/shared/exceptions/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/shared/types/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/shared/redis/tsconfig.lib.json"
     },
     {
       "path": "../../libs/configs/rabbitmq/tsconfig.lib.json"

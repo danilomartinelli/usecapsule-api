@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD, APP_FILTER } from '@nestjs/core';
+import { GlobalExceptionFilter, UsecapsuleExceptionsModule } from '@usecapsule/exceptions';
 import {
   authServiceFactory,
   authServiceSchema,
   ParametersModule,
 } from '@usecapsule/parameters';
 import { RabbitMQModule } from '@usecapsule/rabbitmq';
+import { RedisModule } from '@usecapsule/redis';
+import { RateLimitGuard } from '@usecapsule/shared-redis';
 
 import { AuthModule } from '../modules/auth/auth.module';
 import { RolesModule } from '../modules/roles/roles.module';
@@ -57,12 +61,33 @@ import { AppService } from './app.service';
         'amqp://usecapsule:usecapsule_dev_password@localhost:7010',
       serviceName: 'auth-service',
     }),
+    // Configure Redis for rate limiting and caching
+    RedisModule.forRoot({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      password: process.env.REDIS_PASSWORD,
+      database: parseInt(process.env.REDIS_DB || '0', 10),
+    }),
+    // Shared modules
+    UsecapsuleExceptionsModule,
     // Auth, Roles and User Management modules
     AuthModule,
     RolesModule,
     UserManagementModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Global exception filter
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
+    },
+    // Global rate limiting guard
+    {
+      provide: APP_GUARD,
+      useClass: RateLimitGuard,
+    },
+  ],
 })
 export class AppModule {}

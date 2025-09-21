@@ -1,10 +1,15 @@
-import { Injectable, Logger, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import {
+  EmailAlreadyExistsException,
+  InvalidCredentialsException,
+} from '@usecapsule/exceptions';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { PasswordService } from '../../auth/services/password.service';
 import type { IUserRepository } from '../database/user.repository.interface';
 import { User } from '../domain/entities/user.entity';
 import type { RegisterUserDto, RegisterUserResponseDto } from '../dto/register-user.dto';
+import { registerUserSchema } from '../dto/register-user.schema';
 
 /**
  * Command handler for user registration.
@@ -18,7 +23,7 @@ export class RegisterUserCommand {
   private readonly logger = new Logger(RegisterUserCommand.name);
 
   constructor(
-    private readonly userRepository: IUserRepository,
+    @Inject('IUserRepository') private readonly userRepository: IUserRepository,
     private readonly passwordService: PasswordService,
   ) {}
 
@@ -34,39 +39,39 @@ export class RegisterUserCommand {
     this.logger.log(`Starting user registration for email: ${dto.email}`);
 
     try {
-      // Validate input data
-      await this.validateRegistrationData(dto);
+      // Validate input data using Zod schema
+      const validatedData = registerUserSchema.parse(dto);
 
       // Check if user already exists
-      const existingUser = await this.userRepository.findByEmail(dto.email);
+      const existingUser = await this.userRepository.findByEmail(validatedData.email);
       if (existingUser) {
-        this.logger.warn(`Registration attempt with existing email: ${dto.email}`);
-        throw new ConflictException('User with this email already exists');
+        this.logger.warn(`Registration attempt with existing email: ${validatedData.email}`);
+        throw new EmailAlreadyExistsException(validatedData.email);
       }
 
-      // Validate password strength
-      const passwordValidation = this.passwordService.validatePasswordStrength(dto.password);
+      // Validate password strength (redundant with schema, but good for additional security)
+      const passwordValidation = this.passwordService.validatePasswordStrength(validatedData.password);
       if (!passwordValidation.isValid) {
-        throw new BadRequestException({
-          message: 'Password does not meet strength requirements',
+        throw new InvalidCredentialsException({
+          reason: 'Password does not meet strength requirements',
           errors: passwordValidation.errors,
         });
       }
 
       // Hash the password
-      const passwordHash = await this.passwordService.hashPassword(dto.password);
+      const passwordHash = await this.passwordService.hashPassword(validatedData.password);
 
       // Create user entity
       const userId = uuidv4();
       const user = User.create(
         userId,
-        dto.email,
+        validatedData.email,
         passwordHash,
-        dto.firstName,
-        dto.lastName,
-        dto.profilePictureUrl,
-        dto.timezone || 'UTC',
-        dto.locale || 'en'
+        validatedData.firstName,
+        validatedData.lastName,
+        validatedData.profilePictureUrl,
+        validatedData.timezone || 'UTC',
+        validatedData.locale || 'en'
       );
 
       // Save user to database
@@ -98,85 +103,25 @@ export class RegisterUserCommand {
       this.logger.error(`User registration failed for ${dto.email}:`, error);
 
       // Re-throw known exceptions
-      if (error instanceof BadRequestException || error instanceof ConflictException) {
+      if (error instanceof EmailAlreadyExistsException || error instanceof InvalidCredentialsException) {
         throw error;
       }
 
-      // Wrap unknown errors
-      throw new BadRequestException('User registration failed');
-    }
-  }
-
-  /**
-   * Validates the registration data.
-   *
-   * @param dto - Registration data to validate
-   * @throws BadRequestException for validation errors
-   */
-  private async validateRegistrationData(dto: RegisterUserDto): Promise<void> {
-    const errors: string[] = [];
-
-    // Required field validation
-    if (!dto.email || dto.email.trim().length === 0) {
-      errors.push('Email is required');
-    }
-
-    if (!dto.password || dto.password.length === 0) {
-      errors.push('Password is required');
-    }
-
-    if (!dto.firstName || dto.firstName.trim().length === 0) {
-      errors.push('First name is required');
-    }
-
-    if (!dto.lastName || dto.lastName.trim().length === 0) {
-      errors.push('Last name is required');
-    }
-
-    // Email format validation
-    if (dto.email && !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(dto.email)) {
-      errors.push('Invalid email format');
-    }
-
-    // Length validation
-    if (dto.email && dto.email.length > 255) {
-      errors.push('Email address is too long (max 255 characters)');
-    }
-
-    if (dto.firstName && dto.firstName.length > 100) {
-      errors.push('First name is too long (max 100 characters)');
-    }
-
-    if (dto.lastName && dto.lastName.length > 100) {
-      errors.push('Last name is too long (max 100 characters)');
-    }
-
-    // Profile picture URL validation
-    if (dto.profilePictureUrl) {
-      try {
-        new URL(dto.profilePictureUrl);
-      } catch {
-        errors.push('Invalid profile picture URL format');
+      // Handle Zod validation errors
+      if (error instanceof Error && error.name === 'ZodError') {
+        throw new InvalidCredentialsException({
+          reason: 'Invalid input data',
+          validationErrors: error.message,
+        });
       }
-    }
 
-    // Timezone validation (basic check)
-    if (dto.timezone && dto.timezone.length > 50) {
-      errors.push('Timezone is too long (max 50 characters)');
-    }
-
-    // Locale validation (basic check)
-    if (dto.locale && !/^[a-z]{2}(-[A-Z]{2})?$/.test(dto.locale)) {
-      errors.push('Invalid locale format (expected: en, pt-BR, etc.)');
-    }
-
-    if (errors.length > 0) {
-      throw new BadRequestException({
-        message: 'Validation failed',
-        errors,
+      // Wrap unknown errors
+      throw new InvalidCredentialsException({
+        reason: 'User registration failed due to internal error',
       });
     }
   }
+
 
   // TEMP: Email verification integration point
   // This method will be implemented when mailer-service is ready
