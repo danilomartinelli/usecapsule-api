@@ -14,7 +14,8 @@
         "tsConfig": "libs/shared/utils/tsconfig.lib.json",
         "packageJson": "libs/shared/utils/package.json",
         "main": "libs/shared/utils/src/index.ts",
-        "assets": ["libs/shared/utils/*.md"]
+        "assets": ["libs/shared/utils/*.md"],
+        "rootDir": "libs/shared/utils/src"
       }
     }
   }

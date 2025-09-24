@@ -144,6 +144,16 @@ export const authServiceSchema = z
       .describe('JWT access token expiration time'),
 
     /**
+     * JWT refresh token secret key.
+     * Used for signing and verifying refresh tokens. Must be different from JWT_SECRET.
+     * Minimum 64 characters required for enhanced security.
+     */
+    JWT_REFRESH_SECRET: z
+      .string()
+      .min(64)
+      .describe('JWT refresh token secret key for signing and validation'),
+
+    /**
      * JWT refresh token expiration time.
      * Defines how long refresh tokens remain valid.
      * Longer expiration times provide better user experience.
@@ -256,6 +266,48 @@ export const authServiceSchema = z
       .max(15)
       .default(0)
       .describe('Redis database number to use'),
+
+    /**
+     * Rate limit for authentication endpoints (login, register) per minute.
+     * Prevents brute force attacks on authentication endpoints.
+     *
+     * @default 5
+     */
+    AUTH_RATE_LIMIT_PER_MINUTE: z
+      .number()
+      .int()
+      .positive()
+      .max(1000)
+      .default(5)
+      .describe('Rate limit for auth endpoints per minute'),
+
+    /**
+     * Rate limit block duration in seconds for auth endpoints.
+     * How long to block after rate limit is exceeded.
+     *
+     * @default 300 (5 minutes)
+     */
+    AUTH_RATE_LIMIT_BLOCK_DURATION: z
+      .number()
+      .int()
+      .positive()
+      .max(86400)
+      .default(300)
+      .describe('Rate limit block duration in seconds'),
+
+    /**
+     * General API rate limit per minute for authenticated users.
+     * Prevents API abuse from authenticated users.
+     *
+     * @default 100
+     */
+    API_RATE_LIMIT_PER_MINUTE: z
+      .number()
+      .int()
+      .positive()
+      .max(10000)
+      .default(100)
+      .describe('General API rate limit per minute for authenticated users'),
   })
   // Merge with timeout configuration schema
   .merge(timeoutConfigSchema)

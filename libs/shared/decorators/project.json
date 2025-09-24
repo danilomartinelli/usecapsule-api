@@ -13,7 +13,8 @@
         "tsConfig": "libs/shared/decorators/tsconfig.lib.json",
         "packageJson": "libs/shared/decorators/package.json",
         "main": "libs/shared/decorators/src/index.ts",
-        "assets": ["libs/shared/decorators/*.md"]
+        "assets": ["libs/shared/decorators/*.md"],
+        "rootDir": "libs/shared/decorators/src"
       }
     }
   }

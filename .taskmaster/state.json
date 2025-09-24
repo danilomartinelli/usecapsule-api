@@ -1,6 +1,8 @@
 {
-  "currentTag": "master",
-  "lastSwitched": "2025-09-12T14:12:02.105Z",
-  "branchTagMapping": {},
+  "currentTag": "feature-auth-core-implementation",
+  "lastSwitched": "2025-09-21T00:04:00.334Z",
+  "branchTagMapping": {
+    "feature/auth-core-implementation": "feature-auth-core-implementation"
+  },
   "migrationNoticeShown": true
 }

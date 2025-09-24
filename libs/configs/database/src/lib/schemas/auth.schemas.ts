@@ -6,15 +6,15 @@ import { BaseEntitySchema, SoftDeletableEntitySchema } from './common.schemas';
  * User entity schema for authentication service
  */
 export const UserSchema = SoftDeletableEntitySchema.extend({
-  email: z.string().email().max(255),
+  email: z.string().max(255).email(),
   passwordHash: z.string().min(1),
   firstName: z.string().min(1).max(100),
   lastName: z.string().min(1).max(100),
   emailVerified: z.boolean().default(false),
-  emailVerifiedAt: z.coerce.date().nullable(),
-  lastLoginAt: z.coerce.date().nullable(),
+  emailVerifiedAt: z.date().nullable(),
+  lastLoginAt: z.date().nullable(),
   failedLoginAttempts: z.number().int().nonnegative().default(0),
-  lockedAt: z.coerce.date().nullable(),
+  lockedAt: z.date().nullable(),
   isActive: z.boolean().default(true),
   profilePictureUrl: z.string().url().nullable(),
   timezone: z.string().default('UTC'),
@@ -28,9 +28,9 @@ export const UserSchema = SoftDeletableEntitySchema.extend({
 export const UserRoleSchema = BaseEntitySchema.extend({
   userId: z.string().uuid(),
   role: z.enum(['USER', 'ADMIN', 'SUPERADMIN']),
-  grantedAt: z.coerce.date(),
+  grantedAt: z.date(),
   grantedBy: z.string().uuid(),
-  expiresAt: z.coerce.date().nullable(),
+  expiresAt: z.date().nullable(),
 });
 
 /**
@@ -43,9 +43,9 @@ export const AuthSessionSchema = BaseEntitySchema.extend({
   deviceName: z.string().nullable(),
   ipAddress: z.string(),
   userAgent: z.string(),
-  expiresAt: z.coerce.date(),
+  expiresAt: z.date(),
   isActive: z.boolean().default(true),
-  lastActivityAt: z.coerce.date(),
+  lastActivityAt: z.date(),
 });
 
 /**
@@ -55,8 +55,8 @@ export const EmailVerificationTokenSchema = BaseEntitySchema.extend({
   userId: z.string().uuid(),
   token: z.string().min(1),
   email: z.string().email(),
-  expiresAt: z.coerce.date(),
-  usedAt: z.coerce.date().nullable(),
+  expiresAt: z.date(),
+  usedAt: z.date().nullable(),
 });
 
 /**
@@ -65,8 +65,8 @@ export const EmailVerificationTokenSchema = BaseEntitySchema.extend({
 export const PasswordResetTokenSchema = BaseEntitySchema.extend({
   userId: z.string().uuid(),
   token: z.string().min(1),
-  expiresAt: z.coerce.date(),
-  usedAt: z.coerce.date().nullable(),
+  expiresAt: z.date(),
+  usedAt: z.date().nullable(),
   ipAddress: z.string(),
 });
 
@@ -78,8 +78,8 @@ export const TwoFactorAuthSchema = BaseEntitySchema.extend({
   secret: z.string().min(1),
   backupCodes: z.array(z.string()),
   isVerified: z.boolean().default(false),
-  verifiedAt: z.coerce.date().nullable(),
-  lastUsedAt: z.coerce.date().nullable(),
+  verifiedAt: z.date().nullable(),
+  lastUsedAt: z.date().nullable(),
 });
 
 /**
@@ -92,7 +92,7 @@ export const OAuthProviderSchema = BaseEntitySchema.extend({
   providerEmail: z.string().email(),
   providerData: z.record(z.string(), z.unknown()),
   isLinked: z.boolean().default(true),
-  linkedAt: z.coerce.date(),
+  linkedAt: z.date(),
 });
 
 /**
@@ -103,8 +103,8 @@ export const ApiKeySchema = SoftDeletableEntitySchema.extend({
   name: z.string().min(1).max(100),
   keyHash: z.string().min(1),
   permissions: z.array(z.string()),
-  expiresAt: z.coerce.date().nullable(),
-  lastUsedAt: z.coerce.date().nullable(),
+  expiresAt: z.date().nullable(),
+  lastUsedAt: z.date().nullable(),
   isActive: z.boolean().default(true),
 });
 

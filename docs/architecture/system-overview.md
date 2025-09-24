@@ -401,7 +401,7 @@ class UserRegistrationSaga {
 - **Primary Database**: PostgreSQL 15 (ACID transactions)
 - **Time-Series Database**: TimescaleDB (monitoring service)
 - **Schema Management**: Flyway migrations
-- **ORM**: TypeORM (planned) or Prisma (planned)
+- **ORM**: Slonik
 
 ### Infrastructure & Operations
 

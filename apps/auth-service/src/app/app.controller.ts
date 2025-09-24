@@ -1,7 +1,11 @@
 import { Controller } from '@nestjs/common';
 import { EXCHANGES, AUTH_ROUTING_KEYS } from '@usecapsule/messaging';
-import { RabbitRPC } from '@usecapsule/rabbitmq';
+import { RabbitRPC, RabbitPayload } from '@usecapsule/rabbitmq';
+import { AuthRateLimit } from '@usecapsule/shared-redis';
 import type { HealthCheckResponse } from '@usecapsule/types';
+
+import type { RegisterUserCommand } from '../modules/user-management/commands/register-user.command';
+import type { RegisterUserDto, RegisterUserResponseDto } from '../modules/user-management/dto/register-user.dto';
 
 import type { AppService } from './app.service';
 
@@ -14,7 +18,10 @@ import type { AppService } from './app.service';
  */
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly registerUserCommand: RegisterUserCommand,
+  ) {}
 
   /**
    * Health check RPC handler for RabbitMQ monitoring.
@@ -32,5 +39,37 @@ export class AppController {
   })
   healthCheck(): HealthCheckResponse {
     return this.appService.getHealthStatus();
+  }
+
+  /**
+   * User registration RPC handler.
+   *
+   * This handler processes user registration requests from the API Gateway
+   * via RabbitMQ. It handles validation, user creation, and returns
+   * registration confirmation. Email verification is handled separately
+   * through the mailer service integration.
+   *
+   * @param dto - User registration data from the request
+   * @returns Promise resolving to registration response with user data
+   */
+  @AuthRateLimit({
+    limit: 5,
+    windowSize: 300, // 5 minutes
+    blockDuration: 900, // 15 minutes
+    keyGenerator: (context: { body?: { email?: string }; ip?: string }) => {
+      const email = context.body?.email as string;
+      const ip = context.ip || 'unknown';
+      return email ? `auth:register:${email}` : `auth:register:${ip}`;
+    },
+    message: 'Too many registration attempts. Please try again later.',
+  })
+  @RabbitRPC({
+    exchange: EXCHANGES.COMMANDS,
+    routingKey: AUTH_ROUTING_KEYS.REGISTER,
+  })
+  async registerUser(
+    @RabbitPayload() dto: RegisterUserDto,
+  ): Promise<RegisterUserResponseDto> {
+    return this.registerUserCommand.execute(dto);
   }
 }

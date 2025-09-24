@@ -13,7 +13,18 @@
         "tsConfig": "libs/shared/redis/tsconfig.lib.json",
         "packageJson": "libs/shared/redis/package.json",
         "main": "libs/shared/redis/src/index.ts",
-        "assets": ["libs/shared/redis/*.md"]
+        "assets": ["libs/shared/redis/*.md"],
+        "rootDir": "libs/shared/redis/src"
+      }
+    },
+    "copy-declarations": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "mkdir -p libs/shared/redis/dist",
+          "cp -r dist/libs/shared/redis/* libs/shared/redis/dist/ 2>/dev/null || true"
+        ],
+        "parallel": false
       }
     }
   }

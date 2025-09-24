@@ -1,10 +1,29 @@
-# CLAUDE.md
+# CLAUDE.md - Capsule Platform Development Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> **Essential context for Claude Code when working with the Capsule Platform**
 
-## Overview
+This is the primary guidance file for Claude Code development on the Capsule Platform - a cloud-native application deployment platform built with Domain-Driven Design (DDD) and Microservices Architecture using Nx 21.5.1, NestJS, and RabbitMQ messaging.
 
-This is a Capsule Platform monorepo built with Nx 21.5.1 and npm. It implements Domain-Driven Design (DDD) with Hexagonal Architecture using NestJS. The architecture employs an API Gateway pattern where all external HTTP traffic flows through a single gateway, which then communicates with internal microservices via RabbitMQ message queues.
+## 🚀 Quick Start for Claude Code
+
+### Essential First Steps
+
+1. Use `nx_workspace` tool to understand project structure
+2. Use `nx_docs` tool for current Nx best practices (knowledge cutoff protection)
+3. Check `nx_current_running_tasks_details` before starting new builds
+4. Always run `npm run lint` and `npm run typecheck <service>` after changes
+
+### Core Architecture Rules
+
+- **HTTP Entry**: Only API Gateway accepts HTTP requests (port 3000)
+- **Service Communication**: All microservices communicate via RabbitMQ only
+- **Database Isolation**: Each service owns its database completely
+- **Exchange-Based Routing**: Use @golevelup/nestjs-rabbitmq with exchanges
+- **No Direct Service HTTP**: Services never call each other via HTTP
+
+### Testing Policy
+
+Currently, we **DO NOT** implement unit tests, integration tests, or e2e tests in this project. Please skip any testing-related suggestions or implementations.
 
 ## Project Structure
 
@@ -17,726 +36,428 @@ apps/
 └── monitor-service/      # Metrics and observability
 ```
 
-## Common Development Commands
+## 🛠️ Development Commands (Claude Code Optimized)
 
-### Nx Workspace Commands
+### Essential Nx Commands for Claude Code
 
 ```bash
-# View workspace structure and dependencies
-nx graph
+# ALWAYS use these Nx tools first
+nx_workspace                 # Understand project structure
+nx_docs "search term"        # Get current Nx documentation
+nx_current_running_tasks_details  # Check running tasks before building
+nx_project_details <project>  # Get full project configuration
 
-# Build specific app
-nx build api-gateway
-nx build auth-service
-
-# Run in development mode
-nx serve api-gateway
-nx serve auth-service --watch
-
-# Lint code
-nx lint auth-service
-nx lint --all
-
-# Type check
-nx typecheck auth-service
+# Nx Workspace Operations
+nx graph                     # View dependencies
+nx build <project>           # Build specific project
+nx serve <project> --watch   # Development mode
+nx lint <project>            # Lint specific project
+nx typecheck <project>       # Type checking
 ```
 
-### Development Workflow
+### Required Development Workflow
 
 ```bash
-# Install dependencies
-npm install
+# 1. Start Infrastructure (one-time setup)
+npm run infrastructure:up    # Start databases, RabbitMQ
 
-# Start development environment
-npm run dev                    # Start all services
-npm run serve:gateway         # Start API Gateway only
+# 2. Database Setup (after infrastructure)
+npm run db:migrate:all       # Run all migrations
 
-# Code Quality
+# 3. Start Development
+npm run dev                  # All services
+npm run serve:gateway        # API Gateway only
+
+# 4. Code Quality (MANDATORY after changes)
 npm run lint                 # Lint all projects
 npm run lint:affected        # Lint only changed code
+npm run typecheck <service>  # Type check specific service
 npm run format              # Format with Prettier
-
 ```
 
-### Infrastructure Commands
+### Infrastructure Management
 
 ```bash
-# Docker infrastructure
+# Docker Control
 npm run infrastructure:up    # Start databases, RabbitMQ
 npm run infrastructure:down  # Stop all containers
-npm run infrastructure:reset # Reset all data
+npm run infrastructure:reset # Reset all data (DESTRUCTIVE)
 
-# Database management
+# Database Operations
 npm run db:migrate:all       # Run all migrations
-npm run db:migrate:auth      # Run auth service migrations
+npm run db:migrate:auth      # Service-specific migrations
 npm run db:seed:all         # Seed test data
-npm run db:reset:all        # Drop and recreate databases
+npm run db:reset:all        # Drop and recreate (DESTRUCTIVE)
 ```
 
-## Architecture Principles
+## 🏗️ Architecture Principles (Critical for Claude Code)
 
-### 1. Microservices with Message Queues
+### 1. Microservices Communication Rules
 
-- Services communicate only via RabbitMQ, never direct HTTP
-- API Gateway is the single HTTP entry point
-- Each service has its own database
+**NEVER VIOLATE THESE:**
 
-### 2. Domain-Driven Design
+- ✅ API Gateway → RabbitMQ → Microservices (ONLY pattern allowed)
+- ❌ Service-to-Service HTTP calls (FORBIDDEN)
+- ✅ Each service has dedicated database
+- ✅ Use @golevelup/nestjs-rabbitmq for all messaging
 
-- Each app represents a bounded context
-- Business logic stays in domain entities
-- CQRS for command/query separation
+### 2. Domain-Driven Design Implementation
 
-### 3. Development Guidelines
+- **Bounded Contexts**: Each app/ directory is a complete domain
+- **Entity-Centric Logic**: Business rules live in domain entities
+- **CQRS Pattern**: Separate command/query operations
+- **Event-Driven**: Domain events via RabbitMQ capsule.events exchange
 
-- Use Nx generators for consistent code structure
-- Follow NestJS conventions and decorators
-- Write tests at unit, integration, and e2e levels
-- Keep services focused on single business capabilities
+### 3. Claude Code Development Guidelines
 
-## Nx Development Guidelines
+- **Always Check First**: Use nx_workspace before making assumptions
+- **Use Nx Generators**: Generate consistent code with nx_run_generator
+- **Follow NestJS Patterns**: @RabbitRPC and @RabbitSubscribe decorators
+- **Service Focus**: Single business capability per service
+- **Code Quality**: Run lint/typecheck after ALL changes
 
-### Working with Nx MCP Server
+## 📋 Nx MCP Integration (MANDATORY USAGE)
 
-When using Claude Code with this Nx workspace:
+### Critical: Always Use Nx Tools First
 
-1. **Understanding the workspace**: Use `nx_workspace` tool to gain understanding of workspace architecture
-2. **Configuration questions**: Use `nx_docs` tool for up-to-date Nx configuration best practices instead of assumptions
-3. **Project graph errors**: Use `nx_workspace` tool to get any errors
-4. **Visualizing dependencies**: Use `nx_visualize_graph` tool to demonstrate task dependencies
+**Before making ANY assumptions about Nx configuration:**
 
-### Generation Workflow
+```bash
+# 1. ALWAYS start with workspace understanding
+nx_workspace                    # Get complete workspace overview
+nx_project_details <project>    # Deep dive on specific project
 
-When generating new code:
+# 2. Get current documentation (avoids outdated knowledge)
+nx_docs "your search term"      # Current Nx best practices
 
-1. Learn about workspace using `nx_workspace` and `nx_project_details` tools
-2. Get available generators with `nx_generators` tool
-3. Check `nx_available_plugins` for additional plugins if needed
-4. Get generator details with `nx_generator_schema` tool
-5. Use `nx_docs` for generator-specific documentation
-6. Open generator UI with `nx_run_generator` tool
-7. Read results with generator log tools
+# 3. Check running tasks before starting new ones
+nx_current_running_tasks_details # Avoid conflicts with running builds
+```
 
-### Task Management
+### Code Generation Workflow (Use Tools)
 
-For running tests, builds, lint, and other tasks:
+**ALWAYS use these tools for code generation:**
 
-1. Check current tasks with `nx_current_running_tasks_details`
-2. Get task output with `nx_current_running_task_output`
-3. Use `nx run <taskId>` to rerun tasks in proper Nx context
-4. Don't rerun continuous tasks that are already running
+```bash
+# 1. Discover available generators
+nx_generators                   # List all available generators
+nx_available_plugins           # Check for additional plugins
 
-### CI Pipeline Debugging
+# 2. Get generator specifications
+nx_generator_schema <name>      # Get detailed generator options
+nx_docs "<generator-name>"      # Get current documentation
 
-For CI pipeline errors:
+# 3. Generate code with UI (PREFERRED)
+nx_run_generator                # Opens interactive generator UI
+```
 
-1. Get CIPE details with `nx_cloud_cipe_details`
-2. Get specific task logs with `nx_cloud_fix_cipe_failure`
-3. Fix identified problems and rerun the failing task
+### Task Management (Prevent Conflicts)
 
-## Quick Architecture Reference
+```bash
+# Before building/testing
+nx_current_running_tasks_details # Check what's already running
+nx_current_running_task_output <id> # Monitor specific task output
+
+# For CI/CD debugging
+nx_cloud_cipe_details          # Get CI pipeline execution details
+nx_cloud_fix_cipe_failure      # Debug specific failures
+```
+
+### Workspace Visualization
+
+```bash
+nx_visualize_graph              # Visual dependency graph
+nx_workspace --filter="tag:api" # Filtered workspace view
+```
+
+## 🌐 System Architecture (Claude Code Reference)
+
+### Communication Flow (NEVER DEVIATE)
 
 ```text
-External Clients → API Gateway (HTTP) → RabbitMQ → Microservices
-                      ↓
-              - auth-service
-              - billing-service
-              - deploy-service
-              - monitor-service
+External HTTP → API Gateway (3000) → RabbitMQ Exchanges → Service Queues
+                     ↓
+            capsule.commands (Direct) → auth.*, billing.*, deploy.*, monitor.*
+            capsule.events (Topic)   → user.created, payment.processed, etc.
+            dlx (Dead Letter)        → Failed message recovery
 ```
 
-### Key Architecture Points
+### Service Endpoints & Ports
 
-- **API Gateway**: Single HTTP entry point (port 3000)
-- **Microservices**: Communicate only via RabbitMQ, no direct HTTP
-- **Database per Service**: Each service owns its data completely
-- **Message Patterns**: Request/Response (RPC) and Event-driven (Pub/Sub)
-- **Domain Focus**: Each service represents a business capability
+- **API Gateway**: <http://localhost:3000> (HTTP entry point)
+- **API Docs**: <http://localhost:3000/api/documentation>
+- **Health Check**: <http://localhost:3000/health>
+- **RabbitMQ Management**: <http://localhost:7020> (usecapsule/usecapsule_dev_password)
+- **RabbitMQ AMQP**: amqp://usecapsule:usecapsule_dev_password@localhost:7010
 
-### Service Structure Pattern
+### Microservices Structure (DDD Pattern)
 
 ```text
-apps/[service-name]/
-├── src/
-│   ├── main.ts              # RabbitMQ microservice bootstrap
-│   ├── app.module.ts        # Service configuration
-│   └── modules/             # Domain modules (aggregates)
-│       └── [aggregate]/
-│           ├── commands/    # Write operations
-│           ├── queries/     # Read operations
-│           ├── domain/      # Business entities
-│           ├── database/    # Infrastructure adapters
-│           └── message-handlers/ # RabbitMQ handlers
+apps/[service-name]/src/
+├── main.ts                  # RabbitMQ microservice (NOT HTTP)
+├── app.module.ts           # @golevelup/nestjs-rabbitmq config
+└── modules/[domain]/       # Bounded context implementation
+    ├── commands/           # Write operations (@RabbitRPC)
+    ├── queries/            # Read operations (@RabbitRPC)
+    ├── domain/             # Business entities (pure TypeScript)
+    ├── database/           # Infrastructure adapters (Slonik)
+    └── message-handlers/   # RabbitMQ handlers (@RabbitSubscribe)
 ```
 
-## RabbitMQ Architecture
+## 📨 RabbitMQ Implementation (Claude Code Essentials)
 
-### Message Queue Architecture Overview
-
-The platform uses RabbitMQ as the central nervous system for all inter-service communication. This exchange-first architecture ensures decoupled, reliable messaging between microservices:
-
-```text
-API Gateway → capsule.commands → [auth.*|billing.*|deploy.*|monitor.*] → Service Queues
-Services → capsule.events → [*.created|*.updated|*.deleted] → Event Subscribers
-Health Checks → capsule.commands → [service.health] → Service Health Responses
-Failed Messages → dlx (Dead Letter Exchange) → dlq → Manual Recovery
-```
-
-### Exchange-Based Routing Architecture
-
-The system uses @golevelup/nestjs-rabbitmq for sophisticated exchange-based routing with declarative configuration:
-
-#### Core Exchanges
-
-1. **`capsule.commands`** (Direct Exchange)
-   - **Purpose**: RPC-style service commands with routing keys
-   - **Type**: Direct (exact routing key matching)
-   - **Routing**: `{service}.{action}` patterns
-   - **Examples**: `auth.register`, `billing.charge`, `deploy.create`
-
-2. **`capsule.events`** (Topic Exchange)
-   - **Purpose**: Domain events for pub/sub patterns
-   - **Type**: Topic (wildcard routing key matching)
-   - **Routing**: `{context}.{event}` patterns
-   - **Examples**: `user.created`, `payment.processed`, `deployment.completed`
-
-3. **`dlx`** (Dead Letter Exchange)
-   - **Purpose**: Failed message collection and manual recovery
-   - **Type**: Fanout (broadcasts to all bound queues)
-   - **Auto-configured**: All queues have DLQ policy applied
-
-#### @golevelup/nestjs-rabbitmq Architecture
-
-The platform uses the @golevelup/nestjs-rabbitmq library for unified, exchange-based messaging:
-
-**Key Features:**
-
-- **Declarative Configuration**: Exchanges and queues created automatically via code
-- **Type-safe Decorators**: `@RabbitRPC` and `@RabbitSubscribe` for message handlers
-- **AmqpConnection**: Direct access to AMQP channel for publishing and RPC calls
-- **Built-in Error Handling**: Automatic retries and dead letter queue support
-- **Health Check Integration**: Connection monitoring and health reporting
-
-**Module Configuration:**
+### Exchange Pattern (USE THESE ONLY)
 
 ```typescript
-// API Gateway (HTTP Client)
+// 1. COMMANDS (Direct Exchange) - RPC Pattern
+@RabbitRPC({
+  exchange: 'capsule.commands',
+  routingKey: 'auth.register',  // {service}.{action}
+})
+async registerUser(@RabbitPayload() dto: RegisterUserDto): Promise<User> {
+  return this.authService.register(dto);
+}
+
+// 2. EVENTS (Topic Exchange) - Pub/Sub Pattern
+@RabbitSubscribe({
+  exchange: 'capsule.events',
+  routingKey: 'user.created',   // {entity}.{event}
+})
+async onUserCreated(@RabbitPayload() event: UserCreatedEvent): Promise<void> {
+  await this.billingService.createCustomerProfile(event.userId);
+}
+
+// 3. PUBLISHING EVENTS
+await this.amqpConnection.publish('capsule.events', 'user.created', {
+  userId: user.id,
+  email: user.email,
+  timestamp: new Date().toISOString(),
+});
+```
+
+### Core Exchanges (AUTO-CONFIGURED)
+
+1. **`capsule.commands`** (Direct) - Service commands: `auth.*`, `billing.*`, `deploy.*`
+2. **`capsule.events`** (Topic) - Domain events: `user.created`, `payment.processed`
+3. **`dlx`** (Dead Letter) - Failed message recovery with automatic retry
+
+### Module Configuration Patterns
+
+```typescript
+// API Gateway Configuration (HTTP to RabbitMQ bridge)
 RabbitMQModule.forGateway({
   uri: 'amqp://usecapsule:usecapsule_dev_password@localhost:7010',
 });
 
-// Microservices
+// Microservice Configuration (RabbitMQ only)
 RabbitMQModule.forMicroservice({
   uri: 'amqp://usecapsule:usecapsule_dev_password@localhost:7010',
   serviceName: 'auth-service',
 });
 ```
 
-**Message Handlers:**
+### Required Health Check Pattern
 
 ```typescript
-// RPC Handler (Request/Response)
+// EVERY service MUST implement this exact pattern
 @RabbitRPC({
   exchange: 'capsule.commands',
-  routingKey: 'auth.health',
+  routingKey: 'auth.health',  // Replace 'auth' with service name
 })
 healthCheck(@RabbitPayload() payload?: any): HealthCheckResponse {
   return this.appService.getHealthStatus();
 }
-
-// Event Subscriber (Fire-and-Forget)
-@RabbitSubscribe({
-  exchange: 'capsule.events',
-  routingKey: 'user.created',
-})
-onUserCreated(@RabbitPayload() event: UserCreatedEvent): void {
-  // Handle event
-}
 ```
 
-**Publishing Messages:**
+### Routing Key Conventions (FOLLOW EXACTLY)
 
 ```typescript
-// RPC Request
-const response = await this.amqpConnection.request({
-  exchange: 'capsule.commands',
-  routingKey: 'auth.health',
-  payload: {},
-  timeout: 5000,
-});
+// Service Commands: {service}.{action}
+'auth.register'; // User registration
+'billing.charge'; // Process payment
+'deploy.create'; // Create deployment
+'monitor.alert'; // Send alert
 
-// Event Publishing
-await this.amqpConnection.publish('capsule.events', 'user.created', eventData);
+// Domain Events: {entity}.{event}
+'user.created'; // User was created
+'payment.processed'; // Payment completed
+'deployment.failed'; // Deployment failed
+
+// Health Checks: {service}.health
+'auth.health'; // Auth service health
+'billing.health'; // Billing service health
 ```
 
-#### Service Queue Management
+## 🚨 Troubleshooting (Claude Code Quick Reference)
 
-The @golevelup/nestjs-rabbitmq library automatically creates and manages queues based on message handlers:
-
-- **Dynamic Queue Creation**: Queues are created automatically when services register @RabbitRPC handlers
-- **Direct Reply-To**: RPC responses use AMQP's Direct Reply-To feature for efficient request/response patterns
-- **Exchange-based Routing**: All messages route through exchanges rather than direct queue bindings
-- **Auto-reconnection**: Built-in connection recovery and health monitoring
-
-#### Exchange Bindings and Routing
-
-```text
-capsule.commands Exchange Bindings:
-├── auth.*     → auth_queue     (auth.register, auth.login, auth.health)
-├── billing.*  → billing_queue  (billing.charge, billing.cancel, billing.health)
-├── deploy.*   → deploy_queue   (deploy.create, deploy.status, deploy.health)
-└── monitor.*  → monitor_queue  (monitor.metrics, monitor.alert, monitor.health)
-
-dlx Exchange Bindings:
-└── "" (empty) → dlq           (all failed messages)
-```
-
-### Message Patterns and Usage
-
-#### 1. RPC Commands (Request/Response)
-
-Used for operations requiring immediate responses:
-
-```typescript
-// Service Handler (e.g., auth-service)
-@Controller()
-export class AuthController {
-  @MessagePattern('auth.register')
-  async registerUser(@Payload() dto: RegisterUserDto): Promise<User> {
-    return this.authService.register(dto);
-  }
-
-  @MessagePattern('health.check')
-  healthCheck(): HealthCheckResponse {
-    return this.appService.getHealthStatus();
-  }
-}
-
-// API Gateway Client
-export class AuthGatewayService {
-  async registerUser(userData: RegisterUserDto): Promise<User> {
-    return this.rabbitMQService.send('auth.register', userData);
-  }
-
-  async checkAuthHealth(): Promise<HealthCheckResponse> {
-    return this.rabbitMQService.sendHealthCheck('auth.health');
-  }
-}
-```
-
-#### 2. Event Publishing (Fire-and-Forget)
-
-Used for domain events that multiple services may consume:
-
-```typescript
-// Event Publisher
-@Injectable()
-export class UserEventPublisher {
-  async publishUserCreated(user: User): Promise<void> {
-    this.rabbitMQService.emit('user.created', {
-      userId: user.id,
-      email: user.email,
-      timestamp: new Date().toISOString(),
-    });
-  }
-}
-
-// Event Subscriber (in billing-service)
-@Controller()
-export class UserEventHandler {
-  @EventPattern('user.created')
-  async onUserCreated(@Payload() event: UserCreatedEvent): Promise<void> {
-    await this.billingService.createCustomerProfile(event.userId);
-  }
-}
-```
-
-#### 3. Health Check Pattern
-
-Specialized health checking with routing key targeting:
-
-```typescript
-// Health Check Implementation
-export class RabbitMQService {
-  async sendHealthCheck(routingKey: string): Promise<HealthCheckResponse> {
-    // Routes to specific service queue via exchange binding
-    return this.client
-      .send('health.check', { routingKey })
-      .pipe(
-        timeout(5000),
-        retry(1),
-        catchError(() =>
-          of({
-            status: HealthStatus.UNHEALTHY,
-            service: routingKey.split('.')[0],
-            timestamp: new Date().toISOString(),
-          }),
-        ),
-      )
-      .toPromise();
-  }
-}
-```
-
-### Message Routing and Delivery
-
-#### Routing Key Conventions
-
-1. **Service Commands**: `{service}.{action}`
-   - `auth.register`, `auth.login`, `auth.logout`
-   - `billing.charge`, `billing.refund`, `billing.subscribe`
-   - `deploy.create`, `deploy.scale`, `deploy.delete`
-   - `monitor.track`, `monitor.alert`, `monitor.report`
-
-2. **Domain Events**: `{entity}.{event}`
-   - `user.created`, `user.updated`, `user.deleted`
-   - `payment.processed`, `payment.failed`, `payment.refunded`
-   - `deployment.started`, `deployment.completed`, `deployment.failed`
-
-3. **Health Checks**: `{service}.health`
-   - `auth.health`, `billing.health`, `deploy.health`, `monitor.health`
-
-#### Message Processing Flow
-
-```text
-1. API Gateway receives HTTP request
-2. Gateway validates and transforms request
-3. Gateway publishes to capsule.commands with routing key
-4. Exchange routes to appropriate service queue
-5. Service processes message and responds
-6. Service may emit domain events to capsule.events
-7. Other services consume relevant events
-```
-
-### Advanced Configuration
-
-#### Custom Message Patterns
-
-The platform provides enhanced decorators for complex messaging:
-
-```typescript
-// Priority Messages
-@PriorityMessagePattern('auth.urgent-verification', 255)
-async handleUrgentVerification(@Payload() data: VerificationDto): Promise<void> {
-  // High-priority message processing
-}
-
-// Temporary Messages with Expiration
-@TemporaryMessagePattern('auth.temp-session', 300000) // 5 minutes
-async handleTempSession(@Payload() data: SessionDto): Promise<void> {
-  // Temporary session handling
-}
-
-// Retry Policies
-@DatabaseRetry(3, 1500) // 3 retries with 1.5s base delay
-@RabbitMQMessagePattern('billing.process-payment')
-async processPayment(@Payload() dto: PaymentDto): Promise<PaymentResult> {
-  return this.billingService.processPayment(dto);
-}
-```
-
-#### Service Module Configuration
-
-```typescript
-// Complete service configuration example
-@Module({
-  imports: [
-    RabbitMQModule.forMicroservice({
-      queue: 'auth_queue',
-      connection: {
-        urls: [process.env.RABBITMQ_URL],
-      },
-      globalRetryPolicy: {
-        maxRetries: 3,
-        retryDelay: 1000,
-        exponentialBackoff: true,
-        maxRetryDelay: 30000,
-      },
-      exchanges: [
-        {
-          name: 'capsule.commands',
-          type: 'direct',
-          options: { durable: true },
-        },
-        {
-          name: 'capsule.events',
-          type: 'topic',
-          options: { durable: true },
-        },
-      ],
-    }),
-  ],
-})
-export class AppModule {}
-```
-
-### Dead Letter Queue (DLQ) Handling
-
-Automatic failure recovery system:
-
-#### DLQ Policy Configuration
-
-```json
-{
-  "name": "dlq-policy",
-  "pattern": "^(?!.*\.dlq$).*",
-  "definition": {
-    "dead-letter-exchange": "dlx",
-    "dead-letter-routing-key": "dlq"
-  }
-}
-```
-
-#### Failure Flow Process
-
-1. **Message Processing Fails**: Service handler throws unhandled exception
-2. **Retry Logic**: Automatic retry up to 3 times with exponential backoff
-3. **DLQ Routing**: After retry exhaustion, message sent to `dlx` exchange
-4. **Dead Letter Storage**: Message stored in `dlq` with failure metadata
-5. **Manual Recovery**: Operations team investigates via Management UI
-6. **Reprocessing**: Messages can be manually requeued or fixed and resubmitted
-
-#### DLQ Monitoring
+### RabbitMQ Issues
 
 ```bash
-# Access RabbitMQ Management UI
-open http://localhost:7020
-# Login: usecapsule / usecapsule_dev_password
+# Check RabbitMQ Management UI
+open http://localhost:7020  # usecapsule/usecapsule_dev_password
 
-# Check DLQ messages via CLI
+# Quick RabbitMQ diagnostics
+docker logs rabbitmq_dev
 docker exec rabbitmq_dev rabbitmqctl list_queues name messages
 
-# Inspect specific DLQ message
-# Use Management UI -> Queues -> dlq -> Get Messages
+# Reset RabbitMQ if needed
+docker restart rabbitmq_dev
 ```
 
-## Important Development Notes
-
-### URLs and Endpoints
-
-- **API Gateway**: <http://localhost:3000>
-- **API Documentation**: <http://localhost:3000/api/documentation>
-- **Health Check**: <http://localhost:3000/health>
-- **RabbitMQ Management UI**: <http://localhost:7020> (usecapsule/usecapsule_dev_password)
-- **RabbitMQ AMQP**: `amqp://usecapsule:usecapsule_dev_password@localhost:7010/`
-
-### RabbitMQ Management and Debugging
-
-#### RabbitMQ Management UI Features
-
-Access the management interface at <http://localhost:7020> for:
-
-1. **Queue Monitoring**
-   - Message counts and rates
-   - Consumer information
-   - Queue bindings and routing
-
-2. **Exchange Visualization**
-   - Exchange types and bindings
-   - Message routing topology
-   - Publisher and consumer connections
-
-3. **Dead Letter Queue Inspection**
-   - Failed message details
-   - Error stack traces
-   - Message requeue capabilities
-
-4. **Performance Metrics**
-   - Message throughput
-   - Connection statistics
-   - Node health and memory usage
-
-#### Debugging Message Routing Issues
+### Service Health Debugging
 
 ```bash
-# Check queue status
-docker exec rabbitmq_dev rabbitmqctl list_queues name messages consumers
+# Test API Gateway health
+curl http://localhost:3000/health
 
-# Inspect exchange bindings
-docker exec rabbitmq_dev rabbitmqctl list_bindings
+# Check all service health via API Gateway
+curl http://localhost:3000/health/ready
 
-# Monitor real-time message flow
-docker exec rabbitmq_dev rabbitmqctl list_exchanges name type
-
-# Check connection status
-docker exec rabbitmq_dev rabbitmqctl list_connections
-
-# View detailed queue information
-docker exec rabbitmq_dev rabbitmqctl list_queues name messages_ready messages_unacknowledged
+# Check specific service (via RabbitMQ Management UI)
+# Go to Queues → auth_queue → Publish Message
+# Routing Key: auth.health, Payload: {}
 ```
 
-#### Common RabbitMQ Troubleshooting
+### Common Development Issues
 
-1. **Messages Not Being Consumed**
+1. **Port conflicts**: Use `lsof -i :3000` to check port usage
+2. **Database connection**: Ensure `npm run infrastructure:up` completed successfully
+3. **RabbitMQ connection**: Services won't start without RabbitMQ running
+4. **TypeScript errors**: Always run `npm run typecheck <service>` after changes
 
-   ```bash
-   # Check if service is connected to queue
-   docker logs auth_service_container
+## 📖 Documentation References
 
-   # Verify queue bindings
-   # Management UI -> Exchanges -> capsule.commands -> Bindings
-   ```
+### Complete Documentation Structure
 
-2. **Health Checks Failing**
+- **Main Guide**: [README.md](./README.md) - Quick setup and overview
+- **Architecture Deep Dive**: [docs/architecture/system-overview.md](./docs/architecture/system-overview.md)
+- **RabbitMQ Implementation**: [docs/guides/rabbitmq-implementation.md](./docs/guides/rabbitmq-implementation.md)
+- **Message Handlers Examples**: [docs/examples/message-handlers.md](./docs/examples/message-handlers.md)
+- **Troubleshooting Guide**: [docs/troubleshooting/common-issues.md](./docs/troubleshooting/common-issues.md)
 
-   ```bash
-   # Test health check routing
-   curl -X GET http://localhost:3000/health
+### Task Master Integration
 
-   # Check specific service health
-   # Management UI -> Queues -> auth_queue -> Publish Message
-   # Pattern: health.check, Payload: {"routingKey": "auth.health"}
-   ```
+- **Task Master Guide**: [docs/guides/task-master-Integration.md](./docs/guides/task-master-Integration.md)
+- **Development Workflow**: Use MCP tools for task management
+- **Task Commands**: Available via `mcp__task-master-ai__*` tools in Claude Code
 
-3. **Dead Letter Queue Messages**
+## ⚙️ Creating New Services (Claude Code Workflow)
 
-   ```bash
-   # Inspect failed messages
-   # Management UI -> Queues -> dlq -> Get Messages
-
-   # Check DLQ policy application
-   docker exec rabbitmq_dev rabbitmqctl list_policies
-   ```
-
-4. **Message TTL Expiration**
-
-   ```bash
-   # Check message TTL settings (6 hours = 21,600,000ms)
-   # Management UI -> Queues -> [queue_name] -> Features -> TTL
-   ```
-
-#### Testing Message Patterns
+### Step-by-Step Service Creation
 
 ```bash
-# Test direct command routing
-# Management UI -> Exchanges -> capsule.commands -> Publish Message
-# Routing Key: auth.register
-# Payload: {"email": "test@example.com", "password": "password"}
+# 1. ALWAYS use Nx generators (via nx_run_generator tool)
+nx_generators                           # List available generators
+nx_run_generator                        # Open generator UI
+# Select @nx/nest:app and configure new service
 
-# Test event publishing
-# Management UI -> Exchanges -> capsule.events -> Publish Message
-# Routing Key: user.created
-# Payload: {"userId": "123", "email": "test@example.com"}
+# 2. Configure RabbitMQ microservice (NOT HTTP)
+# Edit apps/[service]/src/main.ts - see existing services for pattern
 
-# Test health check routing
-# Management UI -> Exchanges -> capsule.commands -> Publish Message
-# Routing Key: auth.health
-# Payload: {"routingKey": "auth.health"}
+# 3. Add RabbitMQ module configuration
+# Edit apps/[service]/src/app.module.ts - follow auth-service pattern
+
+# 4. Add health check handler (REQUIRED)
+# Implement @RabbitRPC health check in controller
+
+# 5. Update infrastructure
+# Add database to compose.yml (follow existing pattern)
+# Add RabbitMQ queue bindings if needed
 ```
 
-### Creating New Services
+### Required Service Structure
 
-When adding a new bounded context:
+```typescript
+// main.ts - RabbitMQ microservice bootstrap (NOT HTTP)
+const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+  AppModule,
+  {
+    transport: Transport.RMQ,
+    options: {
+      urls: [rabbitUrl],
+      queue: `${serviceName}_queue`,
+      queueOptions: { durable: true },
+    },
+  },
+);
 
-1. **Generate Service Structure**
+// app.module.ts - RabbitMQ configuration
+RabbitMQModule.forMicroservice({
+  uri: 'amqp://usecapsule:usecapsule_dev_password@localhost:7010',
+  serviceName: 'new-service',
+});
+```
 
-   ```bash
-   nx g @nx/nest:app [service-name]
-   ```
+## 🎯 Claude Code Best Practices
 
-2. **Configure RabbitMQ Microservice Bootstrap**
+### Before Starting Any Task
 
-   ```typescript
-   // apps/[service-name]/src/main.ts
-   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-     AppModule,
-     {
-       transport: Transport.RMQ,
-       options: {
-         urls: [rabbitUrl],
-         queue: `${serviceName}_queue`,
-         queueOptions: { durable: true },
-       },
-     },
-   );
-   ```
+1. **Check Running Processes**: `nx_current_running_tasks_details`
+2. **Understand Workspace**: `nx_workspace` for current project state
+3. **Get Documentation**: `nx_docs "topic"` for current best practices
+4. **Check Project Details**: `nx_project_details <service>` for specific service info
 
-3. **Add Message Handlers**
+### During Development
 
-   ```typescript
-   // Service controller
-   @Controller()
-   export class ServiceController {
-     @MessagePattern(`${serviceName}.action`)
-     async handleAction(@Payload() dto: ActionDto): Promise<ActionResult> {
-       return this.service.performAction(dto);
-     }
+1. **Use Nx Generators**: Always use `nx_run_generator` for new code
+2. **Follow Patterns**: Look at existing services for implementation patterns
+3. **Test Incrementally**: Build and test individual services: `nx build <service>`
+4. **Check Health**: Test service health via `curl http://localhost:3000/health`
 
-     @MessagePattern('health.check')
-     healthCheck(): HealthCheckResponse {
-       return this.appService.getHealthStatus();
-     }
-   }
-   ```
+### After Changes (MANDATORY)
 
-4. **Update RabbitMQ Infrastructure**
+1. **Lint**: `npm run lint` or `nx lint <service>`
+2. **Type Check**: `npm run typecheck <service>`
+3. **Build Test**: `nx build <service>`
+4. **Health Check**: Verify services still respond to health checks
 
-   ```json
-   // devtools/infra/rabbitmq/definitions.json
-   {
-     "queues": [
-       {
-         "name": "[service-name]_queue",
-         "vhost": "/",
-         "durable": true,
-         "auto_delete": false,
-         "arguments": { "x-message-ttl": 21600000 }
-       }
-     ],
-     "bindings": [
-       {
-         "source": "capsule.commands",
-         "destination": "[service-name]_queue",
-         "destination_type": "queue",
-         "routing_key": "[service-name].*"
-       }
-     ]
-   }
-   ```
+### Code Quality Rules
 
-5. **Add Database Configuration**
+- **No HTTP between services**: Only RabbitMQ communication allowed
+- **Health checks required**: Every service must implement health check pattern
+- **Exchange-based routing**: Use capsule.commands and capsule.events only
+- **Database isolation**: Each service owns its database completely
 
-   ```yaml
-   # compose.yml
-   [service-name]-db:
-     container_name: [service-name]_db_dev
-     image: postgres:15
-     environment:
-       POSTGRES_USER: [service-name]_user
-       POSTGRES_PASSWORD: [service-name]_pass
-       POSTGRES_DB: [service-name]_service_db
-     ports:
-       - '711X:5432'  # Use next available port
-   ```
+## 🔗 Quick Reference Links
 
-6. **Register with API Gateway**
+### Development Endpoints
 
-   ```typescript
-   // apps/api-gateway/src/modules/[domain]/[domain].service.ts
-   @Injectable()
-   export class DomainService {
-     async performAction(dto: ActionDto): Promise<ActionResult> {
-       return this.rabbitMQService.send(`${serviceName}.action`, dto);
-     }
-   }
-   ```
+- **API Gateway**: <http://localhost:3000> (Primary HTTP entry)
+- **API Documentation**: <http://localhost:3000/api/documentation> (Swagger)
+- **Health Check**: <http://localhost:3000/health> (All services status)
+- **RabbitMQ Management**: <http://localhost:7020> (usecapsule/usecapsule_dev_password)
 
-### Testing Guidelines
+### Key Configuration Values
 
-- Unit tests: `*.spec.ts` files next to source code
-- Integration tests: `*.integration.spec.ts` with test databases
-- E2E tests: In dedicated e2e projects
-- Each service uses isolated test databases
-- Run `npm run test:affected` to test only changed code
+- **RabbitMQ AMQP URI**: `amqp://usecapsule:usecapsule_dev_password@localhost:7010`
+- **Command Exchange**: `capsule.commands` (Direct routing)
+- **Event Exchange**: `capsule.events` (Topic routing)
+- **Database Pattern**: Each service has dedicated PostgreSQL database
 
-## Appendix
+## 📚 Complete Documentation
 
-### Capsule Repository Documentation
+### For Detailed Implementation Guides
 
-**Import Capsule's documentation folder, treat as if import is in the main CLAUDE.md file.**
+This CLAUDE.md provides essential context for Claude Code development. For comprehensive implementation details, see:
 
-`@./docs/**/*.md`
+- **[Complete Documentation Index](./docs/README.md)** - Full technical documentation
+- **[System Architecture](./docs/architecture/system-overview.md)** - Detailed architecture patterns
+- **[RabbitMQ Implementation](./docs/guides/rabbitmq-implementation.md)** - Complete messaging guide
+- **[Service Development](./docs/guides/service-development.md)** - Creating new microservices
+- **[Troubleshooting](./docs/troubleshooting/common-issues.md)** - Common issues and solutions
+- **[Task Master Integration](./docs/guides/task-master-Integration.md)** - Development workflow tools
 
-#### Quick Links
+### Development Philosophy
 
-- `@./docs/guides/task-master-Integration.md` (Task Master's development workflow commands and guidelines)
+This platform prioritizes:
+
+1. **Domain-Driven Design** - Business logic in domain entities
+2. **Message-First Architecture** - All communication via RabbitMQ
+3. **Database Isolation** - Each service owns its data
+4. **Health Check Monitoring** - Every service must be observable
+5. **Type Safety** - TypeScript with strict checking required
+
+---
+
+**For Claude Code**: This file provides essential context. Always use Nx MCP tools for current documentation and avoid assumptions based on knowledge cutoff dates. Refer to detailed documentation in `docs/` directory for complete implementation guidance.
+- Always run `npx nx affected -t lint typecheck build --skip-nx-cache` after changes.

@@ -13,7 +13,18 @@
         "tsConfig": "libs/shared/exceptions/tsconfig.lib.json",
         "packageJson": "libs/shared/exceptions/package.json",
         "main": "libs/shared/exceptions/src/index.ts",
-        "assets": ["libs/shared/exceptions/*.md"]
+        "assets": ["libs/shared/exceptions/*.md"],
+        "rootDir": "libs/shared/exceptions/src"
+      }
+    },
+    "copy-declarations": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "mkdir -p libs/shared/exceptions/dist",
+          "cp -r dist/libs/shared/exceptions/* libs/shared/exceptions/dist/ 2>/dev/null || true"
+        ],
+        "parallel": false
       }
     }
   }

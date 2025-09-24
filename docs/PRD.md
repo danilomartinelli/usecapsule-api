@@ -1,11 +1,11 @@
 # Product Requirements Document (PRD)
 
-## Capsule Platform v2.0
+## Capsule Platform v1.0
 
-**Document Version**: 2.0.0
-**Date**: 2025-01-27
+**Document Version**: 1.0.0
+**Date**: 2026-09-23
 **Status**: Active Development
-**Owner**: Platform Engineering Team
+**Owner**: Witek Team
 **Classification**: Technical Blueprint
 
 ---
@@ -395,6 +395,15 @@ Backend Services:
   Testing: Jest, Supertest
   Build: Webpack 5, SWC
 
+Frontend App:
+  Language: TypeScript 5.8+
+  Framework: React 18+
+  State Management: Redux Toolkit
+  Routing: React Router 6
+  Styling: Tailwind CSS
+  Testing: React Testing Library, Jest
+  Build: Vite 4
+
 Infrastructure:
   Orchestration: Kubernetes 1.28+
   Service Mesh: Istio 1.20+
@@ -402,7 +411,7 @@ Infrastructure:
   Registry: Harbor 2.10+
 
 Databases:
-  Primary: PostgreSQL 15+
+  Primary: PostgreSQL 15+ with Slonik (Type-safe SQL toolkit)
   Time-series: TimescaleDB 2.13+
   Cache: Redis 7.2+
   Search: ElasticSearch 8.12+
@@ -418,7 +427,10 @@ Observability:
   Visualization: Grafana 10+
 
 Development:
-  Monorepo: Nx 18+
+  Repository: Monorepo structure (NestJS API + React Web App)
+  WebApp: React SPA with Vite
+  API: Node.js Rest API with Nest.js
+  Database Layer: Slonik (Type-safe PostgreSQL client)
   Version Control: Git
   CI/CD: GitHub Actions / GitLab CI
   IaC: Terraform 1.7+
@@ -592,16 +604,16 @@ interface RealtimeEvents {
 
 ## 4. Implementation Roadmap
 
-### 4.1 Roadmap Strategy for AI Analysis
+### 4.1 Roadmap Strategy
 
-The roadmap is structured with hierarchical task decomposition to enable AI-driven project management. Each phase contains epics, which break down into user stories, which further decompose into specific implementation tasks. This structure allows AI systems to:
+The roadmap is structured with hierarchical task decomposition to enable driven project management. Each phase contains epics, which break down into user stories, which further decompose into specific implementation tasks. This structure allows product teams to:
 
-1. Generate granular GitHub issues from high-level objectives
-2. Estimate effort and dependencies automatically
+1. Generate granular tasks from high-level objectives
+2. Estimate effort and dependencies accurately
 3. Optimize sprint planning based on team velocity
 4. Track progress and identify blockers
 
-### 4.2 Phase 1: Foundation (Q1 2025 - 12 weeks)
+### 4.2 Phase 1: Foundation (Q1 2026 - 12 weeks)
 
 ```yaml
 Epic 1.1: Core Platform Infrastructure
@@ -613,11 +625,11 @@ Epic 1.1: Core Platform Infrastructure
     US_1.1.1:
       title: "As a developer, I need a monorepo structure for the platform"
       acceptance_criteria:
-        - Nx workspace configured with apps and libs folders
+        - Nest.js repository configured with modules and libs folders
         - TypeScript, ESLint, Prettier configured
         - Git hooks for code quality
       tasks:
-        - TASK_001: Initialize Nx workspace with NestJS preset
+        - TASK_001: Initialize repository with NestJS preset
         - TASK_002: Configure TypeScript paths and aliases
         - TASK_003: Setup ESLint with DDD rules
         - TASK_004: Configure Prettier and format scripts
@@ -635,7 +647,7 @@ Epic 1.1: Core Platform Infrastructure
         - TASK_008: Configure docker-compose.yml with networks
         - TASK_009: Setup volume mounts for development
         - TASK_010: Configure Flyway for migrations
-        - TASK_011: Create make/script commands for common tasks
+        - TASK_011: Create Taskfile script/file for common tasks
 
 Epic 1.2: Authentication & Authorization Service
   Priority: P0
@@ -676,7 +688,7 @@ Epic 1.3: Magic Deploy Detection Engine
         - TASK_021: Identify shared libraries usage
 ```
 
-### 4.3 Phase 2: Magic Deploy Core (Q2 2025 - 12 weeks)
+### 4.3 Phase 2: Magic Deploy Core (Q2 2026 - 12 weeks)
 
 ```yaml
 Epic 2.1: Framework Detection Intelligence
@@ -748,7 +760,7 @@ Epic 2.3: Deployment Orchestration
         - TASK_039: Create rollback mechanism
 ```
 
-### 4.4 Phase 3: Zero Lock-in Implementation (Q3 2025 - 12 weeks)
+### 4.4 Phase 3: Zero Lock-in Implementation (Q3 2026 - 12 weeks)
 
 ```yaml
 Epic 3.1: Kubernetes Export Engine
@@ -809,7 +821,7 @@ Epic 3.3: Migration Tooling
         - TASK_054: Create cutover checklist
 ```
 
-### 4.5 Phase 4: Production Readiness (Q4 2025 - 12 weeks)
+### 4.5 Phase 4: Production Readiness (Q4 2026 - 12 weeks)
 
 ```yaml
 Epic 4.1: Observability Platform
@@ -868,6 +880,353 @@ Epic 4.3: Performance & Scale
         - TASK_067: Optimize API Gateway
         - TASK_068: Configure CDN integration
         - TASK_069: Implement rate limiting
+```
+
+---
+
+## 4.6 Parallel Track: Web Application Development (All Phases - 48 weeks)
+
+### Overview
+
+The web application development runs in parallel with API development, enabling frontend and backend teams to work simultaneously. The React web application provides the complete user interface for the Capsule Platform.
+
+### Phase 1: Web Foundation & Core UI (Q1 2026 - 12 weeks)
+
+```yaml
+Epic W1.1: Web Application Infrastructure
+  Priority: P0
+  Estimated_Effort: 3_weeks
+  Dependencies: [Epic_1.1]
+
+  User_Stories:
+    US_W1.1.1:
+      title: "As a developer, I need a modern React application foundation"
+      acceptance_criteria:
+        - Vite-based React 18+ application
+        - TypeScript strict mode configuration
+        - Tailwind CSS design system
+        - ESLint + Prettier setup
+      tasks:
+        - TASK_W001: Initialize Vite React application with TypeScript
+        - TASK_W002: Configure Tailwind CSS with custom design tokens
+        - TASK_W003: Setup ESLint with React and TypeScript rules
+        - TASK_W004: Configure Prettier and format scripts
+        - TASK_W005: Create folder structure (components, pages, hooks, utils)
+
+    US_W1.1.2:
+      title: "As a developer, I need state management and routing"
+      acceptance_criteria:
+        - Redux Toolkit with RTK Query
+        - React Router 6 with protected routes
+        - Authentication state management
+        - Error boundary implementation
+      tasks:
+        - TASK_W006: Configure Redux Toolkit store
+        - TASK_W007: Setup RTK Query for API integration
+        - TASK_W008: Implement React Router with route guards
+        - TASK_W009: Create authentication slice and middleware
+        - TASK_W010: Build error boundary components
+
+Epic W1.2: Authentication & User Management UI
+  Priority: P0
+  Estimated_Effort: 4_weeks
+  Dependencies: [Epic_W1.1, Epic_1.2]
+
+  User_Stories:
+    US_W1.2.1:
+      title: "As a user, I can authenticate through the web interface"
+      acceptance_criteria:
+        - OAuth login flows (GitHub, GitLab)
+        - JWT token management
+        - User profile management
+        - Session handling
+      tasks:
+        - TASK_W011: Build OAuth login components
+        - TASK_W012: Implement token storage and refresh logic
+        - TASK_W013: Create user profile management UI
+        - TASK_W014: Build session timeout handling
+        - TASK_W015: Implement logout functionality
+
+    US_W1.2.2:
+      title: "As a user, I have role-based access in the UI"
+      acceptance_criteria:
+        - Role-based component rendering
+        - Permission-based navigation
+        - Protected route implementation
+        - Admin interface access control
+      tasks:
+        - TASK_W016: Create role-based rendering hooks
+        - TASK_W017: Implement permission-based navigation
+        - TASK_W018: Build protected route components
+        - TASK_W019: Create admin interface guards
+
+Epic W1.3: Core Dashboard & Navigation
+  Priority: P0
+  Estimated_Effort: 5_weeks
+  Dependencies: [Epic_W1.2]
+
+  User_Stories:
+    US_W1.3.1:
+      title: "As a user, I have a main dashboard with navigation"
+      acceptance_criteria:
+        - Responsive navigation sidebar
+        - Main dashboard layout
+        - Breadcrumb navigation
+        - Mobile-responsive design
+      tasks:
+        - TASK_W020: Build responsive sidebar navigation
+        - TASK_W021: Create main dashboard layout component
+        - TASK_W022: Implement breadcrumb navigation system
+        - TASK_W023: Ensure mobile-responsive design
+        - TASK_W024: Add dark/light theme support
+
+    US_W1.3.2:
+      title: "As a user, I can manage my projects and organizations"
+      acceptance_criteria:
+        - Project listing and creation
+        - Organization management
+        - Project settings interface
+        - Team member management
+      tasks:
+        - TASK_W025: Build project management interface
+        - TASK_W026: Create organization management UI
+        - TASK_W027: Implement project settings pages
+        - TASK_W028: Build team member management interface
+```
+
+### Phase 2: Magic Deploy & Deployment UI (Q2 2026 - 12 weeks)
+
+```yaml
+Epic W2.1: Magic Deploy Interface
+  Priority: P0
+  Estimated_Effort: 5_weeks
+  Dependencies: [Epic_W1.3, Epic_2.1]
+
+  User_Stories:
+    US_W2.1.1:
+      title: "As a developer, I can visualize framework detection results"
+      acceptance_criteria:
+        - Repository analysis visualization
+        - Framework detection display
+        - Dependency graph rendering
+        - Build configuration preview
+      tasks:
+        - TASK_W029: Build repository analysis dashboard
+        - TASK_W030: Create framework detection visualization
+        - TASK_W031: Implement dependency graph component
+        - TASK_W032: Build build configuration preview
+
+    US_W2.1.2:
+      title: "As a user, I can initiate and monitor deployments"
+      acceptance_criteria:
+        - One-click deployment interface
+        - Real-time deployment progress
+        - Deployment history tracking
+        - Error handling and retry mechanisms
+      tasks:
+        - TASK_W033: Create deployment initiation interface
+        - TASK_W034: Build real-time progress components
+        - TASK_W035: Implement deployment history view
+        - TASK_W036: Create error handling and retry UI
+
+Epic W2.2: Resource Management Interface
+  Priority: P0
+  Estimated_Effort: 4_weeks
+  Dependencies: [Epic_W2.1, Epic_2.2]
+
+  User_Stories:
+    US_W2.2.1:
+      title: "As a user, I can visualize and manage resources"
+      acceptance_criteria:
+        - Resource allocation visualization
+        - Scaling controls interface
+        - Performance metrics display
+        - Cost tracking dashboard
+      tasks:
+        - TASK_W037: Build resource allocation dashboard
+        - TASK_W038: Create scaling controls interface
+        - TASK_W039: Implement performance metrics display
+        - TASK_W040: Build cost tracking visualization
+
+    US_W2.2.2:
+      title: "As a user, I can manage service configurations"
+      acceptance_criteria:
+        - Service configuration editor
+        - Environment variable management
+        - Health check configuration
+        - Network settings interface
+      tasks:
+        - TASK_W041: Create service configuration editor
+        - TASK_W042: Build environment variable manager
+        - TASK_W043: Implement health check configuration UI
+        - TASK_W044: Create network settings interface
+
+Epic W2.3: Real-time Monitoring Dashboard
+  Priority: P0
+  Estimated_Effort: 3_weeks
+  Dependencies: [Epic_W2.2]
+
+  User_Stories:
+    US_W2.3.1:
+      title: "As a user, I have real-time system visibility"
+      acceptance_criteria:
+        - WebSocket integration for live data
+        - Real-time charts and metrics
+        - Alert notifications
+        - System health indicators
+      tasks:
+        - TASK_W045: Implement WebSocket client integration
+        - TASK_W046: Build real-time charts library
+        - TASK_W047: Create alert notification system
+        - TASK_W048: Implement health status indicators
+```
+
+### Phase 3: Zero Lock-in & Export Interface (Q3 2026 - 12 weeks)
+
+```yaml
+Epic W3.1: Export Management Interface
+  Priority: P0
+  Estimated_Effort: 5_weeks
+  Dependencies: [Epic_W2.3, Epic_3.1]
+
+  User_Stories:
+    US_W3.1.1:
+      title: "As a user, I can export infrastructure configurations"
+      acceptance_criteria:
+        - Kubernetes manifest export UI
+        - Terraform module generation interface
+        - Docker Compose export
+        - CI/CD pipeline generation
+      tasks:
+        - TASK_W049: Build Kubernetes export interface
+        - TASK_W050: Create Terraform generation UI
+        - TASK_W051: Implement Docker Compose export
+        - TASK_W052: Build CI/CD pipeline generator
+
+    US_W3.1.2:
+      title: "As a user, I can manage export history and versions"
+      acceptance_criteria:
+        - Export history tracking
+        - Version comparison interface
+        - Download and share functionality
+        - Export validation display
+      tasks:
+        - TASK_W053: Implement export history dashboard
+        - TASK_W054: Build version comparison interface
+        - TASK_W055: Create download and share functionality
+        - TASK_W056: Add export validation display
+
+Epic W3.2: Migration Planning Interface
+  Priority: P1
+  Estimated_Effort: 4_weeks
+  Dependencies: [Epic_W3.1, Epic_3.2]
+
+  User_Stories:
+    US_W3.2.1:
+      title: "As a user, I can plan infrastructure migration"
+      acceptance_criteria:
+        - Migration wizard interface
+        - Compatibility checker
+        - Migration timeline visualization
+        - Risk assessment display
+      tasks:
+        - TASK_W057: Build migration wizard interface
+        - TASK_W058: Create compatibility checker UI
+        - TASK_W059: Implement timeline visualization
+        - TASK_W060: Build risk assessment interface
+
+Epic W3.3: Documentation & Help System
+  Priority: P1
+  Estimated_Effort: 3_weeks
+  Dependencies: [Epic_W3.2]
+
+  User_Stories:
+    US_W3.3.1:
+      title: "As a user, I have comprehensive help and documentation"
+      acceptance_criteria:
+        - Interactive help system
+        - Documentation search
+        - Video tutorials integration
+        - Context-sensitive help
+      tasks:
+        - TASK_W061: Build interactive help system
+        - TASK_W062: Implement documentation search
+        - TASK_W063: Integrate video tutorials
+        - TASK_W064: Create context-sensitive help
+```
+
+### Phase 4: Advanced Features & Enterprise UI (Q4 2026 - 12 weeks)
+
+```yaml
+Epic W4.1: Advanced Observability Interface
+  Priority: P0
+  Estimated_Effort: 5_weeks
+  Dependencies: [Epic_W3.3, Epic_4.1]
+
+  User_Stories:
+    US_W4.1.1:
+      title: "As a user, I have complete observability through the web interface"
+      acceptance_criteria:
+        - Unified metrics dashboard
+        - Log search and filtering
+        - Distributed tracing visualization
+        - Custom dashboard builder
+      tasks:
+        - TASK_W065: Build unified metrics dashboard
+        - TASK_W066: Implement log search interface
+        - TASK_W067: Create tracing visualization
+        - TASK_W068: Build custom dashboard builder
+
+    US_W4.1.2:
+      title: "As a user, I can manage alerts and notifications"
+      acceptance_criteria:
+        - Alert configuration interface
+        - Notification channel management
+        - Alert history and analytics
+        - Escalation policy management
+      tasks:
+        - TASK_W069: Create alert configuration UI
+        - TASK_W070: Build notification management
+        - TASK_W071: Implement alert history dashboard
+        - TASK_W072: Create escalation policy interface
+
+Epic W4.2: Enterprise & Compliance Features
+  Priority: P1
+  Estimated_Effort: 4_weeks
+  Dependencies: [Epic_W4.1, Epic_4.2]
+
+  User_Stories:
+    US_W4.2.1:
+      title: "As an enterprise user, I have advanced security and compliance features"
+      acceptance_criteria:
+        - SSO/SAML configuration interface
+        - Audit log dashboard
+        - Compliance reporting interface
+        - Role and permission management
+      tasks:
+        - TASK_W073: Build SSO configuration interface
+        - TASK_W074: Create audit log dashboard
+        - TASK_W075: Implement compliance reporting UI
+        - TASK_W076: Build advanced RBAC interface
+
+Epic W4.3: Performance & Mobile Optimization
+  Priority: P0
+  Estimated_Effort: 3_weeks
+  Dependencies: [Epic_W4.2]
+
+  User_Stories:
+    US_W4.3.1:
+      title: "As a user, I have optimal performance on all devices"
+      acceptance_criteria:
+        - Progressive Web App (PWA) features
+        - Mobile-optimized interfaces
+        - Offline capability
+        - Performance optimization
+      tasks:
+        - TASK_W077: Implement PWA features
+        - TASK_W078: Optimize mobile interfaces
+        - TASK_W079: Add offline capability
+        - TASK_W080: Performance optimization and monitoring
 ```
 
 ---
@@ -1133,7 +1492,6 @@ Critical_Services:
 
 Third_Party_Libraries:
   NestJS: Core framework
-  Nx: Monorepo management
   OpenTelemetry: Observability
   Prometheus: Metrics collection
 
@@ -1180,53 +1538,19 @@ Regulatory_Constraints:
 | **Detection Engine** | System that analyzes repository structure to understand project configuration                            |
 | **Export Artifacts** | Generated Kubernetes, Terraform, and Docker files for infrastructure portability                         |
 
-### 10.2 Reference Architecture Diagrams
-
-```yaml
-Diagrams_Available:
-  - System_Architecture.svg
-  - Database_Schema.png
-  - Deployment_Flow.mermaid
-  - Export_Pipeline.drawio
-  - Network_Topology.pdf
-
-Location: /docs/architecture/
-```
-
-### 10.3 API Documentation
-
-```yaml
-Documentation:
-  OpenAPI_Spec: /api/documentation.yaml
-  Postman_Collection: /docs/api/postman.json
-  SDK_Documentation: /docs/sdk/
-  WebSocket_Events: /docs/websocket.md
-```
-
-### 10.4 Decision Log
+### 10.2 Decision Log
 
 | Date       | Decision                    | Rationale                                        | Alternatives Considered    |
 | ---------- | --------------------------- | ------------------------------------------------ | -------------------------- |
-| 2025-01-15 | Use NestJS for all services | DDD support, enterprise-ready, TypeScript native | Express, Fastify, Koa      |
-| 2025-01-16 | RabbitMQ for messaging      | Reliability, ease of operation, broad support    | Kafka, NATS, Redis Pub/Sub |
-| 2025-01-17 | PostgreSQL per service      | ACID compliance, JSON support, extensions        | MongoDB, CockroachDB       |
-| 2025-01-18 | Kubernetes as platform      | Industry standard, portability, ecosystem        | ECS, Cloud Run, Nomad      |
-
----
-
-## 11. Approval & Sign-off
-
-| Role                   | Name              | Signature  | Date   |
-| ---------------------- | ----------------- | ---------- | ------ |
-| CEO & Founder          | Danilo Martinelli | **\_\_\_** | **\_** |
-| CTO & Co-founder       | Anderson Araújo   | **\_\_\_** | **\_** |
-| Lead Platform Engineer | TBD               | **\_\_\_** | **\_** |
-| Product Manager        | TBD               | **\_\_\_** | **\_** |
+| 2025-07-17 | Use NestJS for all services | DDD support, enterprise-ready, TypeScript native | Express, Fastify, Koa      |
+| 2025-07-23 | RabbitMQ for messaging      | Reliability, ease of operation, broad support    | Kafka, NATS, Redis Pub/Sub |
+| 2025-08-12 | PostgreSQL per service      | ACID compliance, JSON support, extensions        | MongoDB, CockroachDB       |
+| 2025-08-27 | Kubernetes as platform      | Industry standard, portability, ecosystem        | ECS, Cloud Run, Nomad      |
 
 ---
 
 _This document serves as the authoritative technical specification for Capsule Platform development. Updates require approval from technical leadership and must maintain backward compatibility with existing decisions._
 
 **Document Status**: Living document - Updates tracked in Git
-**Next Review**: End of Phase 1 (March 2025)
-**Repository**: github.com/usecapsule/platform-prd
+**Next Review**: Beginning of Phase 1 (January 2026)
+**Repository**: github.com/usecapsule/platform-api

@@ -1358,14 +1358,23 @@
             "testStrategy": ""
           }
         ]
-      },
+      }
+    ],
+    "metadata": {
+      "created": "2025-09-18T03:27:07.647Z",
+      "updated": "2025-09-18T12:52:17.405Z",
+      "description": "Tasks for master context"
+    }
+  },
+  "feature-auth-core-implementation": {
+    "tasks": [
       {
         "id": 16,
         "title": "Implement Core Authentication Boilerplate",
         "description": "Build foundational authentication system with user registration, login, password reset, and role-based access control (RBAC) for secure platform access",
         "details": "",
         "testStrategy": "",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [],
         "priority": "high",
         "subtasks": [
@@ -1386,7 +1395,7 @@
               "16.1"
             ],
             "details": "Create auth-service/src/modules/auth/services/password.service.ts for bcrypt password hashing/verification. Implement auth-service/src/modules/auth/services/jwt.service.ts for access token and refresh token generation/validation using @nestjs/jwt. Configure JWT secrets, expiration times, and token payload structure. Include token blacklisting mechanism using Redis for logout functionality.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for password hashing security, JWT token validation, and token expiration handling"
           },
           {
@@ -1398,7 +1407,7 @@
               "16.2"
             ],
             "details": "Create auth-service/src/modules/auth/commands/register-user/ with RegisterUserCommand, RegisterUserCommandHandler, and RegisterUserDto. Implement email uniqueness validation, password strength validation (min 8 chars, special chars, numbers). Generate email verification tokens and store in database. Emit user.registration.initiated event via RabbitMQ for email service integration. Follow DDD patterns with proper domain validation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Command handler tests, email uniqueness validation, password strength validation, and event emission verification"
           },
           {
@@ -1433,7 +1442,7 @@
               "16.1"
             ],
             "details": "Create auth-service/src/modules/roles/ with Role entity, RoleService, and permission checking logic. Implement role assignment/revocation commands with expiration support. Create role-based guards and decorators for endpoint protection. Support hierarchical permissions where SUPERADMIN > ADMIN > USER. Include role history tracking and audit logging. Create role-checking middleware for RabbitMQ message handlers.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Role assignment tests, permission hierarchy validation, guard functionality testing, and role expiration handling"
           },
           {
@@ -1489,14 +1498,88 @@
             "details": "Create auth-service/src/modules/auth/guards/ with JwtAuthGuard, RolesGuard, and RateLimitGuard. Implement JWT token extraction from Authorization headers, token validation, and user context injection. Create role-based authorization with @Roles decorator support. Implement rate limiting using Redis for login attempts and password reset requests. Include IP-based blocking and suspicious activity detection.",
             "status": "pending",
             "testStrategy": "Guard functionality tests, JWT validation testing, role authorization verification, rate limiting effectiveness, and security middleware integration"
+          },
+          {
+            "id": 11,
+            "title": "Create API Gateway REST endpoints for authentication",
+            "description": "Implement HTTP REST endpoints in the API Gateway that bridge HTTP requests to RabbitMQ commands for the auth-service. Create controllers for user registration, login, logout, password reset, profile management, and other authentication operations with proper HTTP status codes, request validation, and response formatting.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [
+              "16.2",
+              "16.3",
+              "16.4",
+              "16.5",
+              "16.9"
+            ],
+            "parentTaskId": 16
+          },
+          {
+            "id": 12,
+            "title": "Integrate mock email service in user registration",
+            "description": "Integrate email sending in user registration flow with mock email service for development. Create mock implementation that logs email content instead of sending real emails.",
+            "details": "- Create MockEmailService that implements EmailService interface\n- Integrate email sending in RegisterUserCommand handler\n- Mock verification email generation using existing email_verification_tokens\n- Log email content to console/file for development testing\n- Add configuration for mock vs real email service\n- Ensure email verification flow works end-to-end with mocked emails\n<info added on 2025-09-21T01:21:10.592Z>\nI'll analyze the codebase to understand the current authentication implementation and provide appropriate TEMP comment guidance.Now I need to understand the current Task Master tasks structure to see what has been implemented:Based on my analysis of the codebase and Task Master tasks, I can see that:\n\n1. The current authentication implementation uses a `User` entity (located at `/Users/danilomartinelli/Code/usecapsule-api/apps/auth-service/src/modules/user-management/domain/entities/user.entity.ts`)\n2. Email verification tokens are already set up in the database schema (`email_verification_tokens` table)\n3. The current subtask 16.12 is about integrating mock email service in user registration\n4. The user wants to change from creating a MockEmailService to simply adding TODO/TEMP comments\n\nAdd comments in user registration flow where email service integration will be implemented later. Instead of creating MockEmailService implementation, add TODO/TEMP comments marking locations for future email service calls in RegisterUserCommand handler. Comment placeholders should indicate email verification functionality without implementing mock service. Focus on marking integration points in user registration workflow for future mailer service implementation.\n</info added on 2025-09-21T01:21:10.592Z>",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 16
+          },
+          {
+            "id": 13,
+            "title": "Integrate mock email service in password reset",
+            "description": "Integrate email sending in password reset flow with mock email service. Create password reset email templates and mock delivery for development testing.",
+            "details": "- Integrate email sending in ForgotPasswordCommand handler\n- Mock password reset email generation using existing password_reset_tokens\n- Create password reset email template structure\n- Log reset email content for development testing\n- Implement ResetPasswordCommand that validates email tokens\n- Add mock email template rendering for password reset emails\n<info added on 2025-09-21T01:23:26.894Z>\nI'll analyze the codebase to understand the current implementation and provide an updated approach based on your request.Based on my analysis of the codebase, I can see the auth-service structure and the existing password_reset_tokens table. Here's the updated approach for the subtask:\n\nRemove MockEmailService implementation approach and replace with TEMP comment placeholders at integration points. Add TEMP comments in user registration flow where email confirmation will be integrated (apps/auth-service/src/modules/user-management/domain/entities/user.entity.ts verifyEmail method and registration handlers). Replace password reset email mock implementation with TEMP comments in ForgotPasswordCommand and ResetPasswordCommand handlers. Mark password reset email template generation locations with TEMP comments for future mailer-service integration. Add TEMP comments where registration confirmation email should be sent after user creation. Update existing password_reset_tokens table usage to include TEMP comments for email notification triggers. Focus on user registration confirmation email placeholder specifically in the user registration flow endpoints.\n</info added on 2025-09-21T01:23:26.894Z>",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 16
+          },
+          {
+            "id": 14,
+            "title": "Implement email verification endpoints with mock email",
+            "description": "Create API endpoints for email verification, resend verification, and email change with mock email service integration.",
+            "details": "- Create VerifyEmailCommand handler that uses email_verification_tokens\n- Implement ResendVerificationEmailCommand with mock email service\n- Create ChangeEmailCommand that generates new verification tokens\n- Add REST endpoints for email verification flow\n- Mock all email sending operations for development\n- Add comprehensive validation and error handling for email verification\n<info added on 2025-09-21T01:24:49.836Z>\nI'll analyze the codebase to understand the current authentication implementation and then update the subtask details based on your request to use TEMP comments instead of MockEmailService implementation.Based on my analysis of the codebase, I can see the existing auth-service structure with email verification tokens table and RabbitMQ messaging patterns. Here's the new information to add to the subtask details:\n\nReplace MockEmailService implementation approach with TEMP comment placeholders throughout email verification flow. Add TEMP comments at key integration points: VerifyEmailCommand handler where email_verification_tokens table interactions occur, ResendVerificationEmailCommand where email service will trigger notifications, ChangeEmailCommand where new verification tokens require email notifications, and REST endpoint handlers where email verification responses need email service integration. Mark email verification template rendering locations with TEMP comments for future mailer-service integration (Task 17). Add TEMP comments in apps/auth-service/src/app/app.controller.ts for new @RabbitRPC handlers using AUTH_ROUTING_KEYS constants (auth.verify-email, auth.resend-verification, auth.change-email routing keys). Focus TEMP comments specifically on email verification email placeholder integration points where verification token emails will be sent via future mailer service. Remove all mock email service class creation and replace with inline TEMP comments marking where email service calls will be integrated when mailer-service is implemented.\n</info added on 2025-09-21T01:24:49.836Z>",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 16
+          },
+          {
+            "id": 15,
+            "title": "Create email service interface and mock implementation",
+            "description": "Create email service abstraction with mock implementation for development and interface for future real email service integration.",
+            "details": "- Create EmailService interface with send methods\n- Implement MockEmailService that logs emails to console/file\n- Create EmailTemplate interface and mock template system\n- Add email configuration system (mock vs real)\n- Create email DTOs for different email types (verification, reset, etc.)\n- Add email service dependency injection configuration\n- Prepare interface for future mailer service integration\n<info added on 2025-09-21T01:25:50.026Z>\nI'll analyze the codebase structure to understand the project's approach to service interfaces and then update the subtask based on your request to use TEMP comments instead of mock implementations.Based on my analysis of the auth-service codebase, I can see the project structure and existing patterns. The codebase uses TypeScript with NestJS, follows a modular architecture with services, and has established patterns for dependency injection. Now I'll generate the update for the subtask based on the user's request to switch from MockEmailService to TEMP comments approach.\n\nUpdated implementation approach to use TEMP comment placeholders instead of creating mock email service implementation. Replace mock service creation with strategic TEMP comments at all email integration points to facilitate future mailer service integration. Add comprehensive test placeholders that map to specific integration requirements:\n\n- Add TEMP comment blocks in auth.module.ts where EmailService would be injected and configured\n- Create interface-only email service definitions without implementation classes\n- Place TEMP comments in user registration flow where email verification would be triggered\n- Add TEMP placeholders in password reset handlers for email notifications\n- Insert TEMP comments in user.entity.ts verifyEmail() method where email confirmation logic connects\n- Create test file structures with TEMP comment blocks for email service integration testing\n- Add TEMP comments in RabbitMQ message handlers where email events would be published to future mailer-service\n- Include TEMP placeholders for email configuration validation and environment setup\n- Document specific integration points in auth service that will connect to mailer-service via RabbitMQ capsule.commands exchange using routing patterns like 'mailer.send.verification' and 'mailer.send.reset'\n- Prepare TEMP comment documentation for email DTOs and interfaces that align with future mailer-service expected message formats\n</info added on 2025-09-21T01:25:50.026Z>",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 16
           }
-        ]
+        ],
+        "tag": "feature-auth-core-implementation",
+        "metadata": {
+          "moveHistory": [
+            {
+              "fromTag": "master",
+              "toTag": "feature-auth-core-implementation",
+              "timestamp": "2025-09-19T10:42:09.512Z"
+            }
+          ]
+        }
+      },
+      {
+        "id": 17,
+        "title": "Implement Comprehensive Mailer Service for Capsule Platform",
+        "description": "Build a production-ready mailer service with AWS SES SMTP integration, complete email template system, delivery tracking, and development tools including Mailhog for local testing.",
+        "details": "Create a new microservice `mailer-service` following the Capsule Platform's established patterns:\n\n**1. Service Architecture Setup:**\n- Generate new NestJS microservice using Nx generators following existing service patterns\n- Configure RabbitMQ integration with `@golevelup/nestjs-rabbitmq` using established exchange patterns\n- Set up dedicated PostgreSQL database for email tracking and template storage\n- Implement health check endpoints matching existing service patterns (`mailer.health` routing key)\n\n**2. Email Provider Integration:**\n- Implement AWS SES SMTP adapter with proper error handling and retry logic\n- Create environment-based email provider factory for development/production switching\n- Add Mailhog integration for local development testing (similar to existing dev infrastructure)\n- Configure SMTP settings with connection pooling and rate limiting\n\n**3. Template System Implementation:**\n- Design email template entity with support for HTML/text formats, versioning, and variables\n- Create template repository using Slonik pattern (following auth-service database patterns)\n- Implement template rendering engine with variable interpolation and validation\n- Add template management endpoints accessible via RabbitMQ commands (`mailer.template.create`, `mailer.template.update`)\n\n**4. Email Queue and Delivery:**\n- Implement email queue system using RabbitMQ for reliable message processing\n- Create email entity for tracking delivery status, timestamps, and metadata\n- Add retry logic with exponential backoff for failed deliveries\n- Implement batch processing capabilities for bulk email sending\n\n**5. Event Integration:**\n- Subscribe to domain events from auth-service (user.created, password.reset, email.verification)\n- Publish delivery events to `capsule.events` exchange (email.sent, email.delivered, email.failed)\n- Create webhook handlers for SES delivery notifications\n\n**6. Database Schema:**\n- Create Flyway migrations for email templates, delivery logs, and tracking tables\n- Implement soft deletion for email history and template versioning\n- Add indexes for efficient querying by status, recipient, and timestamp\n\n**7. Development Tools:**\n- Add Mailhog container to compose.yml for local email testing\n- Create development templates for common platform emails (welcome, password reset, verification)\n- Implement email preview endpoints for template testing\n\n**8. Monitoring and Analytics:**\n- Add delivery rate tracking and failure analytics\n- Implement bounce and complaint handling\n- Create metrics endpoints for email service health monitoring\n\n**Technical Implementation:**\n- Use existing shared libraries (@usecapsule/ddd, @usecapsule/messaging, @usecapsule/parameters)\n- Follow established patterns from auth-service for domain entities and repository implementations\n- Implement proper error handling with circuit breaker patterns for external API calls\n- Add comprehensive input validation using class-validator\n- Create email service factory supporting multiple providers (SES, Mailhog, future providers)",
+        "testStrategy": "**1. Unit Testing:**\n- Test email template rendering with various variable combinations and edge cases\n- Verify AWS SES adapter error handling and retry mechanisms\n- Test email queue processing with mock RabbitMQ messages\n- Validate domain entity business logic (email status transitions, template versioning)\n\n**2. Integration Testing:**\n- Test complete email flow from RabbitMQ message to SES delivery\n- Verify database operations with real PostgreSQL using test containers\n- Test template management endpoints via RabbitMQ RPC calls\n- Validate Mailhog integration in development environment\n\n**3. End-to-End Testing:**\n- Send test emails through complete platform flow (user registration → email verification)\n- Verify delivery tracking and status updates in database\n- Test bulk email sending with performance benchmarks\n- Validate webhook processing for delivery notifications\n\n**4. Performance Testing:**\n- Load test email queue processing with high message volumes\n- Measure template rendering performance with complex templates\n- Test concurrent email sending limits and rate limiting\n\n**5. Development Verification:**\n- Start infrastructure: `npm run infrastructure:up`\n- Run database migrations: `npm run db:migrate:mailer`\n- Start mailer service: `nx serve mailer-service`\n- Test health check: verify mailer service responds to `mailer.health` RabbitMQ command\n- Send test email via API Gateway to verify complete integration\n- Check Mailhog interface (http://localhost:8025) for received emails\n- Verify email tracking records in mailer database\n\n**6. Code Quality Verification:**\n- Run linting: `npm run lint` and `nx lint mailer-service`\n- Run type checking: `npm run typecheck mailer-service`\n- Verify build success: `nx build mailer-service`\n- Check test coverage: ensure >90% coverage for core email functionality",
+        "status": "pending",
+        "dependencies": [
+          16
+        ],
+        "priority": "medium",
+        "subtasks": []
       }
     ],
     "metadata": {
-      "created": "2025-09-18T03:27:07.647Z",
-      "updated": "2025-09-18T12:52:17.405Z",
-      "description": "Tasks for master context"
+      "created": "2025-09-19T10:41:56.067Z",
+      "updated": "2025-09-21T01:33:52.543Z",
+      "description": "Tag dedicated to implementing core authentication system - Task 16 and related auth features"
     }
   }
 }
